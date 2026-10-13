@@ -1,0 +1,23 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+_flutter/
+*.iml
+.idea/
+.vscode/
+
+# Clés : jamais commitées (voir env/*.json.example)
+env/*.json
+!env/*.json.example
+.env
+.env.*
+
+# Supabase CLI (état local)
+supabase/.temp/
+supabase/.branches/
+
+# Python
+__pycache__/

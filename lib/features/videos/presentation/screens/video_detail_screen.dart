@@ -1,0 +1,323 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:video_player/video_player.dart';
+
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/route_names.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/formatters.dart';
+import '../../../../core/widgets/loaders/app_loader.dart';
+import '../../../moderation/presentation/widgets/report_content_sheet.dart';
+import '../../domain/entities/video.dart';
+import '../providers/video_providers.dart';
+import '../widgets/comments_sheet.dart';
+
+/// Écran "Video Detail" (PARTIE 9.2, écran 8) : vue plein écran d'une
+/// vidéo consultée hors du fil principal — grille du profil, fiche Move
+/// (meilleures reproductions), recherche... Auparavant un simple message
+/// "à venir" ; réutilise le même vocabulaire visuel que le feed.
+class VideoDetailScreen extends ConsumerStatefulWidget {
+  const VideoDetailScreen({required this.videoId, super.key});
+
+  final String videoId;
+
+  @override
+  ConsumerState<VideoDetailScreen> createState() => _VideoDetailScreenState();
+}
+
+class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
+  VideoPlayerController? _controller;
+  String? _initializedForUrl;
+  Timer? _viewTimer;
+  bool _initFailed = false;
+
+  @override
+  void dispose() {
+    _viewTimer?.cancel();
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initController(String url) async {
+    if (_initializedForUrl == url) return;
+    _initializedForUrl = url;
+    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+    _controller = controller;
+    try {
+      await controller.initialize();
+      await controller.setLooping(true);
+      if (!mounted) return;
+      setState(() {});
+      unawaited(controller.play());
+      _viewTimer = Timer(AppConstants.minWatchTimeForView, () {
+        if (!mounted) return;
+        ref.read(videoDetailControllerProvider(widget.videoId).notifier).registerView();
+      });
+    } catch (_) {
+      if (mounted) setState(() => _initFailed = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final videoAsync = ref.watch(videoDetailControllerProvider(widget.videoId));
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: videoAsync.when(
+        loading: () => const Center(child: AppLoader()),
+        error: (error, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Text(
+              error is Failure ? error.message : 'Vidéo introuvable.',
+              style: const TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        data: (video) {
+          if (video == null) {
+            return const Center(
+              child: Text(
+                'Cette vidéo a été supprimée ou n\'existe plus.',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _initController(video.videoUrl);
+          });
+          return _VideoDetailBody(video: video, controller: _controller, initFailed: _initFailed);
+        },
+      ),
+    );
+  }
+}
+
+class _VideoDetailBody extends ConsumerWidget {
+  const _VideoDetailBody({
+    required this.video,
+    required this.controller,
+    required this.initFailed,
+  });
+
+  final Video video;
+  final VideoPlayerController? controller;
+  final bool initFailed;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildVideoLayer(),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
+                stops: const [0.6, 1.0],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: AppSpacing.md,
+          left: AppSpacing.sm,
+          child: SafeArea(
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => context.canPop() ? context.pop() : context.go(RouteNames.feed),
+            ),
+          ),
+        ),
+        Positioned(
+          top: AppSpacing.md,
+          right: AppSpacing.sm,
+          child: SafeArea(
+            child: IconButton(
+              icon: const Icon(Icons.flag_outlined, color: Colors.white),
+              tooltip: 'Signaler',
+              onPressed: () => showReportContentSheet(
+                context,
+                targetType: 'video',
+                targetId: video.id,
+              ),
+            ),
+          ),
+        ),
+        _buildActionRail(context, ref),
+        _buildInfoOverlay(context),
+      ],
+    );
+  }
+
+  Widget _buildVideoLayer() {
+    final c = controller;
+    if (initFailed) {
+      return const ColoredBox(
+        color: AppColors.surface,
+        child: Center(
+          child: Icon(Icons.videocam_off_outlined, color: AppColors.textSecondary, size: 40),
+        ),
+      );
+    }
+    if (c == null || !c.value.isInitialized) {
+      return const ColoredBox(color: AppColors.surface);
+    }
+    return GestureDetector(
+      onTap: () => c.value.isPlaying ? c.pause() : c.play(),
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(width: c.value.size.width, height: c.value.size.height, child: VideoPlayer(c)),
+      ),
+    );
+  }
+
+  Widget _buildActionRail(BuildContext context, WidgetRef ref) {
+    return Positioned(
+      right: AppSpacing.sm,
+      bottom: 110,
+      child: Column(
+        children: [
+          _RailButton(
+            icon: video.hasLiked ? Icons.favorite : Icons.favorite_border,
+            color: video.hasLiked ? AppColors.primary : Colors.white,
+            label: Formatters.compactCount(video.likesCount),
+            onTap: () => ref
+                .read(videoDetailControllerProvider(video.id).notifier)
+                .toggleLike(isMasterclass: false),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _RailButton(
+            icon: Icons.star,
+            color: video.hasMasterclassed ? AppColors.gold : Colors.white,
+            label: Formatters.compactCount(video.masterclassCount),
+            onTap: () => ref
+                .read(videoDetailControllerProvider(video.id).notifier)
+                .toggleLike(isMasterclass: true),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _RailButton(
+            icon: Icons.mode_comment_outlined,
+            label: Formatters.compactCount(video.commentsCount),
+            onTap: () => CommentsSheet.show(context, video.id),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _RailButton(
+            icon: Icons.share_outlined,
+            label: 'Partager',
+            onTap: () => SharePlus.instance.share(
+              ShareParams(
+                text: video.isMove
+                    ? 'Regarde le Move "${video.moveName}" sur Football IQ Universe : ${video.videoUrl}'
+                    : 'Regarde cette vidéo sur Football IQ Universe : ${video.videoUrl}',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoOverlay(BuildContext context) {
+    final creator = video.creator;
+    return Positioned(
+      left: AppSpacing.md,
+      right: 76,
+      bottom: AppSpacing.lg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => context.push(RouteNames.otherProfilePath(video.userId)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '@${creator?.username ?? 'inconnu'}',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
+                ),
+                if (creator?.isVerified ?? false) ...[
+                  const SizedBox(width: 4),
+                  const Icon(Icons.verified, size: 15, color: AppColors.primary),
+                ],
+              ],
+            ),
+          ),
+          if (video.isMove) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.15),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '🔥 ${video.moveName ?? 'Move'} — Move original',
+                style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ] else if (video.originalMoveId != null) ...[
+            const SizedBox(height: 6),
+            GestureDetector(
+              onTap: () => context.push(RouteNames.moveDetailPath(video.originalMoveId!)),
+              child: const Text(
+                'Reproduit un Move',
+                style: TextStyle(color: AppColors.diamond, fontSize: 11, decoration: TextDecoration.underline),
+              ),
+            ),
+          ],
+          if (video.caption.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(video.caption, style: const TextStyle(color: Colors.white, fontSize: 13)),
+          ],
+          const SizedBox(height: 4),
+          Text(
+            '#${video.category} · ${Formatters.compactCount(video.viewsCount)} vues',
+            style: const TextStyle(color: AppColors.diamond, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RailButton extends StatelessWidget {
+  const _RailButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color = Colors.white,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 30),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+}

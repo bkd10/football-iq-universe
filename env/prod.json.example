@@ -1,0 +1,6 @@
+{
+  "ENVIRONMENT": "prod",
+  "SUPABASE_URL": "https://YOUR-PROD-PROJECT.supabase.co",
+  "SUPABASE_ANON_KEY": "YOUR-PROD-ANON-KEY",
+  "SENTRY_DSN": "https://YOUR-SENTRY-DSN"
+}
