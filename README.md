@@ -24,8 +24,11 @@ Il faut deux comptes gratuits : **Supabase** (la base de données) et
    npx supabase link --project-ref TON_ID_DE_PROJET   # visible dans l'URL du dashboard
    npx supabase db push                               # applique les 22 migrations
    ```
-   Sans Node.js : dans le dashboard, *SQL Editor*, colle puis exécute un par
-   un les fichiers de `supabase/migrations/`, **dans l'ordre** (0000 → 0021).
+   Sans Node.js (le plus simple) : dans le dashboard, *SQL Editor* →
+   *New query*, colle **tout** le contenu de `supabase/install_all.sql`
+   (toutes les migrations + la planification des défis) et clique *Run*.
+   Une seule fois, sur un projet vide. L'étape 3 ci-dessous est alors déjà
+   faite.
 3. *Database → Extensions* : active **pg_cron**, puis dans *SQL Editor* :
    ```sql
    select cron.schedule('resolve-expired-challenges', '*/15 * * * *',
