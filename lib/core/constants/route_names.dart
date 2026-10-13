@@ -70,7 +70,10 @@ class RouteNames {
   // Marque (brand) — Défis Sponsorisés en libre-service.
   static const String brandHome = '/brand';
 
-  // Modération — réservé aux comptes role='admin' (RLS), aucune entrée de
-  // navigation visible, accessible en tapant l'URL directement.
+  // Administration — entrée dans les Réglages pour role='admin' seulement ;
+  // les RPC admin_* refusent tout autre compte côté serveur.
   static const String adminModeration = '/admin/moderation';
+  static const String adminHome = '/admin';
+  static const String adminUsers = '/admin/users';
+  static const String adminOfficialChallenge = '/admin/challenge';
 }

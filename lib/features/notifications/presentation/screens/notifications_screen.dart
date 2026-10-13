@@ -91,6 +91,8 @@ class _NotificationTile extends ConsumerWidget {
         return Icons.visibility;
       case 'contact_approved':
         return Icons.mark_email_read_outlined;
+      case 'moderation':
+        return Icons.shield_outlined;
       default:
         return Icons.notifications;
     }

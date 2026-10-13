@@ -78,11 +78,11 @@ class SettingsScreen extends ConsumerWidget {
           if (profileAsync.valueOrNull?.role == 'admin') ...[
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.flag_outlined),
-              title: const Text('Modération'),
-              subtitle: const Text('Signalements en attente.'),
+              leading: const Icon(Icons.admin_panel_settings_outlined),
+              title: const Text('Administration'),
+              subtitle: const Text('Statistiques, signalements, joueurs, défis officiels.'),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(RouteNames.adminModeration),
+              onTap: () => context.push(RouteNames.adminHome),
             ),
           ],
           const Divider(),

@@ -56,13 +56,21 @@ Il faut deux comptes gratuits : **Supabase** (la base de données) et
 
 ### 3. Jouer
 
-Ouvre l'adresse Netlify sur ton téléphone, crée un compte, confirme
-l'e-mail, publie une vidéo. Pour te donner l'accès modération, dans
+Ouvre l'adresse du site sur ton téléphone, crée un compte, confirme
+l'e-mail, publie une vidéo. Pour te donner l'accès administrateur, dans
 *SQL Editor* :
 ```sql
 update profiles set role = 'admin' where username = 'TON_PSEUDO';
 ```
-puis ouvre `/#/admin/moderation`.
+puis ferme et rouvre le jeu : **Réglages → Administration** (statistiques,
+signalements avec messages pré-écrits, joueurs et bannissement, défis
+officiels).
+
+### Mettre à jour une base déjà installée
+
+Quand une nouvelle migration arrive dans `supabase/migrations/`, colle
+seulement ce fichier-là dans *SQL Editor* puis *Run*. Exemple : le panneau
+admin a besoin de `20260101000022_admin_panel.sql`.
 
 ## État actuel (Phase 0 + Semaines 1-8 du planning — MVP fonctionnellement complet)
 

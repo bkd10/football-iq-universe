@@ -203,6 +203,56 @@ def main():
     check("admin retire la vidéo signalée", s == 200, r)
     s, r = sel(f"videos?id=eq.{vid}&select=status", b_tok)
     check("vidéo retirée invisible", r == [], r)
+
+    # Panneau admin : statistiques, signalements avec messages, bannissement,
+    # défis officiels. Tout est refusé à un non-admin.
+    s, r = rpc("admin_dashboard_stats", {}, a_tok)
+    check("ADMIN stats refusées à un joueur", s in (401, 403), r)
+    s, r = rpc("admin_set_ban", {"p_user_id": b, "p_banned": True, "p_reason": "x"}, a_tok)
+    check("ADMIN bannissement refusé à un joueur", s in (401, 403), r)
+    s, r = rpc("admin_dashboard_stats", {}, c_tok)
+    check("admin voit les statistiques", s == 200 and r["players_total"] >= 2, r)
+    s, r = sel(f"videos?user_id=eq.{b}&select=id&limit=1", a_tok)
+    bvid = r[0]["id"]
+    ins("content_reports", {"target_type": "video", "target_id": bvid, "reporter_id": a, "reason": "Spam"}, a_tok)
+    s, r = rpc("admin_list_reports", {}, c_tok)
+    rep = next((x for x in (r or []) if x["target_id"] == bvid), None)
+    check("admin voit le signalement avec l'auteur", s == 200 and rep and rep["author_id"] == b and rep["video_url"], r)
+    s, r = rpc("admin_resolve_report", {"p_report_id": rep["report_id"], "p_status": "dismissed",
+                                        "p_author_message": "Ta vidéo reste en ligne.",
+                                        "p_reporter_message": "Merci, le contenu respecte nos règles."}, c_tok)
+    check("admin garde la vidéo avec messages", s == 200 and r["reports_closed"] == 1, r)
+    s, r = sel("notifications?type=eq.moderation&select=body", b_tok)
+    check("l'auteur reçoit le message de modération", s == 200 and len(r) == 1, r)
+    s, r = sel("notifications?type=eq.moderation&select=body", a_tok)
+    check("le signaleur reçoit la réponse", s == 200 and len(r) == 1, r)
+    s, r = rpc("admin_set_ban", {"p_user_id": c, "p_banned": True, "p_reason": "x"}, c_tok)
+    check("un admin ne peut pas se bannir", s >= 400, r)
+    s, r = rpc("admin_set_ban", {"p_user_id": b, "p_banned": True, "p_reason": "Triche"}, c_tok)
+    check("admin bannit un joueur", s == 200, r)
+    s, r = req("POST", "/auth/v1/token?grant_type=password", {"email": f"ben{sfx}@test.dev", "password": "Passw0rd!123"})
+    check("joueur banni ne peut plus se connecter", s >= 400, r)
+    s, r = sel(f"videos?user_id=eq.{b}&select=id", a_tok)
+    check("vidéos du joueur banni masquées", r == [], r)
+    s, r = sel("profiles?select=is_banned&limit=1", a_tok)
+    check("statut de bannissement illisible via l'API", s in (401, 403), r)
+    s, r = rpc("admin_list_users", {"p_search": "ben" + sfx}, c_tok)
+    check("admin retrouve le joueur (banni)", s == 200 and len(r) == 1 and r[0]["is_banned"], r)
+    s, r = rpc("admin_set_ban", {"p_user_id": b, "p_banned": False}, c_tok)
+    s, r2 = req("POST", "/auth/v1/token?grant_type=password", {"email": f"ben{sfx}@test.dev", "password": "Passw0rd!123"})
+    check("débannir rend la connexion", s == 200 and r2.get("access_token"), r2)
+    b_tok = r2["access_token"]
+    s, r = sel(f"videos?user_id=eq.{b}&select=id", a_tok)
+    check("débannir remet les vidéos", len(r) >= 1, r)
+    end = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=13)).isoformat()
+    s, r = rpc("admin_create_official_challenge", {"p_title": "Défi Ballon d'Or", "p_description": "x",
+                                                   "p_end_date": end}, a_tok)
+    check("ADMIN défi officiel refusé à un joueur", s in (401, 403), r)
+    s, r = rpc("admin_create_official_challenge", {"p_title": "Défi Ballon d'Or", "p_description": "x",
+                                                   "p_end_date": end, "p_prize_description": "Maillot"}, c_tok)
+    check("admin crée un défi officiel", s == 200, r)
+    s, r = sel(f"challenges?id=eq.{r['challenge_id']}&select=type,is_official,entry_cost", a_tok)
+    check("défi officiel gratuit et marqué officiel", r == [{"type": "world", "is_official": True, "entry_cost": 0}], r)
     s, r = rpc("delete_my_account", {}, b_tok)
     check("supprimer son compte", s == 204, r)
 
