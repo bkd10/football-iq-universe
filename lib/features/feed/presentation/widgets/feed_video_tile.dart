@@ -5,13 +5,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/widgets/video/inline_video_controller.dart';
 import '../../../missions/presentation/providers/missions_providers.dart';
 import '../../../profile/presentation/providers/social_providers.dart';
 import '../../../videos/domain/entities/video.dart';
@@ -31,9 +31,8 @@ class FeedVideoTile extends ConsumerStatefulWidget {
 }
 
 class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
-  VideoPlayerController? _controller;
+  InlineVideoController? _controller;
   Timer? _viewTimer;
-  bool _initFailed = false;
   int _heartBurstId = 0;
 
   @override
@@ -43,19 +42,17 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
   }
 
   Future<void> _initController() async {
-    final controller = VideoPlayerController.networkUrl(
-      Uri.parse(widget.video.videoUrl),
-    );
+    final controller = InlineVideoController(widget.video.videoUrl);
     _controller = controller;
-    try {
-      await controller.initialize();
-      await controller.setLooping(true);
-      if (!mounted) return;
-      setState(() {});
-      if (widget.isActive) _play();
-    } catch (_) {
-      if (mounted) setState(() => _initFailed = true);
-    }
+    controller.addListener(_onControllerChanged);
+    await controller.initialize();
+    if (!mounted) return;
+    setState(() {});
+    if (widget.isActive) _play();
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -88,16 +85,22 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
   @override
   void dispose() {
     _viewTimer?.cancel();
-    _controller?.dispose();
+    _controller
+      ?..removeListener(_onControllerChanged)
+      ..dispose();
     super.dispose();
   }
 
   void _togglePlayPause() {
     final controller = _controller;
-    if (controller == null || !controller.value.isInitialized) return;
-    setState(() {
-      controller.value.isPlaying ? controller.pause() : controller.play();
-    });
+    if (controller == null) return;
+    controller.isPlaying ? controller.pause() : controller.play();
+  }
+
+  void _toggleSound() {
+    final controller = _controller;
+    if (controller == null) return;
+    controller.isMuted = !controller.isMuted;
   }
 
   void _onDoubleTap() {
@@ -159,7 +162,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
 
   Widget _buildVideoLayer() {
     final controller = _controller;
-    if (_initFailed) {
+    if (controller != null && controller.hasError) {
       return const ColoredBox(
         color: AppColors.surface,
         child: Center(
@@ -167,15 +170,25 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
         ),
       );
     }
-    if (controller == null || !controller.value.isInitialized) {
-      return const ColoredBox(color: AppColors.surface);
-    }
-    return FittedBox(
-      fit: BoxFit.cover,
-      child: SizedBox(
-        width: controller.value.size.width,
-        height: controller.value.size.height,
-        child: VideoPlayer(controller),
+    return ColoredBox(
+      color: AppColors.surface,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (widget.video.thumbnailUrl != null)
+            Image.network(
+              widget.video.thumbnailUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          if (controller != null) controller.buildView(),
+          // Lecture bloquée (ex. mode économie d'énergie sur iPhone) ou mise
+          // en pause : un tap relance.
+          if (controller != null && widget.isActive && !controller.isPlaying)
+            const Center(
+              child: Icon(Icons.play_arrow_rounded, color: Colors.white70, size: 88),
+            ),
+        ],
       ),
     );
   }
@@ -191,6 +204,12 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
         children: [
           _CreatorAvatar(video: video, isFollowing: followState.valueOrNull ?? false),
           const SizedBox(height: AppSpacing.lg),
+          _RailButton(
+            icon: (_controller?.isMuted ?? false) ? Icons.volume_off : Icons.volume_up,
+            label: 'Son',
+            onTap: _toggleSound,
+          ),
+          const SizedBox(height: AppSpacing.md),
           _RailButton(
             icon: video.hasLiked ? Icons.favorite : Icons.favorite_border,
             color: video.hasLiked ? AppColors.primary : Colors.white,

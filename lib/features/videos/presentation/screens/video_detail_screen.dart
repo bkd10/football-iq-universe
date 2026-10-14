@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:video_player/video_player.dart';
 
+import '../../../../core/widgets/video/inline_video_controller.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
@@ -32,36 +32,37 @@ class VideoDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
-  VideoPlayerController? _controller;
+  InlineVideoController? _controller;
   String? _initializedForUrl;
   Timer? _viewTimer;
-  bool _initFailed = false;
 
   @override
   void dispose() {
     _viewTimer?.cancel();
-    _controller?.dispose();
+    _controller
+      ?..removeListener(_onControllerChanged)
+      ..dispose();
     super.dispose();
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _initController(String url) async {
     if (_initializedForUrl == url) return;
     _initializedForUrl = url;
-    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+    final controller = InlineVideoController(url);
     _controller = controller;
-    try {
-      await controller.initialize();
-      await controller.setLooping(true);
+    controller.addListener(_onControllerChanged);
+    await controller.initialize();
+    if (!mounted) return;
+    setState(() {});
+    controller.play();
+    _viewTimer = Timer(AppConstants.minWatchTimeForView, () {
       if (!mounted) return;
-      setState(() {});
-      unawaited(controller.play());
-      _viewTimer = Timer(AppConstants.minWatchTimeForView, () {
-        if (!mounted) return;
-        ref.read(videoDetailControllerProvider(widget.videoId).notifier).registerView();
-      });
-    } catch (_) {
-      if (mounted) setState(() => _initFailed = true);
-    }
+      ref.read(videoDetailControllerProvider(widget.videoId).notifier).registerView();
+    });
   }
 
   @override
@@ -94,7 +95,7 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) _initController(video.videoUrl);
           });
-          return _VideoDetailBody(video: video, controller: _controller, initFailed: _initFailed);
+          return _VideoDetailBody(video: video, controller: _controller);
         },
       ),
     );
@@ -105,12 +106,10 @@ class _VideoDetailBody extends ConsumerWidget {
   const _VideoDetailBody({
     required this.video,
     required this.controller,
-    required this.initFailed,
   });
 
   final Video video;
-  final VideoPlayerController? controller;
-  final bool initFailed;
+  final InlineVideoController? controller;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -163,7 +162,7 @@ class _VideoDetailBody extends ConsumerWidget {
 
   Widget _buildVideoLayer() {
     final c = controller;
-    if (initFailed) {
+    if (c != null && c.hasError) {
       return const ColoredBox(
         color: AppColors.surface,
         child: Center(
@@ -171,14 +170,35 @@ class _VideoDetailBody extends ConsumerWidget {
         ),
       );
     }
-    if (c == null || !c.value.isInitialized) {
-      return const ColoredBox(color: AppColors.surface);
-    }
     return GestureDetector(
-      onTap: () => c.value.isPlaying ? c.pause() : c.play(),
-      child: FittedBox(
-        fit: BoxFit.cover,
-        child: SizedBox(width: c.value.size.width, height: c.value.size.height, child: VideoPlayer(c)),
+      onTap: c == null ? null : () => c.isPlaying ? c.pause() : c.play(),
+      child: ColoredBox(
+        color: AppColors.surface,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (video.thumbnailUrl != null)
+              Image.network(
+                video.thumbnailUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            if (c != null) c.buildView(),
+            if (c != null && !c.isPlaying)
+              const Center(
+                child: Icon(Icons.play_arrow_rounded, color: Colors.white70, size: 88),
+              ),
+            if (c != null)
+              Positioned(
+                top: AppSpacing.xl * 2,
+                right: AppSpacing.md,
+                child: IconButton(
+                  icon: Icon(c.isMuted ? Icons.volume_off : Icons.volume_up, color: Colors.white),
+                  onPressed: () => c.isMuted = !c.isMuted,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
