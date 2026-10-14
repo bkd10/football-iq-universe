@@ -93,7 +93,7 @@ Ce qui est en place :
   double-tap pour liker, like/Masterclass (mutuellement exclusifs, comme le
   définit le schéma), commentaires (bottom sheet), follow/unfollow, mise à
   jour optimiste de l'UI, pagination infinie, comptage de vues anti-triche
-- **Publication vidéo** : caméra ou galerie, validation de durée (15-60s),
+- **Publication vidéo** : caméra ou galerie, validation de durée (5-60s),
   formulaire caption/catégorie/Move, upload Supabase Storage — toute l'API
   native (`image_picker`, compression `video_compress`, lecture d'un
   fichier local) passe par `VideoSourceService`

@@ -6,7 +6,7 @@ class AppConstants {
   static const String appName = 'Football IQ Universe';
 
   // Vidéo
-  static const int minVideoDurationSeconds = 15;
+  static const int minVideoDurationSeconds = 5;
   static const int maxVideoDurationSeconds = 60;
 
   // Pagination

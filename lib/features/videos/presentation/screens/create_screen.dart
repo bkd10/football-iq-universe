@@ -15,7 +15,7 @@ import '../../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../economy/presentation/providers/economy_providers.dart';
 import '../providers/video_providers.dart';
 
-/// Enregistrement/import (15-60s), caption, catégorie et option "Créer un
+/// Enregistrement/import (5-60s), caption, catégorie et option "Créer un
 /// Move" — voir PARTIE 8.2 et 9.2 (écrans Camera/Edit Video/Create Move).
 ///
 /// Si [originalMoveId] est renseigné (venant du bouton "Essayer ce Move"
@@ -68,15 +68,23 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
       return;
     }
 
-    final duration = controller.value.duration;
-    if (duration.inSeconds < AppConstants.minVideoDurationSeconds) {
+    // Safari (iPhone) ne connaît souvent pas encore la durée d'une vidéo
+    // tout juste filmée ou choisie (durée nulle ou "infinie") : dans ce cas
+    // on accepte la vidéo plutôt que de la refuser à tort.
+    final duration = _knownDuration(controller);
+    final String? durationError;
+    if (duration == null) {
+      durationError = null;
+    } else if (duration.inSeconds < AppConstants.minVideoDurationSeconds) {
+      durationError = 'La vidéo doit durer au moins ${AppConstants.minVideoDurationSeconds}s.';
+    } else if (duration.inSeconds > AppConstants.maxVideoDurationSeconds) {
+      durationError = 'La vidéo doit durer ${AppConstants.maxVideoDurationSeconds}s maximum.';
+    } else {
+      durationError = null;
+    }
+    if (durationError != null) {
       await controller.dispose();
-      if (mounted) {
-        context.showSnackBar(
-          'La vidéo doit durer au moins ${AppConstants.minVideoDurationSeconds}s.',
-          isError: true,
-        );
-      }
+      if (mounted) context.showSnackBar(durationError, isError: true);
       return;
     }
 
@@ -84,6 +92,11 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
       _pickedVideo = picked;
       _previewController = controller..setLooping(true)..play();
     });
+  }
+
+  static Duration? _knownDuration(VideoPlayerController controller) {
+    final duration = controller.value.duration;
+    return duration > Duration.zero ? duration : null;
   }
 
   void _reset() {
@@ -112,7 +125,8 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
       _statusMessage = 'Préparation de la vidéo...';
     });
 
-    final durationSeconds = _previewController?.value.duration.inSeconds;
+    final controller = _previewController;
+    final durationSeconds = controller == null ? null : _knownDuration(controller)?.inSeconds;
     final prepared =
         await ref.read(videoSourceServiceProvider).prepareForUpload(picked);
 
