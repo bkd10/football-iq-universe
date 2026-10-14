@@ -13,6 +13,14 @@ class VideoCreatorModel {
     this.avatarUrl,
     this.level = 'rookie',
     this.isVerified = false,
+    this.country,
+    this.position,
+    this.preferredFoot,
+    this.stars = 0,
+    this.videosCount = 0,
+    this.likesReceivedCount = 0,
+    this.movesCreatedCount = 0,
+    this.challengesWonCount = 0,
   });
 
   factory VideoCreatorModel.fromJson(Map<String, dynamic> json) =>
@@ -26,6 +34,14 @@ class VideoCreatorModel {
   final String? avatarUrl;
   final String level;
   final bool isVerified;
+  final String? country;
+  final String? position;
+  final String? preferredFoot;
+  final int stars;
+  final int videosCount;
+  final int likesReceivedCount;
+  final int movesCreatedCount;
+  final int challengesWonCount;
 
   VideoCreator toEntity() {
     return VideoCreator(
@@ -35,6 +51,14 @@ class VideoCreatorModel {
       avatarUrl: avatarUrl,
       level: level,
       isVerified: isVerified,
+      country: country,
+      position: position,
+      preferredFoot: preferredFoot,
+      stars: stars,
+      videosCount: videosCount,
+      likesReceivedCount: likesReceivedCount,
+      movesCreatedCount: movesCreatedCount,
+      challengesWonCount: challengesWonCount,
     );
   }
 }

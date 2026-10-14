@@ -9,7 +9,9 @@ import '../models/video_model.dart';
 /// Champ de jointure commun : embarque le profil du créateur/auteur dans
 /// une seule requête plutôt que de faire un aller-retour réseau par vidéo.
 const _creatorSelect =
-    'id, username, display_name, avatar_url, level, is_verified';
+    'id, username, display_name, avatar_url, level, is_verified, country, position, '
+    'preferred_foot, stars, videos_count, likes_received_count, moves_created_count, '
+    'challenges_won_count';
 
 class VideoRemoteDataSource {
   const VideoRemoteDataSource(this._client, this._storageService);

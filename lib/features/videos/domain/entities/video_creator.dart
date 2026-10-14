@@ -14,5 +14,13 @@ class VideoCreator with _$VideoCreator {
     String? avatarUrl,
     @Default('rookie') String level,
     @Default(false) bool isVerified,
+    String? country,
+    String? position,
+    String? preferredFoot,
+    @Default(0) int stars,
+    @Default(0) int videosCount,
+    @Default(0) int likesReceivedCount,
+    @Default(0) int movesCreatedCount,
+    @Default(0) int challengesWonCount,
   }) = _VideoCreator;
 }

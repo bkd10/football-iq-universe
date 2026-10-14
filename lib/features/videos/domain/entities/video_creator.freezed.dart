@@ -22,6 +22,14 @@ mixin _$VideoCreator {
   String? get avatarUrl => throw _privateConstructorUsedError;
   String get level => throw _privateConstructorUsedError;
   bool get isVerified => throw _privateConstructorUsedError;
+  String? get country => throw _privateConstructorUsedError;
+  String? get position => throw _privateConstructorUsedError;
+  String? get preferredFoot => throw _privateConstructorUsedError;
+  int get stars => throw _privateConstructorUsedError;
+  int get videosCount => throw _privateConstructorUsedError;
+  int get likesReceivedCount => throw _privateConstructorUsedError;
+  int get movesCreatedCount => throw _privateConstructorUsedError;
+  int get challengesWonCount => throw _privateConstructorUsedError;
 
   /// Create a copy of VideoCreator
   /// with the given fields replaced by the non-null parameter values.
@@ -42,7 +50,15 @@ abstract class $VideoCreatorCopyWith<$Res> {
       String? displayName,
       String? avatarUrl,
       String level,
-      bool isVerified});
+      bool isVerified,
+      String? country,
+      String? position,
+      String? preferredFoot,
+      int stars,
+      int videosCount,
+      int likesReceivedCount,
+      int movesCreatedCount,
+      int challengesWonCount});
 }
 
 /// @nodoc
@@ -66,6 +82,14 @@ class _$VideoCreatorCopyWithImpl<$Res, $Val extends VideoCreator>
     Object? avatarUrl = freezed,
     Object? level = null,
     Object? isVerified = null,
+    Object? country = freezed,
+    Object? position = freezed,
+    Object? preferredFoot = freezed,
+    Object? stars = null,
+    Object? videosCount = null,
+    Object? likesReceivedCount = null,
+    Object? movesCreatedCount = null,
+    Object? challengesWonCount = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -92,6 +116,38 @@ class _$VideoCreatorCopyWithImpl<$Res, $Val extends VideoCreator>
           ? _value.isVerified
           : isVerified // ignore: cast_nullable_to_non_nullable
               as bool,
+      country: freezed == country
+          ? _value.country
+          : country // ignore: cast_nullable_to_non_nullable
+              as String?,
+      position: freezed == position
+          ? _value.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as String?,
+      preferredFoot: freezed == preferredFoot
+          ? _value.preferredFoot
+          : preferredFoot // ignore: cast_nullable_to_non_nullable
+              as String?,
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+      videosCount: null == videosCount
+          ? _value.videosCount
+          : videosCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      likesReceivedCount: null == likesReceivedCount
+          ? _value.likesReceivedCount
+          : likesReceivedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      movesCreatedCount: null == movesCreatedCount
+          ? _value.movesCreatedCount
+          : movesCreatedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      challengesWonCount: null == challengesWonCount
+          ? _value.challengesWonCount
+          : challengesWonCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -110,7 +166,15 @@ abstract class _$$VideoCreatorImplCopyWith<$Res>
       String? displayName,
       String? avatarUrl,
       String level,
-      bool isVerified});
+      bool isVerified,
+      String? country,
+      String? position,
+      String? preferredFoot,
+      int stars,
+      int videosCount,
+      int likesReceivedCount,
+      int movesCreatedCount,
+      int challengesWonCount});
 }
 
 /// @nodoc
@@ -132,6 +196,14 @@ class __$$VideoCreatorImplCopyWithImpl<$Res>
     Object? avatarUrl = freezed,
     Object? level = null,
     Object? isVerified = null,
+    Object? country = freezed,
+    Object? position = freezed,
+    Object? preferredFoot = freezed,
+    Object? stars = null,
+    Object? videosCount = null,
+    Object? likesReceivedCount = null,
+    Object? movesCreatedCount = null,
+    Object? challengesWonCount = null,
   }) {
     return _then(_$VideoCreatorImpl(
       id: null == id
@@ -158,6 +230,38 @@ class __$$VideoCreatorImplCopyWithImpl<$Res>
           ? _value.isVerified
           : isVerified // ignore: cast_nullable_to_non_nullable
               as bool,
+      country: freezed == country
+          ? _value.country
+          : country // ignore: cast_nullable_to_non_nullable
+              as String?,
+      position: freezed == position
+          ? _value.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as String?,
+      preferredFoot: freezed == preferredFoot
+          ? _value.preferredFoot
+          : preferredFoot // ignore: cast_nullable_to_non_nullable
+              as String?,
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+      videosCount: null == videosCount
+          ? _value.videosCount
+          : videosCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      likesReceivedCount: null == likesReceivedCount
+          ? _value.likesReceivedCount
+          : likesReceivedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      movesCreatedCount: null == movesCreatedCount
+          ? _value.movesCreatedCount
+          : movesCreatedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      challengesWonCount: null == challengesWonCount
+          ? _value.challengesWonCount
+          : challengesWonCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -171,7 +275,15 @@ class _$VideoCreatorImpl implements _VideoCreator {
       this.displayName,
       this.avatarUrl,
       this.level = 'rookie',
-      this.isVerified = false});
+      this.isVerified = false,
+      this.country,
+      this.position,
+      this.preferredFoot,
+      this.stars = 0,
+      this.videosCount = 0,
+      this.likesReceivedCount = 0,
+      this.movesCreatedCount = 0,
+      this.challengesWonCount = 0});
 
   @override
   final String id;
@@ -187,10 +299,31 @@ class _$VideoCreatorImpl implements _VideoCreator {
   @override
   @JsonKey()
   final bool isVerified;
+  @override
+  final String? country;
+  @override
+  final String? position;
+  @override
+  final String? preferredFoot;
+  @override
+  @JsonKey()
+  final int stars;
+  @override
+  @JsonKey()
+  final int videosCount;
+  @override
+  @JsonKey()
+  final int likesReceivedCount;
+  @override
+  @JsonKey()
+  final int movesCreatedCount;
+  @override
+  @JsonKey()
+  final int challengesWonCount;
 
   @override
   String toString() {
-    return 'VideoCreator(id: $id, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, level: $level, isVerified: $isVerified)';
+    return 'VideoCreator(id: $id, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, level: $level, isVerified: $isVerified, country: $country, position: $position, preferredFoot: $preferredFoot, stars: $stars, videosCount: $videosCount, likesReceivedCount: $likesReceivedCount, movesCreatedCount: $movesCreatedCount, challengesWonCount: $challengesWonCount)';
   }
 
   @override
@@ -207,12 +340,40 @@ class _$VideoCreatorImpl implements _VideoCreator {
                 other.avatarUrl == avatarUrl) &&
             (identical(other.level, level) || other.level == level) &&
             (identical(other.isVerified, isVerified) ||
-                other.isVerified == isVerified));
+                other.isVerified == isVerified) &&
+            (identical(other.country, country) || other.country == country) &&
+            (identical(other.position, position) ||
+                other.position == position) &&
+            (identical(other.preferredFoot, preferredFoot) ||
+                other.preferredFoot == preferredFoot) &&
+            (identical(other.stars, stars) || other.stars == stars) &&
+            (identical(other.videosCount, videosCount) ||
+                other.videosCount == videosCount) &&
+            (identical(other.likesReceivedCount, likesReceivedCount) ||
+                other.likesReceivedCount == likesReceivedCount) &&
+            (identical(other.movesCreatedCount, movesCreatedCount) ||
+                other.movesCreatedCount == movesCreatedCount) &&
+            (identical(other.challengesWonCount, challengesWonCount) ||
+                other.challengesWonCount == challengesWonCount));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, username, displayName, avatarUrl, level, isVerified);
+      runtimeType,
+      id,
+      username,
+      displayName,
+      avatarUrl,
+      level,
+      isVerified,
+      country,
+      position,
+      preferredFoot,
+      stars,
+      videosCount,
+      likesReceivedCount,
+      movesCreatedCount,
+      challengesWonCount);
 
   /// Create a copy of VideoCreator
   /// with the given fields replaced by the non-null parameter values.
@@ -230,7 +391,15 @@ abstract class _VideoCreator implements VideoCreator {
       final String? displayName,
       final String? avatarUrl,
       final String level,
-      final bool isVerified}) = _$VideoCreatorImpl;
+      final bool isVerified,
+      final String? country,
+      final String? position,
+      final String? preferredFoot,
+      final int stars,
+      final int videosCount,
+      final int likesReceivedCount,
+      final int movesCreatedCount,
+      final int challengesWonCount}) = _$VideoCreatorImpl;
 
   @override
   String get id;
@@ -244,6 +413,22 @@ abstract class _VideoCreator implements VideoCreator {
   String get level;
   @override
   bool get isVerified;
+  @override
+  String? get country;
+  @override
+  String? get position;
+  @override
+  String? get preferredFoot;
+  @override
+  int get stars;
+  @override
+  int get videosCount;
+  @override
+  int get likesReceivedCount;
+  @override
+  int get movesCreatedCount;
+  @override
+  int get challengesWonCount;
 
   /// Create a copy of VideoCreator
   /// with the given fields replaced by the non-null parameter values.
