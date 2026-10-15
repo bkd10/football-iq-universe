@@ -4,7 +4,7 @@ import '../../../../core/errors/failures.dart';
 import '../entities/profile.dart';
 import '../repositories/auth_repository.dart';
 
-/// Inscription d'un nouveau joueur. Le bonus de bienvenue (500 Ballons) et
+/// Inscription d'un nouveau joueur. Le bonus de bienvenue (100 Ballons) et
 /// la création de la ligne `profiles` sont gérés côté serveur par le
 /// trigger `handle_new_user` — voir
 /// `supabase/migrations/20260101000002_triggers.sql`.

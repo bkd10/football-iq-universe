@@ -10,7 +10,7 @@ class EconomyConstants {
   // Gains (Ballons)
   // Règles v2 (15/10/2026) : la connexion quotidienne et les Moves
   // reproduits ne rapportent plus rien.
-  static const int welcomeBonus = 500;
+  static const int welcomeBonus = 100;
   static const int postVideoReward = 5;
   static const int maxPostVideoRewardsPerDay = 3;
   static const int fullWatchTarget = 20;

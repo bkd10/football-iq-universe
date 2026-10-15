@@ -94,6 +94,15 @@ def main():
     a_tok, a = signup("ana" + sfx, birth="2012-05-01")  # joueuse mineure
     b_tok, b = signup("ben" + sfx)
     c_tok, c = signup("cid" + sfx)
+    check("bonus de bienvenue = 100 Ballons", profile(b)["coins"] == 100, profile(b))
+    # Les scénarios ci-dessous dépensent plus : on recharge les comptes de test
+    # par une vraie transaction pour garder le grand livre juste.
+    for uid in (a, b, c):
+        subprocess.run(["psql", DB_URL, "-Atqc",
+                        f"update profiles set coins = coins + 900 where id='{uid}'; "
+                        f"insert into transactions (user_id, type, amount, currency, balance_after, reason) "
+                        f"select id, 'earn', 900, 'coins', coins, 'test_topup' from profiles where id='{uid}'"],
+                       check=True)
     today = datetime.date.today().isoformat()
     storage = f"{API}/storage/v1/object/public"
 
@@ -269,6 +278,9 @@ def main():
     avid = r[0]["id"]
     s, r = ins("videos", {"user_id": c, "video_url": f"{storage}/videos/{c}/cv.mp4", "category": "dribble"}, c_tok)
     d_tok, d = signup("dan" + sfx)
+    sql(f"update profiles set coins = coins + 900 where id='{d}'; "
+        f"insert into transactions (user_id, type, amount, currency, balance_after, reason) "
+        f"select id, 'earn', 900, 'coins', coins, 'test_topup' from profiles where id='{d}'")
     rpc("start_video_watch", {"p_video_id": wv1, "p_local_date": today}, a_tok)
     s, r = rpc("complete_video_watch", {"p_video_id": wv1, "p_duration_seconds": 10, "p_local_date": today}, a_tok)
     check("FRAUDE vidéo « regardée » trop vite non comptée", s == 200 and not r["counted"], r)

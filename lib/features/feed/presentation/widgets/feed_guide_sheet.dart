@@ -158,7 +158,7 @@ class FeedGuideSheet extends StatelessWidget {
                 'Battle. Égalité ou aucun vote : chacun récupère sa mise.',
           ),
           const _Section('Gagner des Ballons'),
-          const _Line(icon: '🎁', title: 'Bienvenue', text: '500 Ballons à l’inscription.'),
+          const _Line(icon: '🎁', title: 'Bienvenue', text: '100 Ballons à l’inscription.'),
           const _Line(
             icon: '👀',
             title: 'Regarder',
