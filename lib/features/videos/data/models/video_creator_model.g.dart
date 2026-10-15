@@ -22,6 +22,7 @@ VideoCreatorModel _$VideoCreatorModelFromJson(Map<String, dynamic> json) =>
       likesReceivedCount: (json['likes_received_count'] as num?)?.toInt() ?? 0,
       movesCreatedCount: (json['moves_created_count'] as num?)?.toInt() ?? 0,
       challengesWonCount: (json['challenges_won_count'] as num?)?.toInt() ?? 0,
+      formScore: (json['form_score'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$VideoCreatorModelToJson(VideoCreatorModel instance) =>
@@ -40,4 +41,5 @@ Map<String, dynamic> _$VideoCreatorModelToJson(VideoCreatorModel instance) =>
       'likes_received_count': instance.likesReceivedCount,
       'moves_created_count': instance.movesCreatedCount,
       'challenges_won_count': instance.challengesWonCount,
+      'form_score': instance.formScore,
     };

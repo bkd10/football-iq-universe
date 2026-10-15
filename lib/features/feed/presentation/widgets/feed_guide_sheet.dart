@@ -176,10 +176,18 @@ class FeedGuideSheet extends StatelessWidget {
           ),
           const _Section('La note sur 99'),
           const Text(
-            'Elle monte avec ce que le joueur accomplit : vidéos publiées, '
+            'Elle monte lentement avec ce que le joueur accomplit : vidéos publiées, '
             'points de Respect, Stars, défis gagnés et Moves inventés. '
             'Son nombre d’abonnés ne compte pas.',
             style: TextStyle(color: Colors.white70, height: 1.35),
+          ),
+          const SizedBox(height: 10),
+          const _Line(
+            icon: '📈',
+            title: 'La forme',
+            text: 'Une partie de la note suit tes 30 derniers jours : Respect récents, '
+                'Battles gagnées ou perdues. Si tu ne publies plus ou que tu perds, '
+                'ta note baisse. La flèche sous la note montre ta forme (▲ ou ▼).',
           ),
           const SizedBox(height: 24),
           FilledButton(

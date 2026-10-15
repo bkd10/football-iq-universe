@@ -213,6 +213,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
               top: 10,
               child: _RatingBadge(
                 rating: playerRating(video.creator),
+                form: video.creator?.formScore ?? 0,
                 position: positionShort(video.creator?.position),
                 style: style,
               ),
@@ -512,9 +513,18 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
 }
 
 class _RatingBadge extends StatelessWidget {
-  const _RatingBadge({required this.rating, required this.position, required this.style});
+  const _RatingBadge({
+    required this.rating,
+    required this.form,
+    required this.position,
+    required this.style,
+  });
 
   final int rating;
+
+  /// Forme sur 30 jours : flèche verte si elle porte la note, rouge si
+  /// elle la fait baisser.
+  final int form;
   final String position;
   final PlayerCardStyle style;
 
@@ -550,6 +560,16 @@ class _RatingBadge extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+          if (form != 0)
+            Text(
+              form > 0 ? '▲ +$form' : '▼ $form',
+              style: TextStyle(
+                color: form > 0 ? const Color(0xFF4ADE80) : const Color(0xFFF87171),
+                fontSize: 10,
+                height: 1.3,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
         ],
       ),
     );

@@ -11,7 +11,7 @@ import '../models/video_model.dart';
 const _creatorSelect =
     'id, username, display_name, avatar_url, level, is_verified, country, position, '
     'preferred_foot, stars, videos_count, likes_received_count, moves_created_count, '
-    'challenges_won_count';
+    'challenges_won_count, form_score';
 
 class VideoRemoteDataSource {
   const VideoRemoteDataSource(this._client, this._storageService);
