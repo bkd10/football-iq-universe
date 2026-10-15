@@ -13,7 +13,9 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/challenge_providers.dart';
 import '../widgets/challenge_card.dart';
 
-const _creatableTypes = ['battle', 'challenge', 'king'];
+// King est masqué tant que l'app ne permet pas d'enregistrer un record :
+// sans détenteur de record, un défi King se terminerait sans vainqueur.
+const _creatableTypes = ['battle', 'challenge'];
 
 /// Formulaire de création — voir PARTIE 9.2. Seuls Battle/Challenge/King
 /// sont créables par un joueur (Monde reste officiel, piloté par un admin

@@ -95,7 +95,7 @@ class FeedGuideSheet extends StatelessWidget {
           const _Line(
             icon: '🏆',
             title: 'Défis',
-            text: 'Rejoins un défi et affronte les autres joueurs.',
+            text: 'Rejoins un défi avec ta vidéo et remporte la cagnotte.',
           ),
           const _Line(
             icon: '➕',
@@ -127,6 +127,54 @@ class FeedGuideSheet extends StatelessWidget {
           ),
           const _Line(icon: '💬', title: 'Avis', text: 'Laisse un commentaire au joueur.'),
           const _Line(icon: '↗', title: 'Partager', text: 'Envoie la vidéo à tes potes.'),
+          const _Section('Les défis'),
+          const _Line(
+            icon: '🎯',
+            title: 'Challenge',
+            text: 'Un geste imposé. Tu rejoins avec une de tes vidéos (20 Ballons).',
+          ),
+          const _Line(
+            icon: '⚔️',
+            title: 'Battle',
+            text: 'Même principe, en plus relevé (50 Ballons pour entrer).',
+          ),
+          const _Line(
+            icon: '🌍',
+            title: 'Monde',
+            text: 'Les défis officiels Football IQ, gratuits.',
+          ),
+          const _Line(
+            icon: '🏆',
+            title: 'Gagner',
+            text: 'Les joueurs votent. À la fin, celui qui a le plus de votes '
+                'remporte toute la cagnotte et +100 Stars.',
+          ),
+          const _Section('Gagner des Ballons'),
+          const _Line(icon: '🎁', title: 'Bienvenue', text: '500 Ballons à l’inscription.'),
+          const _Line(
+            icon: '📅',
+            title: 'Chaque jour',
+            text: '+20 en te connectant. Bonus de +50 à 7 jours d’affilée, +200 à 30 jours.',
+          ),
+          const _Line(
+            icon: '🎬',
+            title: 'Publier',
+            text: '+5 par vidéo publiée (3 fois par jour maximum).',
+          ),
+          const _Line(
+              icon: '👀',
+              title: 'Regarder',
+              text: '+5 quand tu regardes 3 vidéos dans la journée.',),
+          const _Line(
+            icon: '🔁',
+            title: 'Ton Move reproduit',
+            text: '+1 chaque fois qu’un joueur reproduit un Move que tu as inventé.',
+          ),
+          const _Line(
+            icon: '🏆',
+            title: 'Gagner un défi',
+            text: 'Toute la cagnotte du défi est pour toi.',
+          ),
           const _Section('La note sur 99'),
           const Text(
             'Elle monte avec ce que le joueur accomplit : vidéos publiées, '

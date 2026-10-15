@@ -15,7 +15,6 @@ const _filters = [
   (label: 'Tous', type: null),
   (label: '⚔️ Battle', type: 'battle'),
   (label: '🎯 Challenge', type: 'challenge'),
-  (label: '👑 King', type: 'king'),
   (label: '🌍 Monde', type: 'world'),
   (label: '💼 Sponsorisé', type: 'sponsored'),
 ];

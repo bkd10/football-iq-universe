@@ -38,11 +38,8 @@ class EarnBallonsScreen extends StatelessWidget {
           const _EarnTile(
             icon: Icons.today_outlined,
             title: 'Connexion quotidienne',
-            detail: 'Ouvre l\'app chaque jour. Le montant grandit avec ta '
-                'série de connexions.',
-            amountLabel:
-                '+${EconomyConstants.dailyLoginMin} à '
-                '${EconomyConstants.dailyLoginMax}/jour',
+            detail: 'Ouvre l\'app chaque jour pour récupérer ton bonus.',
+            amountLabel: '+${EconomyConstants.dailyLoginMax}/jour',
           ),
           const _EarnTile(
             icon: Icons.local_fire_department_outlined,
@@ -79,7 +76,7 @@ class EarnBallonsScreen extends StatelessWidget {
           ),
           const _EarnTile(
             icon: Icons.emoji_events_outlined,
-            title: 'Gagner un Défi, une Battle ou un King',
+            title: 'Gagner un Défi ou une Battle',
             detail: 'La cagnotte est constituée des droits d\'entrée payés '
                 'par tous les participants — le vainqueur la remporte '
                 'intégralement, plus 100 Stars.',
