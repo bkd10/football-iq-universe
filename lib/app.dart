@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/config/app_config.dart';
@@ -23,6 +24,11 @@ class FootballIqUniverseApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
       routerConfig: router,
+      // Textes intégrés de Flutter (calendrier, OK/Annuler, copier/coller...)
+      // en français.
+      locale: const Locale('fr', 'FR'),
+      supportedLocales: const [Locale('fr', 'FR')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       // Contraint l'app à une largeur "mobile" sur un navigateur de bureau
       // large — voir `ResponsiveAppFrame`. No-op en dessous de 480px
       // (mobile réel, ou fenêtre navigateur étroite).
