@@ -36,7 +36,7 @@ class PlayerCardStyle {
       panel: Color(0xFF1C2329),
       onPanel: Color(0xFFEDEFF1),
       label: 'Argent',
-      minPoints: 50,
+      minPoints: 500,
     ),
     PlayerCardStyle._(
       gradient: [Color(0xFFF2D27A), Color(0xFFD4A63A), Color(0xFFA9791C)],
@@ -45,7 +45,7 @@ class PlayerCardStyle {
       panel: Color(0xFF2A1E05),
       onPanel: Color(0xFFF2D27A),
       label: 'Or',
-      minPoints: 250,
+      minPoints: 5000,
     ),
     PlayerCardStyle._(
       gradient: [Color(0xFF1B1B2F), Color(0xFF3A2E6E), Color(0xFF0E7C86)],
@@ -54,7 +54,7 @@ class PlayerCardStyle {
       panel: Color(0xFF0D0B1F),
       onPanel: Color(0xFF7FE3FF),
       label: 'Platine',
-      minPoints: 1000,
+      minPoints: 50000,
     ),
     PlayerCardStyle._(
       gradient: [Color(0xFFF7FDFF), Color(0xFFB5E9F7), Color(0xFF6FC3E0)],
@@ -63,7 +63,7 @@ class PlayerCardStyle {
       panel: Color(0xFF07263A),
       onPanel: Color(0xFFCFF4FF),
       label: 'Diamant',
-      minPoints: 5000,
+      minPoints: 500000,
     ),
   ];
 
