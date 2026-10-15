@@ -13,6 +13,7 @@ import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../economy/presentation/providers/economy_providers.dart';
 import '../../../notifications/presentation/providers/notifications_providers.dart';
 import '../../../videos/presentation/providers/video_providers.dart';
+import '../widgets/feed_guide_sheet.dart';
 import '../widgets/feed_video_tile.dart';
 
 enum _FeedTab { forYou, following, trending }
@@ -38,15 +39,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   void initState() {
     super.initState();
     _claimDailyLogin();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) FeedGuideSheet.showOnce(context);
+    });
   }
 
   /// Réclame le bonus de connexion quotidienne une fois par session (voir
   /// `award_coins` — la RPC rejette silencieusement si déjà réclamé
   /// aujourd'hui, ce qui est l'état normal la plupart du temps).
   Future<void> _claimDailyLogin() async {
-    final result = await ref
-        .read(economyControllerProvider.notifier)
-        .awardCoins(EconomyReason.dailyLogin);
+    final result =
+        await ref.read(economyControllerProvider.notifier).awardCoins(EconomyReason.dailyLogin);
     if (!mounted) return;
     result.fold((_) {}, (newBalance) {
       context.showSnackBar('🎉 Bonus de connexion quotidienne récupéré !');
@@ -73,7 +76,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
     if (tab == _tab) return;
     if (tab != _FeedTab.forYou) {
-      context.showSnackBar('Bientôt disponible.');
+      context.showSnackBar(
+        'Le Vestiaire arrive bientôt : tu y verras les vidéos des joueurs que tu suis.',
+      );
       return;
     }
     setState(() => _tab = tab);
@@ -196,6 +201,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               const Spacer(),
               IconButton(
                 visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.help_outline, color: Colors.white),
+                tooltip: 'Comment ça marche',
+                onPressed: () => FeedGuideSheet.show(context),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.search, color: Colors.white),
                 onPressed: () => context.push(RouteNames.search),
               ),
@@ -246,11 +257,22 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 6),
+          Text(
+            _tabHints[_tab]!,
+            style: const TextStyle(color: Colors.white60, fontSize: 12),
+          ),
         ],
       ),
     );
   }
 }
+
+const _tabHints = {
+  _FeedTab.forYou: 'Les talents à découvrir, peu importe leurs abonnés.',
+  _FeedTab.following: 'Les vidéos des joueurs que tu suis.',
+  _FeedTab.trending: 'Les Moves du moment.',
+};
 
 const _pitch = Color(0xFF0D2418);
 const _lime = Color(0xFFD8F34A);

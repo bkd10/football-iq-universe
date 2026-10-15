@@ -127,7 +127,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
   @override
   Widget build(BuildContext context) {
     final video = widget.video;
-    final style = PlayerCardStyle.forLevel(video.creator?.level ?? 'rookie');
+    final style = PlayerCardStyle.forPoints(video.creator?.likesReceivedCount ?? 0);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
@@ -207,7 +207,9 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                     GestureDetector(
                       onTap: () => context.push(RouteNames.moveDetailPath(video.id)),
                       child: _GlassChip(
-                          text: '🔥 Move : ${video.moveName ?? 'original'}', highlight: true,),
+                        text: '🔥 Move : ${video.moveName ?? 'original'}',
+                        highlight: true,
+                      ),
                     )
                   else if (video.originalMoveId != null)
                     GestureDetector(
@@ -250,7 +252,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
       if (countryFlag(creator?.country) != null) countryFlag(creator?.country)!,
       if (creator?.position != null) creator!.position!,
       if (footLabel(creator?.preferredFoot) != null) footLabel(creator?.preferredFoot)!,
-      style.label,
+      'Carte ${style.label}',
     ].join(' · ');
 
     return Padding(
@@ -341,7 +343,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
     final creator = widget.video.creator;
     final stats = [
       ('VID', creator?.videosCount ?? 0),
-      ('RESP', creator?.likesReceivedCount ?? 0),
+      ('RESPECT', creator?.likesReceivedCount ?? 0),
       ('STARS', creator?.stars ?? 0),
       ('DÉFIS', creator?.challengesWonCount ?? 0),
       ('MOVES', creator?.movesCreatedCount ?? 0),

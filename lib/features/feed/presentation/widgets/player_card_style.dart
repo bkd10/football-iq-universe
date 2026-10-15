@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../../videos/domain/entities/video_creator.dart';
 
-/// Habillage « carte joueur » du feed : couleur de la carte selon le niveau
-/// du joueur, note globale, poste et drapeau.
+/// Habillage « carte joueur » du feed. La couleur de la carte se gagne par
+/// paliers de points de Respect reçus, comme les disques d'or : Bronze,
+/// Argent, Or, Platine, Diamant. Un Respect vaut 1 point, une Masterclass 3.
 class PlayerCardStyle {
   const PlayerCardStyle._({
     required this.gradient,
@@ -14,48 +15,60 @@ class PlayerCardStyle {
     required this.panel,
     required this.onPanel,
     required this.label,
+    required this.minPoints,
   });
 
-  factory PlayerCardStyle.forLevel(String level) {
-    switch (level) {
-      case 'legend':
-        return const PlayerCardStyle._(
-          gradient: [Color(0xFF1B1B2F), Color(0xFF3A2E6E), Color(0xFF0E7C86)],
-          ink: Color(0xFFF4F1FF),
-          inkSoft: Color(0xFFB9B3E0),
-          panel: Color(0xFF0D0B1F),
-          onPanel: Color(0xFF7FE3FF),
-          label: 'Légende',
-        );
-      case 'prodigy':
-        return const PlayerCardStyle._(
-          gradient: [Color(0xFFF2D27A), Color(0xFFD4A63A), Color(0xFFA9791C)],
-          ink: Color(0xFF2A1E05),
-          inkSoft: Color(0xFF5E4A1C),
-          panel: Color(0xFF2A1E05),
-          onPanel: Color(0xFFF2D27A),
-          label: 'Prodige',
-        );
-      case 'rising_star':
-        return const PlayerCardStyle._(
-          gradient: [Color(0xFFEDEFF1), Color(0xFFBFC6CC), Color(0xFF8D979F)],
-          ink: Color(0xFF1C2329),
-          inkSoft: Color(0xFF4A555E),
-          panel: Color(0xFF1C2329),
-          onPanel: Color(0xFFEDEFF1),
-          label: 'Espoir',
-        );
-      default:
-        return const PlayerCardStyle._(
-          gradient: [Color(0xFFE0A872), Color(0xFFB97A43), Color(0xFF8A5528)],
-          ink: Color(0xFF2B1608),
-          inkSoft: Color(0xFF5C3A1E),
-          panel: Color(0xFF2B1608),
-          onPanel: Color(0xFFE0A872),
-          label: 'Rookie',
-        );
-    }
-  }
+  /// Les paliers, du plus bas au plus haut.
+  static const tiers = [
+    PlayerCardStyle._(
+      gradient: [Color(0xFFE0A872), Color(0xFFB97A43), Color(0xFF8A5528)],
+      ink: Color(0xFF2B1608),
+      inkSoft: Color(0xFF5C3A1E),
+      panel: Color(0xFF2B1608),
+      onPanel: Color(0xFFE0A872),
+      label: 'Bronze',
+      minPoints: 0,
+    ),
+    PlayerCardStyle._(
+      gradient: [Color(0xFFEDEFF1), Color(0xFFBFC6CC), Color(0xFF8D979F)],
+      ink: Color(0xFF1C2329),
+      inkSoft: Color(0xFF4A555E),
+      panel: Color(0xFF1C2329),
+      onPanel: Color(0xFFEDEFF1),
+      label: 'Argent',
+      minPoints: 50,
+    ),
+    PlayerCardStyle._(
+      gradient: [Color(0xFFF2D27A), Color(0xFFD4A63A), Color(0xFFA9791C)],
+      ink: Color(0xFF2A1E05),
+      inkSoft: Color(0xFF5E4A1C),
+      panel: Color(0xFF2A1E05),
+      onPanel: Color(0xFFF2D27A),
+      label: 'Or',
+      minPoints: 250,
+    ),
+    PlayerCardStyle._(
+      gradient: [Color(0xFF1B1B2F), Color(0xFF3A2E6E), Color(0xFF0E7C86)],
+      ink: Color(0xFFF4F1FF),
+      inkSoft: Color(0xFFB9B3E0),
+      panel: Color(0xFF0D0B1F),
+      onPanel: Color(0xFF7FE3FF),
+      label: 'Platine',
+      minPoints: 1000,
+    ),
+    PlayerCardStyle._(
+      gradient: [Color(0xFFF7FDFF), Color(0xFFB5E9F7), Color(0xFF6FC3E0)],
+      ink: Color(0xFF07263A),
+      inkSoft: Color(0xFF2F5C75),
+      panel: Color(0xFF07263A),
+      onPanel: Color(0xFFCFF4FF),
+      label: 'Diamant',
+      minPoints: 5000,
+    ),
+  ];
+
+  factory PlayerCardStyle.forPoints(int points) =>
+      tiers.lastWhere((tier) => points >= tier.minPoints);
 
   final List<Color> gradient;
 
@@ -69,6 +82,9 @@ class PlayerCardStyle {
   /// Texte et chiffres posés sur [panel].
   final Color onPanel;
   final String label;
+
+  /// Points de Respect à partir desquels on obtient cette carte.
+  final int minPoints;
 }
 
 /// Note globale affichée sur la carte (45 à 99), calculée à partir de ce
