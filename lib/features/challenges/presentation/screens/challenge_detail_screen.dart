@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -9,13 +11,13 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
-import '../../../../shared/widgets/video_thumbnail_tile.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
-import '../../../videos/presentation/providers/video_providers.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/challenge_participation.dart';
 import '../providers/challenge_providers.dart';
 import '../widgets/challenge_card.dart';
+import '../widgets/date_time_field.dart';
+import '../widgets/my_video_picker_sheet.dart';
 
 /// Détail d'un défi — voir PARTIE 8.3/9.2 (écrans "Challenge Detail" et
 /// "Challenge Voting" fusionnés). Le vote et la participation partagent
@@ -78,9 +80,13 @@ class _ChallengeBody extends ConsumerWidget {
               ),
             ),
             Text(
-              challenge.status == 'completed'
-                  ? 'Terminé'
-                  : Formatters.countdown(challenge.timeRemaining),
+              switch (challenge.status) {
+                'completed' => 'Terminé',
+                'cancelled' => 'Annulé',
+                _ => challenge.hasStarted
+                    ? Formatters.countdown(challenge.timeRemaining)
+                    : 'Commence dans ${Formatters.countdown(challenge.timeUntilStart)}',
+              },
               style: AppTypography.stat(color: AppColors.gold),
             ),
           ],
@@ -112,7 +118,18 @@ class _ChallengeBody extends ConsumerWidget {
               ),
             ],
           )
-        else
+        else if (challenge.isBattle) ...[
+          _BattleVersus(challenge: challenge),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _InfoStat(label: 'Mise', value: '${challenge.entryCost} Ballons'),
+              _InfoStat(label: 'À gagner', value: '${challenge.entryCost * 2} Ballons'),
+              _InfoStat(label: 'Joueurs', value: '${challenge.participantsCount}/2'),
+            ],
+          ),
+        ] else
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -130,16 +147,33 @@ class _ChallengeBody extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xl),
         if (challenge.type == 'king')
           _KingRecordBanner(challenge: challenge)
-        else if (challenge.status != 'completed' && !hasJoined)
-          AppPrimaryButton(
-            label: challenge.type == 'sponsored'
-                ? 'Participer gratuitement'
-                : 'Participer (${challenge.entryCost} Ballons)',
-            icon: Icons.videocam,
-            onPressed: challenge.isFull
-                ? null
-                : () => _openParticipateSheet(context, ref, challenge),
-          )
+        else if (challenge.status == 'active' && !hasJoined && !challenge.hasEnded)
+          if (!challenge.hasStarted)
+            AppPrimaryButton(
+              label: 'Ouvre le ${DateTimeField.format(challenge.startDate.toLocal())}',
+              icon: Icons.schedule,
+              onPressed: null,
+            )
+          else if (challenge.isBattle)
+            if (challenge.isFull ||
+                (challenge.opponentId != null && challenge.opponentId != myProfile?.id))
+              const SizedBox.shrink()
+            else
+              AppPrimaryButton(
+                label: 'Relever la Battle (${challenge.entryCost} Ballons)',
+                icon: Icons.sports_mma,
+                onPressed: () => _openParticipateSheet(context, ref, challenge),
+              )
+          else
+            AppPrimaryButton(
+              label: challenge.type == 'sponsored' || challenge.entryCost == 0
+                  ? 'Participer gratuitement'
+                  : 'Participer (${challenge.entryCost} Ballons)',
+              icon: Icons.videocam,
+              onPressed: challenge.isFull
+                  ? null
+                  : () => _openParticipateSheet(context, ref, challenge),
+            )
         else if (hasJoined)
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -151,12 +185,15 @@ class _ChallengeBody extends ConsumerWidget {
               children: [
                 Icon(Icons.check_circle, color: AppColors.primary),
                 SizedBox(width: AppSpacing.sm),
-                Text('Tu participes déjà à ce défi.'),
+                Text('Tu participes à ce défi.'),
               ],
             ),
           ),
         const SizedBox(height: AppSpacing.xl),
-        Text('Participants', style: context.textTheme.titleLarge),
+        Text(
+          challenge.isBattle ? 'Les vidéos — vote pour la meilleure' : 'Participants',
+          style: context.textTheme.titleLarge,
+        ),
         const SizedBox(height: AppSpacing.md),
         participationsAsync.when(
           loading: () => const Center(child: AppLoader()),
@@ -194,13 +231,9 @@ class _ChallengeBody extends ConsumerWidget {
     final myProfile = ref.read(currentProfileProvider).valueOrNull;
     if (myProfile == null) return;
 
-    final videoId = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      builder: (context) => _VideoPickerSheet(userId: myProfile.id),
-    );
-    if (videoId == null || !context.mounted) return;
+    final video = await MyVideoPickerSheet.show(context, myProfile.id);
+    if (video == null || !context.mounted) return;
+    final videoId = video.id;
 
     final success = await ref
         .read(challengeActionsControllerProvider.notifier)
@@ -208,7 +241,7 @@ class _ChallengeBody extends ConsumerWidget {
 
     if (!context.mounted) return;
     if (success) {
-      context.showSnackBar('Tu participes au défi !');
+      context.showSnackBar(challenge.isBattle ? 'Battle relevée ! ⚔️' : 'Tu participes au défi !');
     } else {
       final failure = ref.read(challengeActionsControllerProvider).error;
       context.showSnackBar(
@@ -273,17 +306,23 @@ class _RulesBanner extends StatelessWidget {
           'n\'est débité ni distribué. Le vainqueur (le plus de votes, '
           'égalité départagée par ordre d\'inscription) reçoit le prix '
           'décrit ci-dessus, remis directement par la marque.';
+    } else if (challenge.isBattle) {
+      text = 'Battle 1 contre 1 : chaque joueur mise ${challenge.entryCost} Ballons. '
+          'Les autres utilisateurs regardent les deux vidéos et votent (un vote '
+          'par personne, les deux joueurs ne votent pas). Le gagnant remporte les '
+          '${challenge.entryCost * 2} Ballons et +100 Stars. Égalité, aucun vote ou '
+          'personne en face : chacun récupère sa mise.';
     } else if (challenge.type == 'king') {
       text = 'Le Roi en titre remporte la cagnotte s\'il n\'est pas '
           'détrôné avant la fin du défi. Chaque tentative pour le '
           'détrôner coûte ${challenge.entryCost} Ballons, qui rejoignent '
           'la cagnotte.';
     } else {
-      text = 'Chaque droit d\'entrée (${challenge.entryCost} Ballons) '
-          'rejoint la cagnotte, versée en intégralité au vainqueur. Le '
-          'vainqueur est le participant avec le plus de votes (égalité '
-          'départagée par ordre d\'inscription) — un seul vote par '
-          'joueur.';
+      text = 'Ouvert à tous du ${DateTimeField.format(challenge.startDate.toLocal())} '
+          'au ${DateTimeField.format(challenge.endDate.toLocal())}. Chaque droit '
+          'd\'entrée (${challenge.entryCost} Ballons) rejoint la cagnotte. Le '
+          'participant avec le plus de votes la remporte en entier (égalité : '
+          'le premier inscrit). Aucun vote : chacun est remboursé.';
     }
 
     return Container(
@@ -340,17 +379,27 @@ class _ParticipationTile extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-            child: SizedBox(
-              width: 56,
-              height: 74,
-              child: participation.videoThumbnailUrl != null
-                  ? Image.network(participation.videoThumbnailUrl!, fit: BoxFit.cover)
-                  : const ColoredBox(
-                      color: AppColors.surface,
-                      child: Icon(Icons.videocam_outlined, size: 20),
+          // Toucher la miniature ouvre la vidéo : on vote après l'avoir vue.
+          GestureDetector(
+            onTap: () => context.push(RouteNames.videoDetailPath(participation.videoId)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+              child: SizedBox(
+                width: 56,
+                height: 74,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (participation.videoThumbnailUrl != null)
+                      Image.network(participation.videoThumbnailUrl!, fit: BoxFit.cover)
+                    else
+                      const ColoredBox(color: AppColors.surface),
+                    const Center(
+                      child: Icon(Icons.play_circle_fill, color: Colors.white, size: 26),
                     ),
+                  ],
+                ),
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -370,26 +419,22 @@ class _ParticipationTile extends ConsumerWidget {
               ],
             ),
           ),
-          if (challenge.status != 'completed')
+          if (challenge.status == 'active' &&
+              !(challenge.isBattle && challenge.participantsCount < 2))
             OutlinedButton.icon(
               // Le thème impose une largeur infinie aux boutons (pleine
               // largeur par défaut) : dans une Row, ça écrasait le pseudo
               // du participant à 0 px de large (une lettre par ligne).
               style: OutlinedButton.styleFrom(minimumSize: const Size(72, 40)),
-              onPressed: participation.hasVoted
-                  ? null
-                  : () => ref
-                      .read(challengeActionsControllerProvider.notifier)
-                      .vote(
-                        challengeId: challenge.id,
-                        participantUserId: participation.userId,
-                      ),
+              onPressed: participation.hasVoted ? null : () => _vote(context, ref),
               icon: Icon(
                 participation.hasVoted ? Icons.how_to_vote : Icons.how_to_vote_outlined,
                 size: 16,
               ),
               label: Text('${participation.votesCount}'),
             )
+          else if (challenge.status == 'active')
+            Text('En attente', style: Theme.of(context).textTheme.bodySmall)
           else
             Text(
               '${participation.votesCount} votes',
@@ -399,72 +444,64 @@ class _ParticipationTile extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _vote(BuildContext context, WidgetRef ref) async {
+    final ok = await ref.read(challengeActionsControllerProvider.notifier).vote(
+          challengeId: challenge.id,
+          participantUserId: participation.userId,
+        );
+    if (!context.mounted) return;
+    if (ok) {
+      context.showSnackBar('Vote enregistré 🗳️');
+    } else {
+      final failure = ref.read(challengeActionsControllerProvider).error;
+      context.showSnackBar(
+        failure is Failure ? failure.message : 'Vote impossible.',
+        isError: true,
+      );
+    }
+  }
 }
 
-class _VideoPickerSheet extends ConsumerWidget {
-  const _VideoPickerSheet({required this.userId});
+/// « @joueur1 VS @joueur2 » en haut d'une Battle.
+class _BattleVersus extends StatelessWidget {
+  const _BattleVersus({required this.challenge});
 
-  final String userId;
+  final Challenge challenge;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final videosAsync = ref.watch(userVideosProvider(userId));
-
-    return SafeArea(
-      child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * 0.6,
-        child: Column(
-          children: [
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
+  Widget build(BuildContext context) {
+    final creator = challenge.creator?.username;
+    final opponent = challenge.opponent?.username;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '@${creator ?? '?'}',
+              textAlign: TextAlign.center,
+              style: context.textTheme.titleMedium,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Choisis ta vidéo', style: context.textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            Expanded(
-              child: videosAsync.when(
-                loading: () => const Center(child: AppLoader()),
-                error: (error, _) => Center(
-                  child: Text(error is Failure ? error.message : 'Erreur.'),
-                ),
-                data: (videos) {
-                  if (videos.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Publie d\'abord une vidéo pour pouvoir participer.',
-                        style: context.textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
-                      childAspectRatio: 0.72,
-                    ),
-                    itemCount: videos.length,
-                    itemBuilder: (context, index) {
-                      final video = videos[index];
-                      return VideoThumbnailTile(
-                        video: video,
-                        onTap: () => Navigator.of(context).pop(video.id),
-                      );
-                    },
-                  );
-                },
+          ),
+          Text('VS', style: AppTypography.stat(fontSize: 22, color: AppColors.gold)),
+          Expanded(
+            child: Text(
+              opponent != null ? '@$opponent' : 'Adversaire à trouver',
+              textAlign: TextAlign.center,
+              style: context.textTheme.titleMedium?.copyWith(
+                color: opponent != null ? null : AppColors.textSecondary,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

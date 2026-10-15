@@ -36,24 +36,6 @@ class EarnBallonsScreen extends StatelessWidget {
             amountLabel: '+${EconomyConstants.welcomeBonus}',
           ),
           const _EarnTile(
-            icon: Icons.today_outlined,
-            title: 'Connexion quotidienne',
-            detail: 'Ouvre l\'app chaque jour pour récupérer ton bonus.',
-            amountLabel: '+${EconomyConstants.dailyLoginMax}/jour',
-          ),
-          const _EarnTile(
-            icon: Icons.local_fire_department_outlined,
-            title: 'Série de 7 jours',
-            detail: 'Connecte-toi 7 jours d\'affilée sans interruption.',
-            amountLabel: '+${EconomyConstants.streak7DaysBonus} bonus',
-          ),
-          const _EarnTile(
-            icon: Icons.military_tech_outlined,
-            title: 'Série de 30 jours',
-            detail: 'Connecte-toi 30 jours d\'affilée sans interruption.',
-            amountLabel: '+${EconomyConstants.streak30DaysBonus} bonus',
-          ),
-          const _EarnTile(
             icon: Icons.videocam_outlined,
             title: 'Publier une vidéo',
             detail: 'Jusqu\'à ${EconomyConstants.maxPostVideoRewardsPerDay} '
@@ -62,24 +44,16 @@ class EarnBallonsScreen extends StatelessWidget {
           ),
           const _EarnTile(
             icon: Icons.play_circle_outline,
-            title: 'Regarder 3 vidéos dans la journée',
-            detail: 'Mission quotidienne, à réclamer depuis l\'onglet '
-                'Missions.',
-            amountLabel: '+5',
-          ),
-          const _EarnTile(
-            icon: Icons.refresh,
-            title: 'Un joueur reproduit ton Move',
-            detail: 'Tu restes l\'inventeur affiché à vie sur ce Move — '
-                'chaque reproduction (hors la tienne) te rapporte.',
-            amountLabel: '+${EconomyConstants.moveReproducedReward}',
+            title: 'Regarder ${EconomyConstants.fullWatchTarget} vidéos en entier',
+            detail: 'Dans la journée, jusqu\'au bout. Une fois par jour.',
+            amountLabel: '+${EconomyConstants.fullWatchReward}',
           ),
           const _EarnTile(
             icon: Icons.emoji_events_outlined,
             title: 'Gagner un Défi ou une Battle',
-            detail: 'La cagnotte est constituée des droits d\'entrée payés '
-                'par tous les participants — le vainqueur la remporte '
-                'intégralement, plus 100 Stars.',
+            detail: 'Le joueur avec le plus de votes remporte toute la '
+                'cagnotte (droits d\'entrée ou mises de la Battle), plus '
+                '100 Stars.',
             amountLabel: 'Cagnotte + 100 ★',
           ),
           const SizedBox(height: AppSpacing.xl),

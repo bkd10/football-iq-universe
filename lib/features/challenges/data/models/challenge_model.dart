@@ -31,6 +31,8 @@ class ChallengeModel {
     this.isOfficial = false,
     this.creator,
     this.recordHolder,
+    this.opponentId,
+    this.opponent,
   });
 
   factory ChallengeModel.fromJson(Map<String, dynamic> json) =>
@@ -62,6 +64,8 @@ class ChallengeModel {
   final VideoCreatorModel? creator;
   @JsonKey(name: 'record_holder')
   final VideoCreatorModel? recordHolder;
+  final String? opponentId;
+  final VideoCreatorModel? opponent;
 
   Challenge toEntity() {
     return Challenge(
@@ -88,6 +92,8 @@ class ChallengeModel {
       isOfficial: isOfficial,
       creator: creator?.toEntity(),
       recordHolder: recordHolder?.toEntity(),
+      opponentId: opponentId,
+      opponent: opponent?.toEntity(),
     );
   }
 }

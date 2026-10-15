@@ -32,11 +32,16 @@ class Challenge with _$Challenge {
     @Default(false) bool isOfficial,
     VideoCreator? creator,
     VideoCreator? recordHolder,
+    String? opponentId,
+    VideoCreator? opponent,
   }) = _Challenge;
 
   const Challenge._();
 
   bool get hasEnded => DateTime.now().isAfter(endDate);
+  bool get hasStarted => !DateTime.now().isBefore(startDate);
+  Duration get timeUntilStart => startDate.difference(DateTime.now());
+  bool get isBattle => type == 'battle';
   Duration get timeRemaining => endDate.difference(DateTime.now());
 
   bool get isFull =>

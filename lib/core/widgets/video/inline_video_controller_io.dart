@@ -6,18 +6,39 @@ import 'inline_video_controller.dart';
 InlineVideoController createInlineVideoController(String url) => _NativeInlineVideoController(url);
 
 class _NativeInlineVideoController extends ChangeNotifier implements InlineVideoController {
-  _NativeInlineVideoController(String url) : _controller = VideoPlayerController.networkUrl(Uri.parse(url)) {
-    _controller.addListener(notifyListeners);
+  _NativeInlineVideoController(String url) : _url = url, _controller = VideoPlayerController.networkUrl(Uri.parse(url)) {
+    _controller.addListener(_onTick);
   }
 
-  final VideoPlayerController _controller;
+  final String _url;
+  VideoPlayerController _controller;
   bool _hasError = false;
+  bool _endHandled = false;
+  VoidCallback? _onCompleted;
+
+  /// Pas de boucle native : on détecte la fin pour compter la vidéo comme
+  /// regardée en entier, puis on relance depuis le début.
+  void _onTick() {
+    final value = _controller.value;
+    final duration = value.duration;
+    if (value.isInitialized && duration > Duration.zero) {
+      final atEnd = value.position >= duration - const Duration(milliseconds: 200);
+      if (atEnd && !_endHandled) {
+        _endHandled = true;
+        _onCompleted?.call();
+        _controller.seekTo(Duration.zero).then((_) => _controller.play());
+      } else if (!atEnd && value.position < duration - const Duration(seconds: 1)) {
+        _endHandled = false;
+      }
+    }
+    notifyListeners();
+  }
 
   @override
   Future<void> initialize() async {
     try {
       await _controller.initialize();
-      await _controller.setLooping(true);
+      await _controller.setLooping(false);
     } catch (_) {
       _hasError = true;
     }
@@ -29,6 +50,28 @@ class _NativeInlineVideoController extends ChangeNotifier implements InlineVideo
 
   @override
   bool get hasError => _hasError || _controller.value.hasError;
+
+  @override
+  String? get errorDetail => _controller.value.errorDescription;
+
+  @override
+  double? get durationSeconds {
+    final d = _controller.value.duration;
+    return d > Duration.zero ? d.inMilliseconds / 1000 : null;
+  }
+
+  @override
+  set onCompleted(VoidCallback? callback) => _onCompleted = callback;
+
+  @override
+  void retry() {
+    _controller
+      ..removeListener(_onTick)
+      ..dispose();
+    _hasError = false;
+    _controller = VideoPlayerController.networkUrl(Uri.parse(_url))..addListener(_onTick);
+    initialize();
+  }
 
   @override
   bool get isMuted => _controller.value.volume == 0;
@@ -64,7 +107,7 @@ class _NativeInlineVideoController extends ChangeNotifier implements InlineVideo
   @override
   void dispose() {
     _controller
-      ..removeListener(notifyListeners)
+      ..removeListener(_onTick)
       ..dispose();
     super.dispose();
   }

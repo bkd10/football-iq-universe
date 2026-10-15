@@ -19,6 +19,7 @@ class CreateChallenge {
     int? maxParticipants,
     String? recordUnit,
     String? prizeDescription,
+    DateTime? startDate,
   }) {
     return _repository.createChallenge(
       title: title,
@@ -30,6 +31,7 @@ class CreateChallenge {
       maxParticipants: maxParticipants,
       recordUnit: recordUnit,
       prizeDescription: prizeDescription,
+      startDate: startDate,
     );
   }
 }

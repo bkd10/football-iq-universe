@@ -108,6 +108,7 @@ class ChallengeRepositoryImpl implements ChallengeRepository {
     int? maxParticipants,
     String? recordUnit,
     String? prizeDescription,
+    DateTime? startDate,
   }) async {
     try {
       final model = await _remoteDataSource.createChallenge(
@@ -120,6 +121,37 @@ class ChallengeRepositoryImpl implements ChallengeRepository {
         maxParticipants: maxParticipants,
         recordUnit: recordUnit,
         prizeDescription: prizeDescription,
+        startDate: startDate,
+      );
+      return Right(model.toEntity());
+    } on InsufficientCoinsException catch (e) {
+      return Left(InsufficientCoinsFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(UnknownFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Challenge>> createBattle({
+    required String title,
+    required String rules,
+    required int stake,
+    required String videoId,
+    required DateTime endDate,
+    String? opponentUsername,
+  }) async {
+    try {
+      final model = await _remoteDataSource.createBattle(
+        title: title,
+        rules: rules,
+        stake: stake,
+        videoId: videoId,
+        endDate: endDate,
+        opponentUsername: opponentUsername,
       );
       return Right(model.toEntity());
     } on InsufficientCoinsException catch (e) {

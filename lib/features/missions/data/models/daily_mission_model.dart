@@ -13,6 +13,8 @@ class DailyMissionModel {
     this.challengeParticipated = false,
     this.videosWatched = 0,
     this.coinsEarned = 0,
+    this.fullVideosWatched = 0,
+    this.fullWatchRewarded = false,
   });
 
   factory DailyMissionModel.fromJson(Map<String, dynamic> json) =>
@@ -26,6 +28,8 @@ class DailyMissionModel {
   final bool challengeParticipated;
   final int videosWatched;
   final int coinsEarned;
+  final int fullVideosWatched;
+  final bool fullWatchRewarded;
 
   DailyMission toEntity() {
     return DailyMission(
@@ -35,6 +39,8 @@ class DailyMissionModel {
       challengeParticipated: challengeParticipated,
       videosWatched: videosWatched,
       coinsEarned: coinsEarned,
+      fullVideosWatched: fullVideosWatched,
+      fullWatchRewarded: fullWatchRewarded,
     );
   }
 }

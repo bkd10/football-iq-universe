@@ -39,6 +39,8 @@ mixin _$Challenge {
   bool get isOfficial => throw _privateConstructorUsedError;
   VideoCreator? get creator => throw _privateConstructorUsedError;
   VideoCreator? get recordHolder => throw _privateConstructorUsedError;
+  String? get opponentId => throw _privateConstructorUsedError;
+  VideoCreator? get opponent => throw _privateConstructorUsedError;
 
   /// Create a copy of Challenge
   /// with the given fields replaced by the non-null parameter values.
@@ -75,10 +77,13 @@ abstract class $ChallengeCopyWith<$Res> {
       String? sponsorLogoUrl,
       bool isOfficial,
       VideoCreator? creator,
-      VideoCreator? recordHolder});
+      VideoCreator? recordHolder,
+      String? opponentId,
+      VideoCreator? opponent});
 
   $VideoCreatorCopyWith<$Res>? get creator;
   $VideoCreatorCopyWith<$Res>? get recordHolder;
+  $VideoCreatorCopyWith<$Res>? get opponent;
 }
 
 /// @nodoc
@@ -119,6 +124,8 @@ class _$ChallengeCopyWithImpl<$Res, $Val extends Challenge>
     Object? isOfficial = null,
     Object? creator = freezed,
     Object? recordHolder = freezed,
+    Object? opponentId = freezed,
+    Object? opponent = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -213,6 +220,14 @@ class _$ChallengeCopyWithImpl<$Res, $Val extends Challenge>
           ? _value.recordHolder
           : recordHolder // ignore: cast_nullable_to_non_nullable
               as VideoCreator?,
+      opponentId: freezed == opponentId
+          ? _value.opponentId
+          : opponentId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      opponent: freezed == opponent
+          ? _value.opponent
+          : opponent // ignore: cast_nullable_to_non_nullable
+              as VideoCreator?,
     ) as $Val);
   }
 
@@ -241,6 +256,20 @@ class _$ChallengeCopyWithImpl<$Res, $Val extends Challenge>
 
     return $VideoCreatorCopyWith<$Res>(_value.recordHolder!, (value) {
       return _then(_value.copyWith(recordHolder: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Challenge
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $VideoCreatorCopyWith<$Res>? get opponent {
+    if (_value.opponent == null) {
+      return null;
+    }
+
+    return $VideoCreatorCopyWith<$Res>(_value.opponent!, (value) {
+      return _then(_value.copyWith(opponent: value) as $Val);
     });
   }
 }
@@ -276,12 +305,16 @@ abstract class _$$ChallengeImplCopyWith<$Res>
       String? sponsorLogoUrl,
       bool isOfficial,
       VideoCreator? creator,
-      VideoCreator? recordHolder});
+      VideoCreator? recordHolder,
+      String? opponentId,
+      VideoCreator? opponent});
 
   @override
   $VideoCreatorCopyWith<$Res>? get creator;
   @override
   $VideoCreatorCopyWith<$Res>? get recordHolder;
+  @override
+  $VideoCreatorCopyWith<$Res>? get opponent;
 }
 
 /// @nodoc
@@ -320,6 +353,8 @@ class __$$ChallengeImplCopyWithImpl<$Res>
     Object? isOfficial = null,
     Object? creator = freezed,
     Object? recordHolder = freezed,
+    Object? opponentId = freezed,
+    Object? opponent = freezed,
   }) {
     return _then(_$ChallengeImpl(
       id: null == id
@@ -414,6 +449,14 @@ class __$$ChallengeImplCopyWithImpl<$Res>
           ? _value.recordHolder
           : recordHolder // ignore: cast_nullable_to_non_nullable
               as VideoCreator?,
+      opponentId: freezed == opponentId
+          ? _value.opponentId
+          : opponentId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      opponent: freezed == opponent
+          ? _value.opponent
+          : opponent // ignore: cast_nullable_to_non_nullable
+              as VideoCreator?,
     ));
   }
 }
@@ -444,7 +487,9 @@ class _$ChallengeImpl extends _Challenge {
       this.sponsorLogoUrl,
       this.isOfficial = false,
       this.creator,
-      this.recordHolder})
+      this.recordHolder,
+      this.opponentId,
+      this.opponent})
       : super._();
 
   @override
@@ -499,10 +544,14 @@ class _$ChallengeImpl extends _Challenge {
   final VideoCreator? creator;
   @override
   final VideoCreator? recordHolder;
+  @override
+  final String? opponentId;
+  @override
+  final VideoCreator? opponent;
 
   @override
   String toString() {
-    return 'Challenge(id: $id, title: $title, type: $type, startDate: $startDate, endDate: $endDate, createdAt: $createdAt, description: $description, category: $category, entryCost: $entryCost, prizePool: $prizePool, prizeCurrency: $prizeCurrency, prizeDescription: $prizeDescription, currentRecord: $currentRecord, recordUnit: $recordUnit, maxParticipants: $maxParticipants, participantsCount: $participantsCount, status: $status, winnerId: $winnerId, sponsorName: $sponsorName, sponsorLogoUrl: $sponsorLogoUrl, isOfficial: $isOfficial, creator: $creator, recordHolder: $recordHolder)';
+    return 'Challenge(id: $id, title: $title, type: $type, startDate: $startDate, endDate: $endDate, createdAt: $createdAt, description: $description, category: $category, entryCost: $entryCost, prizePool: $prizePool, prizeCurrency: $prizeCurrency, prizeDescription: $prizeDescription, currentRecord: $currentRecord, recordUnit: $recordUnit, maxParticipants: $maxParticipants, participantsCount: $participantsCount, status: $status, winnerId: $winnerId, sponsorName: $sponsorName, sponsorLogoUrl: $sponsorLogoUrl, isOfficial: $isOfficial, creator: $creator, recordHolder: $recordHolder, opponentId: $opponentId, opponent: $opponent)';
   }
 
   @override
@@ -549,7 +598,11 @@ class _$ChallengeImpl extends _Challenge {
                 other.isOfficial == isOfficial) &&
             (identical(other.creator, creator) || other.creator == creator) &&
             (identical(other.recordHolder, recordHolder) ||
-                other.recordHolder == recordHolder));
+                other.recordHolder == recordHolder) &&
+            (identical(other.opponentId, opponentId) ||
+                other.opponentId == opponentId) &&
+            (identical(other.opponent, opponent) ||
+                other.opponent == opponent));
   }
 
   @override
@@ -577,7 +630,9 @@ class _$ChallengeImpl extends _Challenge {
         sponsorLogoUrl,
         isOfficial,
         creator,
-        recordHolder
+        recordHolder,
+        opponentId,
+        opponent
       ]);
 
   /// Create a copy of Challenge
@@ -613,7 +668,9 @@ abstract class _Challenge extends Challenge {
       final String? sponsorLogoUrl,
       final bool isOfficial,
       final VideoCreator? creator,
-      final VideoCreator? recordHolder}) = _$ChallengeImpl;
+      final VideoCreator? recordHolder,
+      final String? opponentId,
+      final VideoCreator? opponent}) = _$ChallengeImpl;
   const _Challenge._() : super._();
 
   @override
@@ -662,6 +719,10 @@ abstract class _Challenge extends Challenge {
   VideoCreator? get creator;
   @override
   VideoCreator? get recordHolder;
+  @override
+  String? get opponentId;
+  @override
+  VideoCreator? get opponent;
 
   /// Create a copy of Challenge
   /// with the given fields replaced by the non-null parameter values.

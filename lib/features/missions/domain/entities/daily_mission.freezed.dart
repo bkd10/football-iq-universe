@@ -22,6 +22,8 @@ mixin _$DailyMission {
   bool get challengeParticipated => throw _privateConstructorUsedError;
   int get videosWatched => throw _privateConstructorUsedError;
   int get coinsEarned => throw _privateConstructorUsedError;
+  int get fullVideosWatched => throw _privateConstructorUsedError;
+  bool get fullWatchRewarded => throw _privateConstructorUsedError;
 
   /// Create a copy of DailyMission
   /// with the given fields replaced by the non-null parameter values.
@@ -42,7 +44,9 @@ abstract class $DailyMissionCopyWith<$Res> {
       bool videoPosted,
       bool challengeParticipated,
       int videosWatched,
-      int coinsEarned});
+      int coinsEarned,
+      int fullVideosWatched,
+      bool fullWatchRewarded});
 }
 
 /// @nodoc
@@ -66,6 +70,8 @@ class _$DailyMissionCopyWithImpl<$Res, $Val extends DailyMission>
     Object? challengeParticipated = null,
     Object? videosWatched = null,
     Object? coinsEarned = null,
+    Object? fullVideosWatched = null,
+    Object? fullWatchRewarded = null,
   }) {
     return _then(_value.copyWith(
       missionDate: null == missionDate
@@ -92,6 +98,14 @@ class _$DailyMissionCopyWithImpl<$Res, $Val extends DailyMission>
           ? _value.coinsEarned
           : coinsEarned // ignore: cast_nullable_to_non_nullable
               as int,
+      fullVideosWatched: null == fullVideosWatched
+          ? _value.fullVideosWatched
+          : fullVideosWatched // ignore: cast_nullable_to_non_nullable
+              as int,
+      fullWatchRewarded: null == fullWatchRewarded
+          ? _value.fullWatchRewarded
+          : fullWatchRewarded // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -110,7 +124,9 @@ abstract class _$$DailyMissionImplCopyWith<$Res>
       bool videoPosted,
       bool challengeParticipated,
       int videosWatched,
-      int coinsEarned});
+      int coinsEarned,
+      int fullVideosWatched,
+      bool fullWatchRewarded});
 }
 
 /// @nodoc
@@ -132,6 +148,8 @@ class __$$DailyMissionImplCopyWithImpl<$Res>
     Object? challengeParticipated = null,
     Object? videosWatched = null,
     Object? coinsEarned = null,
+    Object? fullVideosWatched = null,
+    Object? fullWatchRewarded = null,
   }) {
     return _then(_$DailyMissionImpl(
       missionDate: null == missionDate
@@ -158,6 +176,14 @@ class __$$DailyMissionImplCopyWithImpl<$Res>
           ? _value.coinsEarned
           : coinsEarned // ignore: cast_nullable_to_non_nullable
               as int,
+      fullVideosWatched: null == fullVideosWatched
+          ? _value.fullVideosWatched
+          : fullVideosWatched // ignore: cast_nullable_to_non_nullable
+              as int,
+      fullWatchRewarded: null == fullWatchRewarded
+          ? _value.fullWatchRewarded
+          : fullWatchRewarded // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -171,7 +197,9 @@ class _$DailyMissionImpl extends _DailyMission {
       this.videoPosted = false,
       this.challengeParticipated = false,
       this.videosWatched = 0,
-      this.coinsEarned = 0})
+      this.coinsEarned = 0,
+      this.fullVideosWatched = 0,
+      this.fullWatchRewarded = false})
       : super._();
 
   @override
@@ -191,10 +219,16 @@ class _$DailyMissionImpl extends _DailyMission {
   @override
   @JsonKey()
   final int coinsEarned;
+  @override
+  @JsonKey()
+  final int fullVideosWatched;
+  @override
+  @JsonKey()
+  final bool fullWatchRewarded;
 
   @override
   String toString() {
-    return 'DailyMission(missionDate: $missionDate, loginCompleted: $loginCompleted, videoPosted: $videoPosted, challengeParticipated: $challengeParticipated, videosWatched: $videosWatched, coinsEarned: $coinsEarned)';
+    return 'DailyMission(missionDate: $missionDate, loginCompleted: $loginCompleted, videoPosted: $videoPosted, challengeParticipated: $challengeParticipated, videosWatched: $videosWatched, coinsEarned: $coinsEarned, fullVideosWatched: $fullVideosWatched, fullWatchRewarded: $fullWatchRewarded)';
   }
 
   @override
@@ -213,12 +247,24 @@ class _$DailyMissionImpl extends _DailyMission {
             (identical(other.videosWatched, videosWatched) ||
                 other.videosWatched == videosWatched) &&
             (identical(other.coinsEarned, coinsEarned) ||
-                other.coinsEarned == coinsEarned));
+                other.coinsEarned == coinsEarned) &&
+            (identical(other.fullVideosWatched, fullVideosWatched) ||
+                other.fullVideosWatched == fullVideosWatched) &&
+            (identical(other.fullWatchRewarded, fullWatchRewarded) ||
+                other.fullWatchRewarded == fullWatchRewarded));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, missionDate, loginCompleted,
-      videoPosted, challengeParticipated, videosWatched, coinsEarned);
+  int get hashCode => Object.hash(
+      runtimeType,
+      missionDate,
+      loginCompleted,
+      videoPosted,
+      challengeParticipated,
+      videosWatched,
+      coinsEarned,
+      fullVideosWatched,
+      fullWatchRewarded);
 
   /// Create a copy of DailyMission
   /// with the given fields replaced by the non-null parameter values.
@@ -236,7 +282,9 @@ abstract class _DailyMission extends DailyMission {
       final bool videoPosted,
       final bool challengeParticipated,
       final int videosWatched,
-      final int coinsEarned}) = _$DailyMissionImpl;
+      final int coinsEarned,
+      final int fullVideosWatched,
+      final bool fullWatchRewarded}) = _$DailyMissionImpl;
   const _DailyMission._() : super._();
 
   @override
@@ -251,6 +299,10 @@ abstract class _DailyMission extends DailyMission {
   int get videosWatched;
   @override
   int get coinsEarned;
+  @override
+  int get fullVideosWatched;
+  @override
+  bool get fullWatchRewarded;
 
   /// Create a copy of DailyMission
   /// with the given fields replaced by the non-null parameter values.

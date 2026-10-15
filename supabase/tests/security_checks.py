@@ -110,7 +110,7 @@ def main():
     s, r = rpc("award_coins", {"p_reason": "post_video", "p_reference_id": vid, "p_local_date": today}, a_tok)
     check("récompense vidéo publiée", s == 200, r)
     s, r = rpc("award_coins", {"p_reason": "daily_login", "p_local_date": today}, a_tok)
-    check("bonus de connexion du jour", s == 200, r)
+    check("connexion du jour suivie sans Ballon (règles v2)", s == 200 and r["amount_awarded"] == 0, r)
     s, r = ins("likes", {"user_id": b, "video_id": vid, "type": "like"}, b_tok)
     check("liker", s == 201, r)
     s, r = upd(f"likes?user_id=eq.{b}&video_id=eq.{vid}", {"type": "masterclass"}, b_tok)
@@ -126,7 +126,7 @@ def main():
                                                        "comments_count": 1, "reproductions_count": 2}, r)
     check("compteur d'abonnés", profile(a)["followers_count"] == 1, profile(a))
     s, r = sel("transactions?select=reason&reason=eq.move_reproduced", a_tok)
-    check("Move reproduit récompensé une seule fois par joueur", len(r) == 1, r)
+    check("Move reproduit : plus aucun Ballon (règles v2)", len(r) == 0, r)
     s, r = rpc("get_my_profile", {}, a_tok)
     check("lire sa propre date de naissance", s == 200 and r[0]["birth_date"] == "2012-05-01", r)
     s, r = req("PATCH", f"/rest/v1/profiles?id=eq.{a}&select=id,bio", {"bio": "Ailier gauche"}, a_tok,
@@ -253,6 +253,90 @@ def main():
     check("admin crée un défi officiel", s == 200, r)
     s, r = sel(f"challenges?id=eq.{r['challenge_id']}&select=type,is_official,entry_cost", a_tok)
     check("défi officiel gratuit et marqué officiel", r == [{"type": "world", "is_official": True, "entry_cost": 0}], r)
+
+    # --- Règles v2 : visionnage complet, Challenge daté, Battle 1 contre 1 ---
+    def sql(q):
+        return subprocess.run(["psql", DB_URL, "-Atqc", q], capture_output=True, text=True).stdout.strip()
+
+    s, r = ins("videos", {"user_id": b, "video_url": f"{storage}/videos/{b}/w1.mp4", "category": "dribble",
+                          "duration_seconds": 10}, b_tok)
+    wv1 = r[0]["id"]
+    s, r = ins("videos", {"user_id": b, "video_url": f"{storage}/videos/{b}/w2.mp4", "category": "dribble",
+                          "duration_seconds": 10}, b_tok)
+    wv2 = r[0]["id"]
+    s, r = ins("videos", {"user_id": a, "video_url": f"{storage}/videos/{a}/av.mp4", "category": "dribble",
+                          "duration_seconds": 12}, a_tok)
+    avid = r[0]["id"]
+    s, r = ins("videos", {"user_id": c, "video_url": f"{storage}/videos/{c}/cv.mp4", "category": "dribble"}, c_tok)
+    d_tok, d = signup("dan" + sfx)
+    rpc("start_video_watch", {"p_video_id": wv1, "p_local_date": today}, a_tok)
+    s, r = rpc("complete_video_watch", {"p_video_id": wv1, "p_duration_seconds": 10, "p_local_date": today}, a_tok)
+    check("FRAUDE vidéo « regardée » trop vite non comptée", s == 200 and not r["counted"], r)
+    sql(f"update private.video_watch_sessions set started_at = now() - interval '11 seconds' where user_id='{a}'")
+    s, r = rpc("complete_video_watch", {"p_video_id": wv1, "p_duration_seconds": 10, "p_local_date": today}, a_tok)
+    check("vidéo regardée en entier comptée", s == 200 and r["counted"] and r["full_videos_watched"] == 1, r)
+    s, r = rpc("complete_video_watch", {"p_video_id": wv1, "p_duration_seconds": 10, "p_local_date": today}, a_tok)
+    check("FRAUDE même vidéo comptée deux fois refusée", s == 200 and not r["counted"], r)
+    rpc("start_video_watch", {"p_video_id": vid, "p_local_date": today}, a_tok)
+    s, r = rpc("complete_video_watch", {"p_video_id": vid, "p_duration_seconds": 5, "p_local_date": today}, a_tok)
+    check("FRAUDE regarder sa propre vidéo ne compte pas", s == 200 and not r["counted"], r)
+    sql(f"update daily_missions set full_videos_watched = 19, last_full_watch_at = now() - interval '1 minute' "
+        f"where user_id='{a}' and mission_date='{today}'")
+    rpc("start_video_watch", {"p_video_id": wv2, "p_local_date": today}, a_tok)
+    sql(f"update private.video_watch_sessions set started_at = now() - interval '11 seconds' where user_id='{a}' and video_id='{wv2}'")
+    coins = profile(a)["coins"]
+    s, r = rpc("complete_video_watch", {"p_video_id": wv2, "p_duration_seconds": 10, "p_local_date": today}, a_tok)
+    check("20 vidéos en entier = 30 Ballons", s == 200 and r["reward_awarded"] and profile(a)["coins"] == coins + 30, r)
+
+    start = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)).isoformat()
+    end2 = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=3)).isoformat()
+    s, r = rpc("create_challenge", {"p_title": "Défi de demain", "p_description": "d", "p_type": "challenge",
+                                    "p_start_date": start, "p_end_date": end2}, d_tok)
+    check("créer un Challenge avec date de début", s == 200, r)
+    s, r = rpc("join_challenge", {"p_challenge_id": (r or {}).get("challenge_id") if isinstance(r, dict) else None, "p_video_id": avid}, a_tok)
+    check("participer avant le début refusé", s == 400 and "pas encore commencé" in str(r), r)
+    for t in ("world", "king", "battle"):
+        s, r = rpc("create_challenge", {"p_title": "Interdit " + t, "p_description": "d", "p_type": t,
+                                        "p_end_date": end}, a_tok)
+        check(f"FRAUDE joueur crée un défi {t} par create_challenge refusé", s == 400, r)
+
+    a_coins, b_coins = profile(a)["coins"], profile(b)["coins"]
+    s, r = rpc("create_battle", {"p_title": "Plus beau but", "p_rules": "Le plus beau but gagne", "p_stake": 30,
+                                 "p_video_id": avid, "p_end_date": end, "p_opponent_username": "ben" + sfx}, a_tok)
+    check("lancer une Battle avec mise", s == 200 and profile(a)["coins"] == a_coins - 30, r)
+    bid = r.get("challenge_id") if isinstance(r, dict) else None
+    s, r = rpc("join_challenge", {"p_challenge_id": bid, "p_video_id": avid}, c_tok)
+    check("FRAUDE rejoindre la Battle d'un autre refusé", s == 400, r)
+    s, r = rpc("vote_for_participant", {"p_challenge_id": bid, "p_participant_id": a}, c_tok)
+    check("vote avant que l'adversaire relève refusé", s == 400, r)
+    s, r = rpc("join_challenge", {"p_challenge_id": bid, "p_video_id": wv1}, b_tok)
+    check("l'adversaire relève la Battle (même mise)", s == 200 and profile(b)["coins"] == b_coins - 30, r)
+    s, r = rpc("vote_for_participant", {"p_challenge_id": bid, "p_participant_id": b}, a_tok)
+    check("FRAUDE un joueur de la Battle vote refusé", s == 400, r)
+    s, r = rpc("vote_for_participant", {"p_challenge_id": bid, "p_participant_id": b}, d_tok)
+    check("FRAUDE compte neuf sans vidéo ne vote pas", s == 400, r)
+    s, r = rpc("vote_for_participant", {"p_challenge_id": bid, "p_participant_id": b}, c_tok)
+    check("un joueur avec vidéo vote", s == 200, r)
+    b_coins, b_stars = profile(b)["coins"], profile(b)["stars"]
+    sql(f"update challenges set end_date = now() - interval '1 minute' where id='{bid}'")
+    sql("select resolve_expired_challenges()")
+    check("le gagnant de la Battle prend les 2 mises + 100 Stars",
+          profile(b)["coins"] == b_coins + 60 and profile(b)["stars"] == b_stars + 100, profile(b))
+
+    a_coins = profile(a)["coins"]
+    s, r = rpc("create_battle", {"p_title": "Qui jongle le plus", "p_rules": "x", "p_stake": 20,
+                                 "p_video_id": avid, "p_end_date": end}, a_tok)
+    bid2 = r.get("challenge_id") if isinstance(r, dict) else None
+    sql(f"update challenges set end_date = now() - interval '1 minute' where id='{bid2}'")
+    sql("select resolve_expired_challenges()")
+    st = sel(f"challenges?id=eq.{bid2}&select=status")[1]
+    check("Battle sans adversaire : mise rendue", profile(a)["coins"] == a_coins and st == [{"status": "cancelled"}],
+          (profile(a), st))
+    s, r = rpc("create_battle", {"p_title": "Trop cher", "p_rules": "x", "p_stake": 999999,
+                                 "p_video_id": avid, "p_end_date": end}, a_tok)
+    check("FRAUDE mise hors limites refusée", s == 400, r)
+    s, r = rpc("find_ledger_drift", {}, c_tok)
+    check("grand livre toujours juste après Battles et remboursements", s == 200 and r == [], r)
     s, r = rpc("delete_my_account", {}, b_tok)
     check("supprimer son compte", s == 204, r)
 

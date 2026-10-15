@@ -41,5 +41,16 @@ abstract class ChallengeRepository {
     int? maxParticipants,
     String? recordUnit,
     String? prizeDescription,
+    DateTime? startDate,
+  });
+
+  /// Battle 1 contre 1 (RPC `create_battle`) : débite la mise du créateur.
+  Future<Either<Failure, Challenge>> createBattle({
+    required String title,
+    required String rules,
+    required int stake,
+    required String videoId,
+    required DateTime endDate,
+    String? opponentUsername,
   });
 }

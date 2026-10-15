@@ -8,22 +8,21 @@ class EconomyConstants {
   const EconomyConstants._();
 
   // Gains (Ballons)
+  // Règles v2 (15/10/2026) : la connexion quotidienne et les Moves
+  // reproduits ne rapportent plus rien.
   static const int welcomeBonus = 500;
-  static const int dailyLoginMin = 10;
-  static const int dailyLoginMax = 20;
   static const int postVideoReward = 5;
   static const int maxPostVideoRewardsPerDay = 3;
-  static const int moveReproducedReward = 1;
-  static const int masterclassReceivedReward = 2;
+  static const int fullWatchTarget = 20;
+  static const int fullWatchReward = 30;
   static const int adWatchedReward = 30;
   static const int maxAdWatchedPerDay = 5;
   static const int inviteFriendReward = 100;
-  static const int streak7DaysBonus = 50;
-  static const int streak30DaysBonus = 200;
 
   // Dépenses (Ballons)
   static const int joinChallengeCost = 20;
-  static const int joinBattleMinCost = 50;
+  static const int battleMinStake = 10;
+  static const int battleMaxStake = 10000;
   static const int createChallengeCost = 200;
   static const int boostVideoCost = 100;
   static const int customBadgeCost = 300;

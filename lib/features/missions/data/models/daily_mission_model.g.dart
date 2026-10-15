@@ -14,6 +14,8 @@ DailyMissionModel _$DailyMissionModelFromJson(Map<String, dynamic> json) =>
       challengeParticipated: json['challenge_participated'] as bool? ?? false,
       videosWatched: (json['videos_watched'] as num?)?.toInt() ?? 0,
       coinsEarned: (json['coins_earned'] as num?)?.toInt() ?? 0,
+      fullVideosWatched: (json['full_videos_watched'] as num?)?.toInt() ?? 0,
+      fullWatchRewarded: json['full_watch_rewarded'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$DailyMissionModelToJson(DailyMissionModel instance) =>
@@ -24,4 +26,6 @@ Map<String, dynamic> _$DailyMissionModelToJson(DailyMissionModel instance) =>
       'challenge_participated': instance.challengeParticipated,
       'videos_watched': instance.videosWatched,
       'coins_earned': instance.coinsEarned,
+      'full_videos_watched': instance.fullVideosWatched,
+      'full_watch_rewarded': instance.fullWatchRewarded,
     };

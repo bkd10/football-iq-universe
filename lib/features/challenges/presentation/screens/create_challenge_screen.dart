@@ -11,15 +11,12 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/challenge_providers.dart';
-import '../widgets/challenge_card.dart';
+import '../widgets/date_time_field.dart';
 
-// King est masqué tant que l'app ne permet pas d'enregistrer un record :
-// sans détenteur de record, un défi King se terminerait sans vainqueur.
-const _creatableTypes = ['battle', 'challenge'];
-
-/// Formulaire de création — voir PARTIE 9.2. Seuls Battle/Challenge/King
-/// sont créables par un joueur (Monde reste officiel, piloté par un admin
-/// hors de cette RPC) ; Sponsorisé est réservé à un compte marque vérifié
+/// Formulaire de création d'un Challenge : ouvert à tous, avec une date de
+/// début et une date de fin. La Battle (1 contre 1) a son propre écran,
+/// `CreateBattleScreen`. Monde reste officiel, piloté par un admin ;
+/// Sponsorisé est réservé à un compte marque vérifié
 /// (`role == 'brand'`, voir `20260101000014_sponsored_challenges.sql`) —
 /// ce même écran s'adapte selon le rôle du compte connecté plutôt que d'en
 /// dupliquer un second pour une différence somme toute limitée (pas de
@@ -49,15 +46,11 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
   final _prizeDescriptionController = TextEditingController();
 
   String _type = 'challenge';
+  DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 2));
   bool _isSubmitting = false;
   bool _typeInitializedForBrand = false;
 
-  /// Miroir client, affichage uniquement, de la logique serveur de
-  /// `create_challenge` (le vrai coût est toujours calculé côté serveur).
-  int get _entryCostForType => _type == 'battle'
-      ? EconomyConstants.joinBattleMinCost
-      : EconomyConstants.joinChallengeCost;
 
   @override
   void dispose() {
@@ -69,30 +62,10 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     super.dispose();
   }
 
-  Future<void> _pickEndDate() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _endDate,
-      firstDate: DateTime.now().add(const Duration(hours: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 90)),
-    );
-    if (date == null || !mounted) return;
-
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_endDate),
-    );
-    if (time == null) return;
-
-    setState(() {
-      _endDate = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    });
-  }
-
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false) || _isSubmitting) return;
-    if (_endDate.isBefore(DateTime.now())) {
-      context.showSnackBar('La date de fin doit être dans le futur.', isError: true);
+    if (_endDate.isBefore(_startDate.add(const Duration(hours: 1)))) {
+      context.showSnackBar('La fin doit être au moins 1 heure après le début.', isError: true);
       return;
     }
 
@@ -104,6 +77,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           type: _type,
+          startDate: _startDate,
           endDate: _endDate,
           maxParticipants: _type == 'sponsored' ? null : maxParticipants,
           recordUnit: _type == 'king' ? _recordUnitController.text.trim() : null,
@@ -136,7 +110,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isBrand ? 'Créer un Défi Sponsorisé' : 'Créer un défi'),
+        title: Text(isBrand ? 'Créer un Défi Sponsorisé' : 'Créer un Challenge'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -164,29 +138,6 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ] else ...[
-                  Text(
-                    'Coût de création : 200 Ballons',
-                    style: context.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  DropdownButtonFormField<String>(
-                    initialValue: _type,
-                    decoration: const InputDecoration(labelText: 'Type de défi'),
-                    items: _creatableTypes
-                        .map(
-                          (t) => DropdownMenuItem(
-                            value: t,
-                            child: Text(challengeTypeLabels[t] ?? t),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: _isSubmitting
-                        ? null
-                        : (value) {
-                            if (value != null) setState(() => _type = value);
-                          },
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
@@ -194,10 +145,12 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                     child: Text(
-                      'Chaque participant paiera $_entryCostForType Ballons pour '
-                      'rejoindre. Cette somme s\'ajoute à la cagnotte, versée '
-                      'en entier au vainqueur — toi y compris, si tu '
-                      'participes aussi.',
+                      '🎯 Un Challenge est ouvert à tous les joueurs entre la date de '
+                      'début et la date de fin. Créer coûte '
+                      '${EconomyConstants.createChallengeCost} Ballons ; chaque '
+                      'participant paie ${EconomyConstants.joinChallengeCost} Ballons, '
+                      'qui forment la cagnotte. Le joueur avec le plus de votes la '
+                      'remporte.',
                       style: context.textTheme.bodySmall
                           ?.copyWith(color: AppColors.textSecondary),
                     ),
@@ -235,20 +188,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                           : null,
                     ),
                   ),
-                if (_type == 'king')
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: TextFormField(
-                      controller: _recordUnitController,
-                      decoration: const InputDecoration(
-                        labelText: 'Unité du record (ex : jongles, secondes)',
-                      ),
-                      validator: (v) => (_type == 'king' && (v == null || v.trim().isEmpty))
-                          ? 'Requis pour un King Challenge.'
-                          : null,
-                    ),
-                  ),
-                if (_type != 'king')
+                if (_type != 'sponsored')
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.md),
                     child: TextFormField(
@@ -259,16 +199,26 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       ),
                     ),
                   ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Date de fin'),
-                  subtitle: Text(
-                    '${_endDate.day}/${_endDate.month}/${_endDate.year} à '
-                    '${_endDate.hour.toString().padLeft(2, '0')}:'
-                    '${_endDate.minute.toString().padLeft(2, '0')}',
-                  ),
-                  trailing: const Icon(Icons.calendar_today_outlined),
-                  onTap: _isSubmitting ? null : _pickEndDate,
+                DateTimeField(
+                  label: 'Début',
+                  value: _startDate,
+                  enabled: !_isSubmitting,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 30)),
+                  onChanged: (d) => setState(() {
+                    _startDate = d;
+                    if (_endDate.isBefore(d.add(const Duration(hours: 1)))) {
+                      _endDate = d.add(const Duration(days: 2));
+                    }
+                  }),
+                ),
+                DateTimeField(
+                  label: 'Fin',
+                  value: _endDate,
+                  enabled: !_isSubmitting,
+                  firstDate: _startDate,
+                  lastDate: _startDate.add(const Duration(days: 60)),
+                  onChanged: (d) => setState(() => _endDate = d),
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 AppPrimaryButton(

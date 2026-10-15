@@ -45,31 +45,18 @@ class DailyMissionsScreen extends ConsumerWidget {
               _ProgressHeader(mission: mission),
               const SizedBox(height: AppSpacing.md),
               _MissionTile(
-                icon: Icons.login,
-                label: 'Connexion quotidienne',
-                reward: '+${EconomyDisplay.dailyLoginRange}',
-                done: mission.loginCompleted,
-              ),
-              _MissionTile(
                 icon: Icons.videocam_outlined,
-                label: 'Poster une vidéo',
+                label: 'Publier une vidéo',
                 reward: '+5 Ballons',
                 done: mission.videoPosted,
               ),
               _MissionTile(
                 icon: Icons.play_circle_outline,
-                label: 'Regarder ${DailyMission.videosWatchedTarget} vidéos',
-                reward: '+5 Ballons',
-                done: mission.videosWatched >= DailyMission.videosWatchedTarget,
+                label: 'Regarder ${DailyMission.fullWatchTarget} vidéos en entier',
+                reward: '+${DailyMission.fullWatchReward} Ballons',
+                done: mission.fullWatchRewarded,
                 progressLabel:
-                    '${mission.videosWatched.clamp(0, DailyMission.videosWatchedTarget)}/${DailyMission.videosWatchedTarget}',
-              ),
-              _MissionTile(
-                icon: Icons.emoji_events_outlined,
-                label: 'Participer à un défi',
-                reward: '+50 Ballons',
-                done: mission.challengeParticipated,
-                comingSoon: true,
+                    '${mission.fullVideosWatched.clamp(0, DailyMission.fullWatchTarget)}/${DailyMission.fullWatchTarget}',
               ),
               const SizedBox(height: AppSpacing.lg),
               Center(
@@ -84,13 +71,6 @@ class DailyMissionsScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Petite table de correspondance pour l'affichage (les vraies valeurs
-/// viennent de `app_config.economy` côté serveur).
-class EconomyDisplay {
-  const EconomyDisplay._();
-  static const String dailyLoginRange = '10-20 Ballons';
 }
 
 class _StreakCard extends StatelessWidget {
@@ -170,7 +150,6 @@ class _MissionTile extends StatelessWidget {
     required this.reward,
     required this.done,
     this.progressLabel,
-    this.comingSoon = false,
   });
 
   final IconData icon;
@@ -178,7 +157,6 @@ class _MissionTile extends StatelessWidget {
   final String reward;
   final bool done;
   final String? progressLabel;
-  final bool comingSoon;
 
   @override
   Widget build(BuildContext context) {
@@ -203,9 +181,7 @@ class _MissionTile extends StatelessWidget {
                       color: done ? AppColors.textSecondary : null,
                     ),
                   ),
-                  if (comingSoon)
-                    Text('Bientôt disponible', style: context.textTheme.bodySmall)
-                  else if (progressLabel != null)
+                  if (progressLabel != null)
                     Text(progressLabel!, style: context.textTheme.bodySmall),
                 ],
               ),

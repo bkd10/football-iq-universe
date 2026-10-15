@@ -13,6 +13,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/video/inline_video_controller.dart';
 import '../../../../shared/providers/supabase_provider.dart';
+import '../../../missions/domain/entities/daily_mission.dart';
 import '../../../missions/presentation/providers/missions_providers.dart';
 import '../../../profile/presentation/providers/social_providers.dart';
 import '../../../videos/domain/entities/video.dart';
@@ -37,6 +38,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
   InlineVideoController? _controller;
   Timer? _viewTimer;
   int _heartBurstId = 0;
+  bool _retried = false;
 
   @override
   void initState() {
@@ -47,7 +49,9 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
   Future<void> _initController() async {
     final controller = InlineVideoController(widget.video.videoUrl);
     _controller = controller;
-    controller.addListener(_onControllerChanged);
+    controller
+      ..addListener(_onControllerChanged)
+      ..onCompleted = _onVideoCompleted;
     await controller.initialize();
     if (!mounted) return;
     setState(() {});
@@ -71,13 +75,38 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
   }
 
   void _play() {
-    _controller?.play();
+    final controller = _controller;
+    // Une vidéo en erreur (réseau coupé...) est rechargée une fois quand on
+    // revient dessus.
+    if (controller != null && controller.hasError && !_retried) {
+      _retried = true;
+      controller.retry();
+    }
+    controller?.play();
+    ref.read(missionsControllerProvider.notifier).startFullWatch(widget.video.id);
     _viewTimer?.cancel();
     _viewTimer = Timer(AppConstants.minWatchTimeForView, () {
       if (!mounted) return;
       ref.read(feedControllerProvider.notifier).registerView(widget.video.id);
       ref.read(missionsControllerProvider.notifier).registerVideoWatched();
     });
+  }
+
+  /// La vidéo a été regardée jusqu'au bout : compte pour la mission du jour.
+  Future<void> _onVideoCompleted() async {
+    if (!widget.isActive) return;
+    final result = await ref
+        .read(missionsControllerProvider.notifier)
+        .completeFullWatch(widget.video.id, _controller?.durationSeconds);
+    if (!mounted || result == null || !result.rewardAwarded) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '🎉 +${result.reward} Ballons : ${DailyMission.fullWatchTarget} vidéos '
+          'regardées en entier aujourd’hui !',
+        ),
+      ),
+    );
   }
 
   void _pause() {
@@ -424,10 +453,37 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
   Widget _buildVideoLayer() {
     final controller = _controller;
     if (controller != null && controller.hasError) {
-      return const ColoredBox(
+      final detail = controller.errorDetail;
+      return ColoredBox(
         color: AppColors.surface,
         child: Center(
-          child: Icon(Icons.videocam_off_outlined, color: AppColors.textSecondary, size: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.videocam_off_outlined, color: AppColors.textSecondary, size: 40),
+              const SizedBox(height: 8),
+              const Text(
+                'Vidéo pas encore lisible',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+              if (detail != null)
+                Text(detail, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white54),
+                ),
+                onPressed: () {
+                  controller.retry();
+                  if (widget.isActive) controller.play();
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Réessayer'),
+              ),
+            ],
+          ),
         ),
       );
     }

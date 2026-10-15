@@ -43,7 +43,33 @@ class MissionsController extends AsyncNotifier<void> {
       ref.invalidate(currentProfileProvider);
     });
   }
+
+  Future<void> startFullWatch(String videoId) async {
+    try {
+      await ref.read(missionsRemoteDataSourceProvider).startVideoWatch(videoId);
+    } catch (_) {
+      // Sans incidence sur la lecture : la vidéo ne comptera simplement pas.
+    }
+  }
+
+  Future<FullWatchResult?> completeFullWatch(String videoId, double? durationSeconds) async {
+    try {
+      final r = await ref
+          .read(missionsRemoteDataSourceProvider)
+          .completeVideoWatch(videoId, durationSeconds);
+      final counted = r['counted'] == true;
+      final awarded = r['reward_awarded'] == true;
+      if (counted) ref.invalidate(todayMissionProvider);
+      if (awarded) ref.invalidate(currentProfileProvider);
+      return (counted: counted, rewardAwarded: awarded, reward: (r['reward'] as num?)?.toInt() ?? 0);
+    } catch (_) {
+      return null;
+    }
+  }
 }
+
+/// Résultat d'une vidéo regardée en entier : récompense versée ou non.
+typedef FullWatchResult = ({bool counted, bool rewardAwarded, int reward});
 
 final missionsControllerProvider =
     AsyncNotifierProvider<MissionsController, void>(MissionsController.new);

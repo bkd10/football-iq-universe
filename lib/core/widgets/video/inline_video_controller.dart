@@ -17,6 +17,20 @@ abstract class InlineVideoController implements Listenable {
 
   bool get isPlaying;
   bool get hasError;
+
+  /// Code d'erreur du lecteur, pour comprendre une vidéo illisible
+  /// (web : 2 = réseau, 3 = décodage, 4 = format non pris en charge).
+  String? get errorDetail;
+
+  /// Durée de la vidéo en secondes, quand le lecteur la connaît.
+  double? get durationSeconds;
+
+  /// Appelé chaque fois que la vidéo arrive au bout (elle repart ensuite
+  /// du début toute seule).
+  set onCompleted(VoidCallback? callback);
+
+  /// Recharge la vidéo après une erreur.
+  void retry();
   bool get isMuted;
   set isMuted(bool value);
 

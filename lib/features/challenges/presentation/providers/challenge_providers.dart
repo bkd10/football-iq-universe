@@ -117,6 +117,7 @@ class ChallengeActionsController extends AsyncNotifier<void> {
     int? maxParticipants,
     String? recordUnit,
     String? prizeDescription,
+    DateTime? startDate,
   }) async {
     state = const AsyncLoading();
     final result = await ref.read(createChallengeUseCaseProvider)(
@@ -129,7 +130,39 @@ class ChallengeActionsController extends AsyncNotifier<void> {
       maxParticipants: maxParticipants,
       recordUnit: recordUnit,
       prizeDescription: prizeDescription,
+      startDate: startDate,
     );
+    return result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        return null;
+      },
+      (challenge) {
+        ref.invalidate(challengesProvider);
+        ref.invalidate(currentProfileProvider);
+        state = const AsyncData(null);
+        return challenge;
+      },
+    );
+  }
+
+  Future<Challenge?> createBattle({
+    required String title,
+    required String rules,
+    required int stake,
+    required String videoId,
+    required DateTime endDate,
+    String? opponentUsername,
+  }) async {
+    state = const AsyncLoading();
+    final result = await ref.read(challengeRepositoryProvider).createBattle(
+          title: title,
+          rules: rules,
+          stake: stake,
+          videoId: videoId,
+          endDate: endDate,
+          opponentUsername: opponentUsername,
+        );
     return result.fold(
       (failure) {
         state = AsyncError(failure, StackTrace.current);

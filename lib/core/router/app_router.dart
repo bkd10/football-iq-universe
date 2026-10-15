@@ -13,6 +13,7 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/challenges/presentation/screens/brand_home_screen.dart';
 import '../../features/challenges/presentation/screens/challenge_detail_screen.dart';
 import '../../features/challenges/presentation/screens/challenges_screen.dart';
+import '../../features/challenges/presentation/screens/create_battle_screen.dart';
 import '../../features/challenges/presentation/screens/create_challenge_screen.dart';
 import '../../features/economy/presentation/screens/earn_ballons_screen.dart';
 import '../../features/economy/presentation/screens/shop_screen.dart';
@@ -218,6 +219,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.createChallenge,
         builder: (context, state) => const CreateChallengeScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.createBattle,
+        builder: (context, state) => const CreateBattleScreen(),
       ),
       GoRoute(
         path: RouteNames.videoDetail,

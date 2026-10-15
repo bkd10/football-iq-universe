@@ -25,7 +25,7 @@ class ChallengeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isKing = challenge.type == 'king';
     final isSponsored = challenge.type == 'sponsored';
-    final isCompleted = challenge.status == 'completed';
+    final isCompleted = challenge.status == 'completed' || challenge.status == 'cancelled';
 
     return AppCard(
       onTap: onTap,
@@ -54,7 +54,9 @@ class ChallengeCard extends StatelessWidget {
                 )
               else
                 Text(
-                  Formatters.countdown(challenge.timeRemaining),
+                  challenge.hasStarted
+                      ? Formatters.countdown(challenge.timeRemaining)
+                      : 'Dans ${Formatters.countdown(challenge.timeUntilStart)}',
                   style: AppTypography.stat(fontSize: 12, color: AppColors.gold),
                 ),
             ],
@@ -74,7 +76,16 @@ class ChallengeCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
           ],
-          if (isKing)
+          if (challenge.isBattle)
+            Text(
+              '@${challenge.creator?.username ?? '?'} VS '
+              '${challenge.opponent != null ? '@${challenge.opponent!.username}' : 'adversaire à trouver'}'
+              ' · mise ${challenge.entryCost} Ballons',
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          else if (isKing)
             Text(
               challenge.currentRecord != null
                   ? 'Record : ${challenge.currentRecord} ${challenge.recordUnit ?? ''} — @${challenge.recordHolder?.username ?? '?'}'

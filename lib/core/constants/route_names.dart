@@ -33,6 +33,7 @@ class RouteNames {
   static const String challengeDetail = '/challenge/:challengeId';
   static String challengeDetailPath(String challengeId) => '/challenge/$challengeId';
   static const String createChallenge = '/challenges/create';
+  static const String createBattle = '/challenges/battle';
 
   // Vidéo
   static const String videoDetail = '/video/:videoId';

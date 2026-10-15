@@ -36,6 +36,11 @@ ChallengeModel _$ChallengeModelFromJson(Map<String, dynamic> json) =>
           ? null
           : VideoCreatorModel.fromJson(
               json['record_holder'] as Map<String, dynamic>),
+      opponentId: json['opponent_id'] as String?,
+      opponent: json['opponent'] == null
+          ? null
+          : VideoCreatorModel.fromJson(
+              json['opponent'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ChallengeModelToJson(ChallengeModel instance) =>
@@ -63,4 +68,6 @@ Map<String, dynamic> _$ChallengeModelToJson(ChallengeModel instance) =>
       'is_official': instance.isOfficial,
       'creator': instance.creator?.toJson(),
       'record_holder': instance.recordHolder?.toJson(),
+      'opponent_id': instance.opponentId,
+      'opponent': instance.opponent?.toJson(),
     };

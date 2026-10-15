@@ -11,7 +11,8 @@ const _creatorSelect = 'id, username, display_name, avatar_url, level, is_verifi
 /// (creator_id, opponent_id, record_holder_id, sponsor_id, winner_id).
 const _challengeSelect =
     '*, creator:profiles!creator_id($_creatorSelect), '
-    'record_holder:profiles!record_holder_id($_creatorSelect)';
+    'record_holder:profiles!record_holder_id($_creatorSelect), '
+    'opponent:profiles!opponent_id($_creatorSelect)';
 
 class ChallengeRemoteDataSource {
   const ChallengeRemoteDataSource(this._client);
@@ -57,7 +58,7 @@ class ChallengeRemoteDataSource {
           .from('challenge_participations')
           .select(
             '*, participant:profiles!user_id($_creatorSelect), '
-            'video:videos!video_id(video_url, thumbnail_url)',
+            'video:videos!video_id(id, video_url, thumbnail_url)',
           )
           .eq('challenge_id', challengeId)
           .order('votes_count', ascending: false);
@@ -121,6 +122,8 @@ class ChallengeRemoteDataSource {
           'p_participant_id': participantUserId,
         },
       );
+    } on supa.PostgrestException catch (e) {
+      throw _mapRpcError(e);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -136,6 +139,7 @@ class ChallengeRemoteDataSource {
     int? maxParticipants,
     String? recordUnit,
     String? prizeDescription,
+    DateTime? startDate,
   }) async {
     try {
       final result = await _client.rpc<Map<String, dynamic>>(
@@ -145,17 +149,53 @@ class ChallengeRemoteDataSource {
           'p_description': description,
           'p_type': type,
           'p_category': category,
-          'p_end_date': endDate.toIso8601String(),
+          'p_end_date': endDate.toUtc().toIso8601String(),
           'p_prize_pool': prizePool,
           'p_max_participants': maxParticipants,
           'p_record_unit': recordUnit,
           'p_prize_description': prizeDescription,
+          'p_start_date': startDate?.toUtc().toIso8601String(),
         },
       );
       final challengeId = result['challenge_id'] as String;
       final created = await getChallengeById(challengeId);
       if (created == null) {
         throw const ServerException('Défi créé mais introuvable.');
+      }
+      return created;
+    } on supa.PostgrestException catch (e) {
+      throw _mapRpcError(e);
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Battle 1 contre 1 : le créateur mise [stake] Ballons avec sa vidéo ;
+  /// l'adversaire (désigné, ou le premier qui relève) mise la même somme.
+  Future<ChallengeModel> createBattle({
+    required String title,
+    required String rules,
+    required int stake,
+    required String videoId,
+    required DateTime endDate,
+    String? opponentUsername,
+  }) async {
+    try {
+      final result = await _client.rpc<Map<String, dynamic>>(
+        'create_battle',
+        params: {
+          'p_title': title,
+          'p_rules': rules,
+          'p_stake': stake,
+          'p_video_id': videoId,
+          'p_end_date': endDate.toUtc().toIso8601String(),
+          'p_opponent_username': opponentUsername,
+        },
+      );
+      final created = await getChallengeById(result['challenge_id'] as String);
+      if (created == null) {
+        throw const ServerException('Battle créée mais introuvable.');
       }
       return created;
     } on supa.PostgrestException catch (e) {

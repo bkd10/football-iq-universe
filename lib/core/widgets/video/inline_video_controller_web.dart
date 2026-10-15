@@ -11,13 +11,15 @@ InlineVideoController createInlineVideoController(String url) => _WebInlineVideo
 int _nextViewId = 0;
 
 class _WebInlineVideoController extends ChangeNotifier implements InlineVideoController {
-  _WebInlineVideoController(String url) : _viewType = 'fiu-inline-video-${_nextViewId++}' {
+  _WebInlineVideoController(this._url) : _viewType = 'fiu-inline-video-${_nextViewId++}' {
     // Muet + playsinline AVANT la source : conditions de Safari (iPhone)
     // pour charger et lancer la vidéo sans geste de l'utilisateur.
     _element
       ..muted = true
       ..defaultMuted = true
-      ..loop = true
+      // Pas de `loop` : l'évènement `ended` sert à compter les vidéos
+      // regardées en entier, puis on relance nous-mêmes depuis le début.
+      ..loop = false
       ..playsInline = true
       ..autoplay = false
       ..preload = 'auto'
@@ -30,20 +32,34 @@ class _WebInlineVideoController extends ChangeNotifier implements InlineVideoCon
       ..objectFit = 'cover'
       // Les gestes (tap, double tap) restent gérés par Flutter.
       ..pointerEvents = 'none';
-    _element.onPlay.listen((_) => notifyListeners());
-    _element.onPause.listen((_) => notifyListeners());
-    _element.onVolumeChange.listen((_) => notifyListeners());
-    _element.onError.listen((_) {
-      _hasError = true;
-      notifyListeners();
+    _element.onPlay.listen((_) => _notify());
+    _element.onPause.listen((_) => _notify());
+    _element.onVolumeChange.listen((_) => _notify());
+    _element.onEnded.listen((_) {
+      if (_disposed) return;
+      _onCompleted?.call();
+      _element.currentTime = 0;
+      play();
     });
-    _element.src = url;
+    _element.onError.listen((_) {
+      if (_disposed) return;
+      _hasError = true;
+      _notify();
+    });
+    _element.src = _url;
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int _) => _element);
   }
 
+  final String _url;
   final String _viewType;
   final web.HTMLVideoElement _element = web.HTMLVideoElement();
   bool _hasError = false;
+  bool _disposed = false;
+  VoidCallback? _onCompleted;
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
 
   @override
   Future<void> initialize() async {}
@@ -53,6 +69,30 @@ class _WebInlineVideoController extends ChangeNotifier implements InlineVideoCon
 
   @override
   bool get hasError => _hasError;
+
+  @override
+  String? get errorDetail {
+    final code = _element.error?.code;
+    return code == null ? null : 'code $code';
+  }
+
+  @override
+  double? get durationSeconds {
+    final d = _element.duration;
+    return d.isFinite && d > 0 ? d.toDouble() : null;
+  }
+
+  @override
+  set onCompleted(VoidCallback? callback) => _onCompleted = callback;
+
+  @override
+  void retry() {
+    _hasError = false;
+    _element
+      ..src = _url
+      ..load();
+    _notify();
+  }
 
   @override
   bool get isMuted => _element.muted;
@@ -69,7 +109,7 @@ class _WebInlineVideoController extends ChangeNotifier implements InlineVideoCon
   void play() {
     // Refus possible (mode économie d'énergie) : l'icône lecture reste
     // affichée et un tap relance la lecture.
-    _element.play().toDart.then((_) {}, onError: (Object _) => notifyListeners());
+    _element.play().toDart.then((_) {}, onError: (Object _) => _notify());
   }
 
   @override
@@ -80,6 +120,7 @@ class _WebInlineVideoController extends ChangeNotifier implements InlineVideoCon
 
   @override
   void dispose() {
+    _disposed = true;
     _element
       ..pause()
       ..removeAttribute('src')

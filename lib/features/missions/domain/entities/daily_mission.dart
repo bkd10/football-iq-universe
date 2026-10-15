@@ -2,9 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'daily_mission.freezed.dart';
 
-/// Carrière quotidienne du jour — voir PARTIE 8.5. `videosWatched` est
-/// plafonné à 3 pour l'affichage de la progression (le palier est atteint
-/// une fois, le compteur serveur peut continuer au-delà sans effet UI).
+/// Missions du jour. Ce qui rapporte des Ballons : publier une vidéo, et
+/// regarder [fullWatchTarget] vidéos en entier dans la journée.
 @freezed
 class DailyMission with _$DailyMission {
   const factory DailyMission({
@@ -14,17 +13,17 @@ class DailyMission with _$DailyMission {
     @Default(false) bool challengeParticipated,
     @Default(0) int videosWatched,
     @Default(0) int coinsEarned,
+    @Default(0) int fullVideosWatched,
+    @Default(false) bool fullWatchRewarded,
   }) = _DailyMission;
 
   const DailyMission._();
 
-  static const int videosWatchedTarget = 3;
+  /// Miroir d'affichage de `app_config.economy` (valeurs réelles côté serveur).
+  static const int fullWatchTarget = 20;
+  static const int fullWatchReward = 30;
 
-  int get completedCount =>
-      (loginCompleted ? 1 : 0) +
-      (videoPosted ? 1 : 0) +
-      (challengeParticipated ? 1 : 0) +
-      (videosWatched >= videosWatchedTarget ? 1 : 0);
+  int get completedCount => (videoPosted ? 1 : 0) + (fullWatchRewarded ? 1 : 0);
 
-  static const int totalMissions = 4;
+  static const int totalMissions = 2;
 }

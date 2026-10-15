@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/challenge_providers.dart';
 import '../widgets/challenge_card.dart';
 
@@ -33,6 +34,39 @@ class ChallengesScreen extends ConsumerStatefulWidget {
 class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
   String? _selectedType;
 
+  /// Un joueur choisit entre Challenge (ouvert à tous) et Battle (1 contre
+  /// 1). Une marque crée directement son défi sponsorisé.
+  Future<void> _showCreateChoice(BuildContext context) async {
+    if (ref.read(currentProfileProvider).valueOrNull?.role == 'brand') {
+      await context.push(RouteNames.createChallenge);
+      return;
+    }
+    final route = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Text('⚔️', style: TextStyle(fontSize: 24)),
+              title: const Text('Battle'),
+              subtitle: const Text('Toi contre un joueur. Tu fixes les règles et la mise.'),
+              onTap: () => Navigator.of(context).pop(RouteNames.createBattle),
+            ),
+            ListTile(
+              leading: const Text('🎯', style: TextStyle(fontSize: 24)),
+              title: const Text('Challenge'),
+              subtitle: const Text('Ouvert à tous, avec une date de début et de fin.'),
+              onTap: () => Navigator.of(context).pop(RouteNames.createChallenge),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (route != null && context.mounted) await context.push(route);
+  }
+
   @override
   Widget build(BuildContext context) {
     final challengesAsync = ref.watch(challengesProvider(_selectedType));
@@ -44,7 +78,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
             tooltip: 'Créer un défi',
-            onPressed: () => context.push(RouteNames.createChallenge),
+            onPressed: () => _showCreateChoice(context),
           ),
         ],
       ),

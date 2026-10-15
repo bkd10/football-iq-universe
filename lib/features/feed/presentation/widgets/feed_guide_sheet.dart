@@ -95,7 +95,7 @@ class FeedGuideSheet extends StatelessWidget {
           const _Line(
             icon: '🏆',
             title: 'Défis',
-            text: 'Rejoins un défi avec ta vidéo et remporte la cagnotte.',
+            text: 'Lance une Battle ou rejoins un Challenge avec ta vidéo.',
           ),
           const _Line(
             icon: '➕',
@@ -129,14 +129,17 @@ class FeedGuideSheet extends StatelessWidget {
           const _Line(icon: '↗', title: 'Partager', text: 'Envoie la vidéo à tes potes.'),
           const _Section('Les défis'),
           const _Line(
-            icon: '🎯',
-            title: 'Challenge',
-            text: 'Un geste imposé. Tu rejoins avec une de tes vidéos (20 Ballons).',
-          ),
-          const _Line(
             icon: '⚔️',
             title: 'Battle',
-            text: 'Même principe, en plus relevé (50 Ballons pour entrer).',
+            text: 'Toi contre un autre joueur. Tu fixes les règles (le plus beau but, '
+                'qui réussit ce geste…) et la mise. Ton adversaire mise autant, les '
+                'utilisateurs votent, le gagnant prend les deux mises.',
+          ),
+          const _Line(
+            icon: '🎯',
+            title: 'Challenge',
+            text: 'Ouvert à tous entre une date de début et une date de fin. '
+                '20 Ballons pour entrer, le plus de votes remporte la cagnotte.',
           ),
           const _Line(
             icon: '🌍',
@@ -144,17 +147,22 @@ class FeedGuideSheet extends StatelessWidget {
             text: 'Les défis officiels Football IQ, gratuits.',
           ),
           const _Line(
-            icon: '🏆',
-            title: 'Gagner',
-            text: 'Les joueurs votent. À la fin, celui qui a le plus de votes '
-                'remporte toute la cagnotte et +100 Stars.',
+            icon: '💼',
+            title: 'Sponsorisé',
+            text: 'Proposés par des marques, avec de vrais lots à gagner.',
+          ),
+          const _Line(
+            icon: '🗳️',
+            title: 'Votes',
+            text: 'Un vote par personne. On ne vote pas pour soi, ni dans sa propre '
+                'Battle. Égalité ou aucun vote : chacun récupère sa mise.',
           ),
           const _Section('Gagner des Ballons'),
           const _Line(icon: '🎁', title: 'Bienvenue', text: '500 Ballons à l’inscription.'),
           const _Line(
-            icon: '📅',
-            title: 'Chaque jour',
-            text: '+20 en te connectant. Bonus de +50 à 7 jours d’affilée, +200 à 30 jours.',
+            icon: '👀',
+            title: 'Regarder',
+            text: '+30 quand tu regardes 20 vidéos en entier dans la journée.',
           ),
           const _Line(
             icon: '🎬',
@@ -162,18 +170,9 @@ class FeedGuideSheet extends StatelessWidget {
             text: '+5 par vidéo publiée (3 fois par jour maximum).',
           ),
           const _Line(
-              icon: '👀',
-              title: 'Regarder',
-              text: '+5 quand tu regardes 3 vidéos dans la journée.',),
-          const _Line(
-            icon: '🔁',
-            title: 'Ton Move reproduit',
-            text: '+1 chaque fois qu’un joueur reproduit un Move que tu as inventé.',
-          ),
-          const _Line(
             icon: '🏆',
-            title: 'Gagner un défi',
-            text: 'Toute la cagnotte du défi est pour toi.',
+            title: 'Gagner',
+            text: 'Remporte une Battle ou un Challenge et la cagnotte est pour toi.',
           ),
           const _Section('La note sur 99'),
           const Text(

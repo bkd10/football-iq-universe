@@ -44,16 +44,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     });
   }
 
-  /// Réclame le bonus de connexion quotidienne une fois par session (voir
-  /// `award_coins` — la RPC rejette silencieusement si déjà réclamé
-  /// aujourd'hui, ce qui est l'état normal la plupart du temps).
+  /// Enregistre la connexion du jour (série de jours et badges). Elle ne
+  /// rapporte plus de Ballons : se connecter sans jouer ne compte pas.
   Future<void> _claimDailyLogin() async {
-    final result =
-        await ref.read(economyControllerProvider.notifier).awardCoins(EconomyReason.dailyLogin);
-    if (!mounted) return;
-    result.fold((_) {}, (newBalance) {
-      context.showSnackBar('🎉 Bonus de connexion quotidienne récupéré !');
-    });
+    await ref.read(economyControllerProvider.notifier).awardCoins(EconomyReason.dailyLogin);
   }
 
   @override
