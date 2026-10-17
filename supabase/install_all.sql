@@ -416,6 +416,7 @@ create table app_config (
   updated_at timestamptz default now()
 );
 
+
 -- ===================== 20260101000001_rls_policies.sql =====================
 -- Row Level Security — activée sur TOUTES les tables.
 --
@@ -684,6 +685,7 @@ using (
   )
 );
 
+
 -- ===================== 20260101000002_triggers.sql =====================
 -- Triggers et fonctions PostgreSQL — PARTIE 3.4 de la spécification.
 
@@ -900,6 +902,7 @@ before update on videos
 for each row
 execute function set_updated_at();
 
+
 -- ===================== 20260101000003_seed_data.sql =====================
 -- Données d'amorçage : feature flags, paramètres économiques, badges.
 
@@ -964,6 +967,7 @@ insert into badges (code, name, description, category, rarity) values
 ('rising_star', 'Rising Star', 'A atteint le niveau Rising Star.', 'level', 'common'),
 ('prodigy', 'Prodigy', 'A atteint le niveau Prodigy.', 'level', 'epic'),
 ('legend', 'Legend', 'A atteint le niveau Legend.', 'level', 'legendary');
+
 
 -- ===================== 20260101000004_storage_and_reactions.sql =====================
 -- Storage RLS + ajustements liés aux réactions (likes/masterclass) et aux
@@ -1074,6 +1078,7 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 grant execute on function increment_video_views(uuid) to authenticated;
+
 
 -- ===================== 20260101000005_economy_rpc.sql =====================
 -- Économie (Ballons) — PARTIE 4.2 / 7 de la spécification.
@@ -1268,6 +1273,7 @@ $$ language plpgsql security definer set search_path = public;
 
 grant execute on function spend_coins(text, uuid, integer) to authenticated;
 
+
 -- ===================== 20260101000006_daily_missions_rpc.sql =====================
 -- Missions quotidiennes — PARTIE 8.5. `login_completed`/`video_posted`
 -- sont déjà mis à jour par `award_coins` (voir migration précédente) au
@@ -1313,6 +1319,7 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 grant execute on function increment_videos_watched() to authenticated;
+
 
 -- ===================== 20260101000007_move_reproduction_reward.sql =====================
 -- Récompense l'inventeur d'un Move à chaque reproduction (+1 Ballon — voir
@@ -1360,6 +1367,7 @@ begin
   return new;
 end;
 $$ language plpgsql;
+
 
 -- ===================== 20260101000008_challenges_rpc.sql =====================
 -- Défis (Battle/Challenge/King/World/Sponsored) — PARTIE 4.2/8.3.
@@ -1663,6 +1671,7 @@ $$ language plpgsql security definer set search_path = public;
 drop policy if exists "Users can create challenges as themselves" on challenges;
 drop policy if exists "Users can join a challenge as themselves" on challenge_participations;
 
+
 -- ===================== 20260101000009_protect_profile_columns.sql =====================
 -- Correctif de sécurité : la policy RLS "Users can update own profile"
 -- (USING auth.uid() = id) autorise un UPDATE sur N'IMPORTE QUELLE colonne
@@ -1692,6 +1701,7 @@ grant update (
 revoke update on videos from authenticated;
 
 grant update (caption, category, is_move, move_name) on videos to authenticated;
+
 
 -- ===================== 20260101000010_pepite_of_the_day.sql =====================
 -- La Pépite du Jour — voir PARTIE 8.9 : "À l'ouverture de l'app, une vidéo
@@ -1750,6 +1760,7 @@ as $$
 $$;
 
 grant execute on function get_pepite_of_the_day() to authenticated, anon;
+
 
 -- ===================== 20260101000011_notification_triggers.sql =====================
 -- Déclencheurs manquants pour peupler `notifications` (PARTIE 3.2) — seul
@@ -1908,6 +1919,7 @@ after insert on user_badges
 for each row
 execute function notify_badge_earned();
 
+
 -- ===================== 20260101000012_challenge_prize_pool.sql =====================
 -- Cagnotte réelle pour les Battles/Défis/King créés par un joueur, et
 -- correction d'un bug d'étiquetage dans l'historique du portefeuille.
@@ -2005,6 +2017,7 @@ begin
   return jsonb_build_object('joined', true);
 end;
 $$ language plpgsql security definer set search_path = public;
+
 
 -- ===================== 20260101000013_scouting_messaging.sql =====================
 -- Messagerie recruteur ↔ joueur — voir PARTIE 8.4/8.5. Complète les tables
@@ -2482,6 +2495,7 @@ $$ language plpgsql stable security definer set search_path = public;
 
 grant execute on function scout_search_players(text, text, text) to authenticated;
 
+
 -- ===================== 20260101000014_sponsored_challenges.sql =====================
 -- Défis Sponsorisés en libre-service pour les comptes marque (role='brand')
 -- — voir PARTIE 8.3. Jusqu'ici seuls Battle/Challenge/King étaient créables
@@ -2675,6 +2689,7 @@ grant execute on function create_challenge(
 drop function if exists create_challenge(
   text, text, text, timestamptz, text, integer, integer, text
 );
+
 
 -- ===================== 20260101000015_hardening.sql =====================
 -- =========================================================================
@@ -2924,6 +2939,7 @@ on content_reports for update
 using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
 with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
 
+
 -- ===================== 20260101000016_welcome_bonus_on_confirmation.sql =====================
 -- =========================================================================
 -- Conditionner le bonus de bienvenue (500 Ballons) à une adresse e-mail
@@ -3027,6 +3043,7 @@ after update on auth.users
 for each row
 when (old.email_confirmed_at is null and new.email_confirmed_at is not null)
 execute function handle_user_email_confirmed();
+
 
 -- ===================== 20260101000017_local_timezone_daily_resets.sql =====================
 -- =========================================================================
@@ -3233,6 +3250,7 @@ $$ language plpgsql security definer set search_path = public;
 
 grant execute on function increment_videos_watched(date) to authenticated;
 
+
 -- ===================== 20260101000018_ledger_reconciliation.sql =====================
 -- =========================================================================
 -- Grand livre : corriger une source de dérive réelle, et ajouter une
@@ -3396,6 +3414,7 @@ $$ language plpgsql security definer set search_path = public;
 
 grant execute on function find_ledger_drift() to authenticated;
 
+
 -- ===================== 20260101000019_canonical_values.sql =====================
 -- =========================================================================
 -- Valeurs canoniques : les colonnes `text` à valeurs contraintes
@@ -3516,6 +3535,7 @@ alter table organization_members
   add constraint organization_members_role_check
   check (role in ('player', 'coach', 'staff'));
 
+
 -- ===================== 20260101000020_account_deletion.sql =====================
 -- =========================================================================
 -- Suppression réelle de compte (obligation légale — RGPD, exigence
@@ -3576,6 +3596,7 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 grant execute on function delete_my_account() to authenticated;
+
 
 -- ===================== 20260101000021_security_audit_fixes.sql =====================
 -- =========================================================================
@@ -4381,6 +4402,7 @@ $$ language plpgsql security definer set search_path = public;
 
 revoke execute on function find_ledger_drift() from public, anon;
 grant execute on function find_ledger_drift() to authenticated;
+
 
 -- ===================== 20260101000022_admin_panel.sql =====================
 -- =========================================================================
@@ -5954,6 +5976,199 @@ $$ language plpgsql security definer set search_path = public;
 
 revoke execute on function handle_new_user() from public, anon, authenticated;
 revoke execute on function handle_user_email_confirmed() from public, anon, authenticated;
+
+
+-- ===================== 20260101000026_battle_opponents.sql =====================
+-- Battle : choisir son adversaire parmi les joueurs qu'on suit ou qui nous
+-- suivent, ou laisser le hasard choisir.
+--
+-- Corrige aussi l'erreur « column "is_banned" does not exist » : les RPC
+-- de la migration 0024 (create_battle, vote_for_participant) filtrent les
+-- comptes bannis, mais la base de production n'avait pas reçu la colonne
+-- (migration 0022 non appliquée). On l'ajoute ici si elle manque.
+
+alter table profiles add column if not exists is_banned boolean not null default false;
+alter table profiles add column if not exists banned_at timestamptz;
+alter table profiles add column if not exists ban_reason text;
+
+-- -------------------------------------------------------------------------
+-- 1. Suggestions d'adversaires : abonnés et abonnements du joueur
+-- -------------------------------------------------------------------------
+create or replace function battle_opponent_suggestions(p_query text default null)
+returns table (
+  id uuid,
+  username text,
+  display_name text,
+  avatar_url text,
+  i_follow boolean,
+  follows_me boolean
+) as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_query text := nullif(lower(trim(both '@ ' from coalesce(p_query, ''))), '');
+begin
+  if v_user_id is null then
+    raise exception 'Authentification requise.' using errcode = '28000';
+  end if;
+
+  return query
+  with related as (
+    select f.following_id as pid, true as i_follow, false as follows_me
+    from follows f where f.follower_id = v_user_id
+    union all
+    select f.follower_id, false, true
+    from follows f where f.following_id = v_user_id
+  ), merged as (
+    select pid, bool_or(r.i_follow) as i_follow, bool_or(r.follows_me) as follows_me
+    from related r group by pid
+  )
+  select p.id, p.username, p.display_name, p.avatar_url, m.i_follow, m.follows_me
+  from merged m
+  join profiles p on p.id = m.pid
+  where p.id != v_user_id
+    and not p.is_banned
+    and (
+      v_query is null
+      or lower(p.username) like '%' || v_query || '%'
+      or lower(coalesce(p.display_name, '')) like '%' || v_query || '%'
+    )
+  order by (m.i_follow and m.follows_me) desc, p.username
+  limit 50;
+end;
+$$ language plpgsql stable security definer set search_path = public;
+
+revoke execute on function battle_opponent_suggestions(text) from public, anon;
+grant execute on function battle_opponent_suggestions(text) to authenticated;
+
+-- -------------------------------------------------------------------------
+-- 2. create_battle : nouvelle option « adversaire aléatoire »
+-- -------------------------------------------------------------------------
+drop function if exists create_battle(text, text, integer, uuid, timestamptz, text);
+
+create or replace function create_battle(
+  p_title text,
+  p_rules text,
+  p_stake integer,
+  p_video_id uuid,
+  p_end_date timestamptz,
+  p_opponent_username text default null,
+  p_random_opponent boolean default false
+)
+returns jsonb as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_economy jsonb;
+  v_min_stake integer;
+  v_max_stake integer;
+  v_opponent_id uuid;
+  v_new_balance integer;
+  v_challenge_id uuid;
+  v_creator_name text;
+begin
+  if v_user_id is null then
+    raise exception 'Authentification requise.' using errcode = '28000';
+  end if;
+
+  if p_title is null or char_length(trim(p_title)) < 3 or char_length(p_title) > 80 then
+    raise exception 'Le titre doit faire entre 3 et 80 caractères.' using errcode = 'P0001';
+  end if;
+
+  if char_length(coalesce(p_rules, '')) > 1000 then
+    raise exception 'Les règles sont trop longues (1000 caractères max).' using errcode = 'P0001';
+  end if;
+
+  select value into v_economy from app_config where key = 'economy';
+  v_min_stake := coalesce((v_economy ->> 'battle_min_stake')::integer, 10);
+  v_max_stake := coalesce((v_economy ->> 'battle_max_stake')::integer, 10000);
+
+  if p_stake is null or p_stake < v_min_stake or p_stake > v_max_stake then
+    raise exception 'La mise doit être entre % et % Ballons.', v_min_stake, v_max_stake
+      using errcode = 'P0001';
+  end if;
+
+  if p_end_date < now() + interval '1 hour' or p_end_date > now() + interval '14 days' then
+    raise exception 'Une Battle dure entre 1 heure et 14 jours.' using errcode = 'P0001';
+  end if;
+
+  if not exists (
+    select 1 from videos
+    where id = p_video_id and user_id = v_user_id and status = 'active'
+  ) then
+    raise exception 'Choisis une de tes propres vidéos.' using errcode = 'P0001';
+  end if;
+
+  if p_random_opponent then
+    -- Adversaire aléatoire : un vrai joueur (non banni) qui a au moins une
+    -- vidéo publiée, pour qu'il puisse relever la Battle.
+    select p.id into v_opponent_id
+    from profiles p
+    where p.id != v_user_id
+      and p.role = 'player'
+      and not p.is_banned
+      and exists (select 1 from videos v where v.user_id = p.id and v.status = 'active')
+    order by random()
+    limit 1;
+
+    if v_opponent_id is null then
+      raise exception 'Aucun adversaire disponible pour le moment.' using errcode = 'P0001';
+    end if;
+  elsif p_opponent_username is not null and trim(p_opponent_username) != '' then
+    select id into v_opponent_id
+    from profiles
+    where lower(username) = lower(trim(both '@ ' from p_opponent_username))
+      and not is_banned;
+
+    if v_opponent_id is null then
+      raise exception 'Joueur introuvable : %', p_opponent_username using errcode = 'P0001';
+    end if;
+    if v_opponent_id = v_user_id then
+      raise exception 'Tu ne peux pas te défier toi-même.' using errcode = 'P0001';
+    end if;
+  end if;
+
+  update profiles set coins = coins - p_stake
+  where id = v_user_id and coins >= p_stake
+  returning coins, coalesce(display_name, username) into v_new_balance, v_creator_name;
+
+  if v_new_balance is null then
+    raise exception 'Solde de Ballons insuffisant.' using errcode = 'P0001';
+  end if;
+
+  insert into challenges (
+    creator_id, title, description, type, entry_cost, prize_pool,
+    opponent_id, max_participants, participants_count, start_date, end_date, status
+  ) values (
+    v_user_id, trim(p_title), coalesce(p_rules, ''), 'battle', p_stake, p_stake,
+    v_opponent_id, 2, 1, now(), p_end_date, 'active'
+  )
+  returning id into v_challenge_id;
+
+  insert into challenge_participations (challenge_id, user_id, video_id)
+  values (v_challenge_id, v_user_id, p_video_id);
+
+  insert into transactions (
+    user_id, type, amount, currency, balance_after, reason, reference_type, reference_id
+  ) values (
+    v_user_id, 'spend', -p_stake, 'coins', v_new_balance, 'join_battle',
+    'challenge', v_challenge_id
+  );
+
+  if v_opponent_id is not null then
+    insert into notifications (user_id, type, title, body, reference_type, reference_id)
+    values (
+      v_opponent_id, 'battle_invite', 'On te défie ! ⚔️',
+      v_creator_name || ' te lance une Battle : « ' || trim(p_title) || ' » (mise : '
+        || p_stake || ' Ballons).',
+      'challenge', v_challenge_id
+    );
+  end if;
+
+  return jsonb_build_object('challenge_id', v_challenge_id);
+end;
+$$ language plpgsql security definer set search_path = public;
+
+revoke execute on function create_battle(text, text, integer, uuid, timestamptz, text, boolean) from public, anon;
+grant execute on function create_battle(text, text, integer, uuid, timestamptz, text, boolean) to authenticated;
 
 
 -- ===================== Planification : résolution automatique des défis =====================

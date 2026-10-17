@@ -6,7 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
-import '../../../../shared/widgets/video_thumbnail_tile.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/video_providers.dart';
 
@@ -63,18 +63,16 @@ class MyVideoPickerSheet extends ConsumerWidget {
                       ),
                     );
                   }
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
-                      childAspectRatio: 0.72,
-                    ),
+                  // Liste plutôt que grille : beaucoup de vidéos n'ont pas de
+                  // miniature, la légende et la date permettent de s'y
+                  // retrouver.
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                     itemCount: videos.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.xs),
                     itemBuilder: (context, index) {
                       final video = videos[index];
-                      return VideoThumbnailTile(
+                      return MyVideoTile(
                         video: video,
                         onTap: () => Navigator.of(context).pop(video),
                       );
@@ -86,6 +84,50 @@ class MyVideoPickerSheet extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Une vidéo du joueur : miniature (ou icône), légende, date et vues.
+class MyVideoTile extends StatelessWidget {
+  const MyVideoTile({required this.video, this.onTap, this.trailing, super.key});
+
+  final Video video;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final caption = video.caption.trim();
+    final title = video.isMove && video.moveName != null
+        ? '🔥 ${video.moveName}'
+        : (caption.isNotEmpty ? caption : 'Vidéo sans légende');
+    final age = Formatters.relativeTime(video.createdAt);
+    final published = age.startsWith('à ') ? 'Publiée $age' : 'Publiée il y a $age';
+    return ListTile(
+      onTap: onTap,
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: SizedBox(
+          width: 44,
+          height: 58,
+          child: ColoredBox(
+            color: AppColors.surfaceLight,
+            child: video.thumbnailUrl != null
+                ? Image.network(
+                    video.thumbnailUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.videocam_outlined, size: 20),
+                  )
+                : const Icon(Icons.videocam_outlined, size: 20),
+          ),
+        ),
+      ),
+      title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+        '$published · ${Formatters.compactCount(video.viewsCount)} vues',
+      ),
+      trailing: trailing,
     );
   }
 }
