@@ -5,12 +5,14 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/config/supabase_config.dart';
+import 'core/l10n/l10n.dart';
 
 /// Point d'entrée commun aux trois flavors (dev/staging/prod) — voir
 /// `main_dev.dart`, `main_staging.dart`, `main_prod.dart`. Centraliser
 /// l'initialisation ici évite de la dupliquer par flavor.
 Future<void> bootstrap(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
+  L10n.init();
 
   await SupabaseConfig.initialize(config);
 
