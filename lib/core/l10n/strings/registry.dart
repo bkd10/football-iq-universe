@@ -5,6 +5,14 @@ import 'auth.dart';
 import 'challenges.dart';
 import 'core.dart';
 import 'economy.dart';
+import 'lang_ar.dart';
+import 'lang_de.dart';
+import 'lang_es.dart';
+import 'lang_it.dart';
+import 'lang_pt.dart';
+import 'lang_ru.dart';
+import 'lang_sv.dart';
+import 'lang_tr.dart';
 import 'profile.dart';
 import 'server.dart';
 import 'social.dart';
@@ -28,9 +36,27 @@ const List<Map<String, Map<String, String>>> _allTables = [
   socialTranslations,
   videosTranslations,
   serverTranslations,
+  arTranslations,
+  deTranslations,
+  esTranslations,
+  itTranslations,
+  ptTranslations,
+  ruTranslations,
+  svTranslations,
+  trTranslations,
 ];
 
-const Map<String, List<List<String>>> _allPatterns = serverTranslationPatterns;
+const Map<String, List<List<String>>> _allPatterns = {
+  ...serverTranslationPatterns,
+  'ar': arServerPatterns,
+  'de': deServerPatterns,
+  'es': esServerPatterns,
+  'it': itServerPatterns,
+  'pt': ptServerPatterns,
+  'ru': ruServerPatterns,
+  'sv': svServerPatterns,
+  'tr': trServerPatterns,
+};
 
 Map<String, String> translationTable(String language) {
   final table = <String, String>{};

@@ -22,4 +22,22 @@ void main() {
     expect(text, contains('jibril'));
     expect(text, isNot(contains('aimé')));
   });
+
+  test('chaque langue traduit les textes', () {
+    for (final lang in L10n.supportedLanguages.where((l) => l != 'fr')) {
+      L10n.setLanguage(lang);
+      expect(
+        'Vérifie ta connexion internet.'.tr,
+        isNot('Vérifie ta connexion internet.'),
+        reason: lang,
+      );
+      expect('@jibril a aimé ta vidéo.'.trServer, contains('jibril'), reason: lang);
+      expect('@jibril a aimé ta vidéo.'.trServer, isNot(contains('aimé')), reason: lang);
+    }
+  });
+
+  test('téléphone en arabe : arabe', () {
+    L10n.init(const [Locale('ar', 'MA')]);
+    expect(L10n.language, 'ar');
+  });
 }
