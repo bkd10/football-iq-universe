@@ -5978,7 +5978,7 @@ revoke execute on function handle_new_user() from public, anon, authenticated;
 revoke execute on function handle_user_email_confirmed() from public, anon, authenticated;
 
 
--- ===================== 20260101000026_battle_opponents.sql =====================
+-- ===================== 20260101000027_battle_opponents.sql =====================
 -- Battle : choisir son adversaire parmi les joueurs qu'on suit ou qui nous
 -- suivent, ou laisser le hasard choisir.
 --
