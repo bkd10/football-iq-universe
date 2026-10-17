@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -66,11 +67,11 @@ class _ReportContentSheetState extends ConsumerState<_ReportContentSheet> {
 
     if (ok) {
       Navigator.of(context).pop();
-      context.showSnackBar('Signalement envoyé — merci, on va vérifier.');
+      context.showSnackBar('Signalement envoyé — merci, on va vérifier.'.tr);
     } else {
       final failure = ref.read(moderationActionsControllerProvider).error;
       context.showSnackBar(
-        failure is Failure ? failure.message : 'Échec du signalement.',
+        failure is Failure ? failure.message : 'Échec du signalement.'.tr,
         isError: true,
       );
     }
@@ -89,10 +90,10 @@ class _ReportContentSheetState extends ConsumerState<_ReportContentSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Signaler ce contenu', style: context.textTheme.titleLarge),
+          Text('Signaler ce contenu'.tr, style: context.textTheme.titleLarge),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Un modérateur va vérifier ce contenu — ton signalement reste confidentiel.',
+            'Un modérateur va vérifier ce contenu — ton signalement reste confidentiel.'.tr,
             style: context.textTheme.bodySmall,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -104,7 +105,7 @@ class _ReportContentSheetState extends ConsumerState<_ReportContentSheet> {
                   .map(
                     (reason) => RadioListTile<String>(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(reason),
+                      title: Text(reason.tr),
                       value: reason,
                       activeColor: AppColors.primary,
                     ),
@@ -114,7 +115,7 @@ class _ReportContentSheetState extends ConsumerState<_ReportContentSheet> {
           ),
           const SizedBox(height: AppSpacing.md),
           AppPrimaryButton(
-            label: 'Envoyer le signalement',
+            label: 'Envoyer le signalement'.tr,
             isLoading: _submitting,
             onPressed: _selectedReason == null ? null : _submit,
           ),

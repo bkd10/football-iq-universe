@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -83,7 +84,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Text('Commentaires', style: context.textTheme.titleLarge),
+              Text('Commentaires'.tr, style: context.textTheme.titleLarge),
               const SizedBox(height: AppSpacing.sm),
               const Divider(height: 1),
               Expanded(
@@ -91,7 +92,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                   loading: () => const Center(child: AppLoader()),
                   error: (error, _) => Center(
                     child: Text(
-                      error is Failure ? error.message : 'Erreur de chargement.',
+                      error is Failure ? error.message : 'Erreur de chargement.'.tr,
                       style: context.textTheme.bodyMedium,
                     ),
                   ),
@@ -99,7 +100,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                     if (comments.isEmpty) {
                       return Center(
                         child: Text(
-                          'Aucun commentaire pour l\'instant.',
+                          'Aucun commentaire pour l\'instant.'.tr,
                           style: context.textTheme.bodyMedium,
                         ),
                       );
@@ -135,7 +136,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                                   Row(
                                     children: [
                                       Text(
-                                        '@${comment.author?.username ?? 'inconnu'}',
+                                        '@${comment.author?.username ?? 'inconnu'.tr}',
                                         style: context.textTheme.bodyMedium
                                             ?.copyWith(fontWeight: FontWeight.w600),
                                       ),
@@ -169,8 +170,8 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                     Expanded(
                       child: TextField(
                         controller: _controller,
-                        decoration: const InputDecoration(
-                          hintText: 'Ajouter un commentaire...',
+                        decoration: InputDecoration(
+                          hintText: 'Ajouter un commentaire...'.tr,
                         ),
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _post(),

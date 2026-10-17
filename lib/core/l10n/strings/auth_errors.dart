@@ -1,0 +1,66 @@
+// Traductions : erreurs de connexion et d'inscription (Supabase Auth).
+const authErrorsTranslations = <String, Map<String, String>>{
+  'en': {
+    'E-mail ou mot de passe incorrect.': 'Wrong email or password.',
+    'Un compte existe déjà avec cet e-mail.': 'An account already exists with this email.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'Password is too short (6 characters minimum).',
+    'Adresse e-mail invalide.': 'Invalid email address.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'Too many attempts. Try again in a few minutes.',
+  },
+  'es': {
+    'E-mail ou mot de passe incorrect.': 'Correo o contraseña incorrectos.',
+    'Un compte existe déjà avec cet e-mail.': 'Ya existe una cuenta con este correo.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'La contraseña es demasiado corta (mínimo 6 caracteres).',
+    'Adresse e-mail invalide.': 'Correo electrónico no válido.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'Demasiados intentos. Vuelve a intentarlo en unos minutos.',
+  },
+  'pt': {
+    'E-mail ou mot de passe incorrect.': 'E-mail ou senha incorretos.',
+    'Un compte existe déjà avec cet e-mail.': 'Já existe uma conta com este e-mail.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'A senha é curta demais (mínimo de 6 caracteres).',
+    'Adresse e-mail invalide.': 'Endereço de e-mail inválido.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'Muitas tentativas. Tente de novo em alguns minutos.',
+  },
+  'de': {
+    'E-mail ou mot de passe incorrect.': 'E-Mail oder Passwort falsch.',
+    'Un compte existe déjà avec cet e-mail.': 'Mit dieser E-Mail gibt es schon ein Konto.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'Passwort zu kurz (mindestens 6 Zeichen).',
+    'Adresse e-mail invalide.': 'Ungültige E-Mail-Adresse.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'Zu viele Versuche. Versuch es in ein paar Minuten noch mal.',
+  },
+  'it': {
+    'E-mail ou mot de passe incorrect.': 'Email o password errati.',
+    'Un compte existe déjà avec cet e-mail.': 'Esiste già un account con questa email.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'Password troppo corta (minimo 6 caratteri).',
+    'Adresse e-mail invalide.': 'Indirizzo email non valido.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'Troppi tentativi. Riprova tra qualche minuto.',
+  },
+  'ar': {
+    'E-mail ou mot de passe incorrect.': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    'Un compte existe déjà avec cet e-mail.': 'يوجد حساب بهذا البريد الإلكتروني بالفعل.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'كلمة المرور قصيرة جدًا (6 أحرف على الأقل).',
+    'Adresse e-mail invalide.': 'عنوان بريد إلكتروني غير صالح.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'محاولات كثيرة. أعد المحاولة بعد بضع دقائق.',
+  },
+  'ru': {
+    'E-mail ou mot de passe incorrect.': 'Неверный e-mail или пароль.',
+    'Un compte existe déjà avec cet e-mail.': 'Аккаунт с этим e-mail уже существует.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'Пароль слишком короткий (минимум 6 символов).',
+    'Adresse e-mail invalide.': 'Неверный адрес e-mail.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'Слишком много попыток. Попробуй через несколько минут.',
+  },
+  'sv': {
+    'E-mail ou mot de passe incorrect.': 'Fel e-post eller lösenord.',
+    'Un compte existe déjà avec cet e-mail.': 'Det finns redan ett konto med den här e-postadressen.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'Lösenordet är för kort (minst 6 tecken).',
+    'Adresse e-mail invalide.': 'Ogiltig e-postadress.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'För många försök. Försök igen om några minuter.',
+  },
+  'tr': {
+    'E-mail ou mot de passe incorrect.': 'E-posta veya şifre yanlış.',
+    'Un compte existe déjà avec cet e-mail.': 'Bu e-postayla zaten bir hesap var.',
+    'Le mot de passe est trop court (6 caractères minimum).': 'Şifre çok kısa (en az 6 karakter).',
+    'Adresse e-mail invalide.': 'Geçersiz e-posta adresi.',
+    'Trop de tentatives. Réessaie dans quelques minutes.': 'Çok fazla deneme. Birkaç dakika sonra tekrar dene.',
+  },
+};

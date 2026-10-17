@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -47,29 +48,29 @@ class ProfileScreen extends ConsumerWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(isMe ? 'Mon Profil' : 'Football Passport'),
+          title: Text(isMe ? 'Mon Profil'.tr : 'Football Passport'),
           actions: isMe
               ? [
                   IconButton(
                     icon: const Icon(Icons.local_fire_department_outlined),
-                    tooltip: 'Missions du jour',
+                    tooltip: 'Missions du jour'.tr,
                     onPressed: () => context.push(RouteNames.dailyMissions),
                   ),
                   IconButton(
                     icon: const Icon(Icons.paid_outlined),
-                    tooltip: 'Wallet',
+                    tooltip: 'Wallet'.tr,
                     onPressed: () => context.push(RouteNames.wallet),
                   ),
                   IconButton(
                     icon: const Icon(Icons.settings_outlined),
-                    tooltip: 'Réglages',
+                    tooltip: 'Réglages'.tr,
                     onPressed: () => context.push(RouteNames.settings),
                   ),
                 ]
               : [
                   IconButton(
                     icon: const Icon(Icons.flag_outlined),
-                    tooltip: 'Signaler ce profil',
+                    tooltip: 'Signaler ce profil'.tr,
                     onPressed: () => showReportContentSheet(
                       context,
                       targetType: 'profile',
@@ -87,7 +88,7 @@ class ProfileScreen extends ConsumerWidget {
             if (profile == null) {
               return Center(
                 child: Text(
-                  isMe ? '' : 'Ce joueur est introuvable.',
+                  isMe ? '' : 'Ce joueur est introuvable.'.tr,
                   style: context.textTheme.bodyLarge,
                 ),
               );
@@ -158,8 +159,8 @@ class _ProfileBody extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     if (isMe)
-                      _StatTile(label: 'Ballons', value: profile.coins, color: AppColors.gold),
-                    _StatTile(label: 'Stars', value: profile.stars, color: AppColors.primary),
+                      _StatTile(label: 'Ballons'.tr, value: profile.coins, color: AppColors.gold),
+                    _StatTile(label: 'Stars'.tr, value: profile.stars, color: AppColors.primary),
                     _StatTile(label: 'Football IQ', value: profile.footballIqTotal),
                   ],
                 ),
@@ -169,9 +170,9 @@ class _ProfileBody extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _CountTile(label: 'Abonnés', value: profile.followersCount),
-                    _CountTile(label: 'Abonnements', value: profile.followingCount),
-                    _CountTile(label: 'Vidéos', value: profile.videosCount),
+                    _CountTile(label: 'Abonnés'.tr, value: profile.followersCount),
+                    _CountTile(label: 'Abonnements'.tr, value: profile.followingCount),
+                    _CountTile(label: 'Vidéos'.tr, value: profile.videosCount),
                   ],
                 ),
                 if (!isMe) ...[
@@ -182,14 +183,14 @@ class _ProfileBody extends ConsumerWidget {
             ),
           ),
         ),
-        const SliverPersistentHeader(
+        SliverPersistentHeader(
           pinned: true,
           delegate: _TabBarDelegate(
             TabBar(
               tabs: [
-                Tab(text: 'Vidéos'),
-                Tab(text: 'Moves'),
-                Tab(text: 'Badges'),
+                Tab(text: 'Vidéos'.tr),
+                Tab(text: 'Moves'.tr),
+                Tab(text: 'Badges'.tr),
               ],
             ),
           ),
@@ -251,7 +252,7 @@ class _IqBars extends StatelessWidget {
             children: [
               SizedBox(
                 width: 76,
-                child: Text(entry.key, style: context.textTheme.bodySmall),
+                child: Text(entry.key.tr, style: context.textTheme.bodySmall),
               ),
               Expanded(
                 child: ClipRRect(
@@ -269,7 +270,7 @@ class _IqBars extends StatelessWidget {
                 width: 32,
                 child: Text(
                   '${entry.value}',
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   style: context.textTheme.bodySmall,
                 ),
               ),
@@ -294,14 +295,16 @@ class _VideosGrid extends ConsumerWidget {
     return videosAsync.when(
       loading: () => const Center(child: AppLoader()),
       error: (error, _) => Center(
-        child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+        child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
       ),
       data: (videos) {
         final filtered = movesOnly ? videos.where((v) => v.isMove).toList() : videos;
         if (filtered.isEmpty) {
           return Center(
             child: Text(
-              movesOnly ? 'Aucun Move créé pour l\'instant.' : 'Aucune vidéo pour l\'instant.',
+              movesOnly
+                  ? 'Aucun Move créé pour l\'instant.'.tr
+                  : 'Aucune vidéo pour l\'instant.'.tr,
               style: context.textTheme.bodyMedium,
             ),
           );
@@ -337,13 +340,13 @@ class _BadgesTab extends ConsumerWidget {
     return badgesAsync.when(
       loading: () => const Center(child: AppLoader()),
       error: (error, _) => Center(
-        child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+        child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
       ),
       data: (badges) {
         if (badges.isEmpty) {
           return Center(
             child: Text(
-              'Aucun badge débloqué pour l\'instant.',
+              'Aucun badge débloqué pour l\'instant.'.tr,
               style: context.textTheme.bodyMedium,
             ),
           );
@@ -392,7 +395,7 @@ class _BadgeTile extends StatelessWidget {
           Icon(Icons.emoji_events, color: color, size: 32),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            badge.name,
+            badge.name.trServer,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -420,13 +423,13 @@ class _FollowButton extends ConsumerWidget {
           ? OutlinedButton(
               onPressed: () =>
                   ref.read(followControllerProvider(userId).notifier).toggle(),
-              child: const Text('Abonné ✓'),
+              child: Text('Abonné ✓'.tr),
             )
           : FilledButton(
               onPressed: () =>
                   ref.read(followControllerProvider(userId).notifier).toggle(),
               style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
-              child: const Text('Suivre', style: TextStyle(color: AppColors.background)),
+              child: Text('Suivre'.tr, style: const TextStyle(color: AppColors.background)),
             ),
     );
   }
@@ -452,7 +455,7 @@ class _ContactPlayerButton extends ConsumerWidget {
           : () async {
               if (!isScout) {
                 context.showSnackBar(
-                  'Réservé aux recruteurs vérifiés · contact médié pour les mineurs.',
+                  'Réservé aux recruteurs vérifiés · contact médié pour les mineurs.'.tr,
                 );
                 return;
               }
@@ -463,15 +466,15 @@ class _ContactPlayerButton extends ConsumerWidget {
               if (status == null) {
                 final failure = ref.read(messagingActionsControllerProvider).error;
                 context.showSnackBar(
-                  failure is Failure ? failure.message : 'Échec de la demande de contact.',
+                  failure is Failure ? failure.message : 'Échec de la demande de contact.'.tr,
                   isError: true,
                 );
               } else if (status == 'pending_guardian_approval') {
                 context.showSnackBar(
-                  'Ce joueur est mineur : demande envoyée, en attente d\'approbation de son tuteur.',
+                  'Ce joueur est mineur : demande envoyée, en attente d\'approbation de son tuteur.'.tr,
                 );
               } else {
-                context.showSnackBar('Demande de contact envoyée.');
+                context.showSnackBar('Demande de contact envoyée.'.tr);
                 unawaited(context.push(RouteNames.inbox));
               }
             },
@@ -480,7 +483,7 @@ class _ContactPlayerButton extends ConsumerWidget {
         side: const BorderSide(color: AppColors.diamond),
         foregroundColor: AppColors.diamond,
       ),
-      child: Text(isScout ? 'Demander le contact' : 'Contacter ce joueur'),
+      child: Text(isScout ? 'Demander le contact'.tr : 'Contacter ce joueur'.tr),
     );
   }
 }

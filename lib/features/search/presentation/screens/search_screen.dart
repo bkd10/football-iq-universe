@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/string_extensions.dart';
@@ -39,19 +40,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         title: TextField(
           controller: _controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Chercher un joueur ou un Move…',
+          decoration: InputDecoration(
+            hintText: 'Chercher un joueur ou un Move…'.tr,
             border: InputBorder.none,
           ),
           onChanged: (value) => ref.read(searchQueryProvider.notifier).state = value,
         ),
       ),
       body: query.trim().length < 2
-          ? const Center(
+          ? Center(
               child: Padding(
-                padding: EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Text(
-                  'Tape au moins 2 caractères pour chercher un joueur ou un Move.',
+                  'Tape au moins 2 caractères pour chercher un joueur ou un Move.'.tr,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -59,7 +60,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           : resultsAsync.when(
               loading: () => const AppFullScreenLoader(),
               error: (error, _) => Center(
-                child: Text(error is Failure ? error.message : 'Erreur de recherche.'),
+                child: Text(error is Failure ? error.message : 'Erreur de recherche.'.tr),
               ),
               data: (results) => _SearchResultsList(results: results),
             ),
@@ -75,14 +76,14 @@ class _SearchResultsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (results.players.isEmpty && results.moves.isEmpty) {
-      return const Center(child: Text('Aucun résultat.'));
+      return Center(child: Text('Aucun résultat.'.tr));
     }
 
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       children: [
         if (results.players.isNotEmpty) ...[
-          const _SectionLabel(label: 'Joueurs'),
+          _SectionLabel(label: 'Joueurs'.tr),
           ...results.players.map(
             (p) => ListTile(
               leading: CircleAvatar(
@@ -96,7 +97,7 @@ class _SearchResultsList extends StatelessWidget {
           ),
         ],
         if (results.moves.isNotEmpty) ...[
-          const _SectionLabel(label: 'Moves'),
+          _SectionLabel(label: 'Moves'.tr),
           ...results.moves.map(
             (v) => ListTile(
               leading: const CircleAvatar(
@@ -104,7 +105,9 @@ class _SearchResultsList extends StatelessWidget {
                 child: Icon(Icons.bolt, color: AppColors.primary),
               ),
               title: Text(v.moveName ?? 'Move'),
-              subtitle: Text('${v.reproductionsCount} reproductions'),
+              subtitle: Text(
+                '{n} reproductions'.trArgs({'n': v.reproductionsCount}),
+              ),
               onTap: () => context.push(RouteNames.moveDetailPath(v.id)),
             ),
           ),

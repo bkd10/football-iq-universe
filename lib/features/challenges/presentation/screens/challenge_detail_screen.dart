@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -33,16 +34,16 @@ class ChallengeDetailScreen extends ConsumerWidget {
     final challengeAsync = ref.watch(challengeByIdProvider(challengeId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Défi')),
+      appBar: AppBar(title: Text('Défi'.tr)),
       body: challengeAsync.when(
         loading: () => const Center(child: AppLoader()),
         error: (error, _) => Center(
-          child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+          child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
         ),
         data: (challenge) {
           if (challenge == null) {
             return Center(
-              child: Text('Ce défi est introuvable.', style: context.textTheme.bodyLarge),
+              child: Text('Ce défi est introuvable.'.tr, style: context.textTheme.bodyLarge),
             );
           }
           return _ChallengeBody(challenge: challenge);
@@ -73,7 +74,7 @@ class _ChallengeBody extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              challengeTypeLabels[challenge.type] ?? challenge.type,
+              challengeTypeLabels[challenge.type]?.tr ?? challenge.type,
               style: const TextStyle(
                 color: AppColors.diamond,
                 fontWeight: FontWeight.w700,
@@ -81,11 +82,11 @@ class _ChallengeBody extends ConsumerWidget {
             ),
             Text(
               switch (challenge.status) {
-                'completed' => 'Terminé',
-                'cancelled' => 'Annulé',
+                'completed' => 'Terminé'.tr,
+                'cancelled' => 'Annulé'.tr,
                 _ => challenge.hasStarted
                     ? Formatters.countdown(challenge.timeRemaining)
-                    : 'Commence dans ${Formatters.countdown(challenge.timeUntilStart)}',
+                    : 'Commence dans {time}'.trArgs({'time': Formatters.countdown(challenge.timeUntilStart)}),
               },
               style: AppTypography.stat(color: AppColors.gold),
             ),
@@ -96,7 +97,7 @@ class _ChallengeBody extends ConsumerWidget {
         if (challenge.type == 'sponsored' && challenge.sponsorName != null) ...[
           const SizedBox(height: 2),
           Text(
-            'Par ${challenge.sponsorName}',
+            'Par {sponsor}'.trArgs({'sponsor': challenge.sponsorName}),
             style: const TextStyle(color: AppColors.diamond, fontWeight: FontWeight.w600),
           ),
         ],
@@ -109,10 +110,10 @@ class _ChallengeBody extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const _InfoStat(label: 'Entrée', value: 'Gratuit'),
-              _InfoStat(label: 'Prix', value: challenge.prizeDescription ?? '—'),
+              _InfoStat(label: 'Entrée'.tr, value: 'Gratuit'.tr),
+              _InfoStat(label: 'Prix'.tr, value: challenge.prizeDescription ?? '—'),
               _InfoStat(
-                label: 'Participants',
+                label: 'Participants'.tr,
                 value: '${challenge.participantsCount}'
                     '${challenge.maxParticipants != null ? '/${challenge.maxParticipants}' : ''}',
               ),
@@ -124,19 +125,31 @@ class _ChallengeBody extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _InfoStat(label: 'Mise', value: '${challenge.entryCost} Ballons'),
-              _InfoStat(label: 'À gagner', value: '${challenge.entryCost * 2} Ballons'),
-              _InfoStat(label: 'Joueurs', value: '${challenge.participantsCount}/2'),
+              _InfoStat(
+                label: 'Mise'.tr,
+                value: '{n} Ballons'.trArgs({'n': challenge.entryCost}),
+              ),
+              _InfoStat(
+                label: 'À gagner'.tr,
+                value: '{n} Ballons'.trArgs({'n': challenge.entryCost * 2}),
+              ),
+              _InfoStat(label: 'Joueurs'.tr, value: '${challenge.participantsCount}/2'),
             ],
           ),
         ] else
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _InfoStat(label: 'Entrée', value: '${challenge.entryCost} Ballons'),
-              _InfoStat(label: 'Cagnotte', value: '${challenge.prizePool} Ballons'),
               _InfoStat(
-                label: 'Participants',
+                label: 'Entrée'.tr,
+                value: '{n} Ballons'.trArgs({'n': challenge.entryCost}),
+              ),
+              _InfoStat(
+                label: 'Cagnotte'.tr,
+                value: '{n} Ballons'.trArgs({'n': challenge.prizePool}),
+              ),
+              _InfoStat(
+                label: 'Participants'.tr,
                 value: '${challenge.participantsCount}'
                     '${challenge.maxParticipants != null ? '/${challenge.maxParticipants}' : ''}',
               ),
@@ -150,7 +163,7 @@ class _ChallengeBody extends ConsumerWidget {
         else if (challenge.status == 'active' && !hasJoined && !challenge.hasEnded)
           if (!challenge.hasStarted)
             AppPrimaryButton(
-              label: 'Ouvre le ${DateTimeField.format(challenge.startDate.toLocal())}',
+              label: 'Ouvre le {date}'.trArgs({'date': DateTimeField.format(challenge.startDate.toLocal())}),
               icon: Icons.schedule,
               onPressed: null,
             )
@@ -160,15 +173,15 @@ class _ChallengeBody extends ConsumerWidget {
               const SizedBox.shrink()
             else
               AppPrimaryButton(
-                label: 'Relever la Battle (${challenge.entryCost} Ballons)',
+                label: 'Relever la Battle ({n} Ballons)'.trArgs({'n': challenge.entryCost}),
                 icon: Icons.sports_mma,
                 onPressed: () => _openParticipateSheet(context, ref, challenge),
               )
           else
             AppPrimaryButton(
               label: challenge.type == 'sponsored' || challenge.entryCost == 0
-                  ? 'Participer gratuitement'
-                  : 'Participer (${challenge.entryCost} Ballons)',
+                  ? 'Participer gratuitement'.tr
+                  : 'Participer ({n} Ballons)'.trArgs({'n': challenge.entryCost}),
               icon: Icons.videocam,
               onPressed: challenge.isFull
                   ? null
@@ -181,29 +194,29 @@ class _ChallengeBody extends ConsumerWidget {
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.check_circle, color: AppColors.primary),
-                SizedBox(width: AppSpacing.sm),
-                Text('Tu participes à ce défi.'),
+                const Icon(Icons.check_circle, color: AppColors.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Text('Tu participes à ce défi.'.tr),
               ],
             ),
           ),
         const SizedBox(height: AppSpacing.xl),
         Text(
-          challenge.isBattle ? 'Les vidéos — vote pour la meilleure' : 'Participants',
+          challenge.isBattle ? 'Les vidéos — vote pour la meilleure'.tr : 'Participants'.tr,
           style: context.textTheme.titleLarge,
         ),
         const SizedBox(height: AppSpacing.md),
         participationsAsync.when(
           loading: () => const Center(child: AppLoader()),
           error: (error, _) => Text(
-            error is Failure ? error.message : 'Erreur de chargement.',
+            error is Failure ? error.message : 'Erreur de chargement.'.tr,
           ),
           data: (participations) {
             if (participations.isEmpty) {
               return Text(
-                'Aucun participant pour l\'instant.',
+                'Aucun participant pour l\'instant.'.tr,
                 style: context.textTheme.bodyMedium,
               );
             }
@@ -241,11 +254,13 @@ class _ChallengeBody extends ConsumerWidget {
 
     if (!context.mounted) return;
     if (success) {
-      context.showSnackBar(challenge.isBattle ? 'Battle relevée ! ⚔️' : 'Tu participes au défi !');
+      context.showSnackBar(
+        challenge.isBattle ? 'Battle relevée ! ⚔️'.tr : 'Tu participes au défi !'.tr,
+      );
     } else {
       final failure = ref.read(challengeActionsControllerProvider).error;
       context.showSnackBar(
-        failure is Failure ? failure.message : 'Échec de la participation.',
+        failure is Failure ? failure.message : 'Échec de la participation.'.tr,
         isError: true,
       );
     }
@@ -273,13 +288,13 @@ class _KingRecordBanner extends StatelessWidget {
           Text(
             challenge.currentRecord != null
                 ? '${challenge.currentRecord} ${challenge.recordUnit ?? ''}'
-                : 'Aucun record',
+                : 'Aucun record'.tr,
             style: AppTypography.stat(fontSize: 24, color: AppColors.gold),
           ),
           Text(
             challenge.recordHolder != null
-                ? 'par @${challenge.recordHolder!.username}'
-                : 'Sois le premier à établir un record !',
+                ? 'par @{user}'.trArgs({'user': challenge.recordHolder!.username})
+                : 'Sois le premier à établir un record !'.tr,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
@@ -302,27 +317,35 @@ class _RulesBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final String text;
     if (challenge.type == 'sponsored') {
-      text = 'Défi gratuit proposé par une marque partenaire : aucun Ballon '
-          'n\'est débité ni distribué. Le vainqueur (le plus de votes, '
-          'égalité départagée par ordre d\'inscription) reçoit le prix '
-          'décrit ci-dessus, remis directement par la marque.';
+      text = ('Défi gratuit proposé par une marque partenaire : aucun Ballon '
+              'n\'est débité ni distribué. Le vainqueur (le plus de votes, '
+              'égalité départagée par ordre d\'inscription) reçoit le prix '
+              'décrit ci-dessus, remis directement par la marque.')
+          .tr;
     } else if (challenge.isBattle) {
-      text = 'Battle 1 contre 1 : chaque joueur mise ${challenge.entryCost} Ballons. '
-          'Les autres utilisateurs regardent les deux vidéos et votent (un vote '
-          'par personne, les deux joueurs ne votent pas). Le gagnant remporte les '
-          '${challenge.entryCost * 2} Ballons et +100 Stars. Égalité, aucun vote ou '
-          'personne en face : chacun récupère sa mise.';
+      text = ('Battle 1 contre 1 : chaque joueur mise {stake} Ballons. '
+              'Les autres utilisateurs regardent les deux vidéos et votent (un vote '
+              'par personne, les deux joueurs ne votent pas). Le gagnant remporte les '
+              '{prize} Ballons et +100 Stars. Égalité, aucun vote ou '
+              'personne en face : chacun récupère sa mise.')
+          .trArgs({'stake': challenge.entryCost, 'prize': challenge.entryCost * 2});
     } else if (challenge.type == 'king') {
-      text = 'Le Roi en titre remporte la cagnotte s\'il n\'est pas '
-          'détrôné avant la fin du défi. Chaque tentative pour le '
-          'détrôner coûte ${challenge.entryCost} Ballons, qui rejoignent '
-          'la cagnotte.';
+      text = ('Le Roi en titre remporte la cagnotte s\'il n\'est pas '
+              'détrôné avant la fin du défi. Chaque tentative pour le '
+              'détrôner coûte {cost} Ballons, qui rejoignent '
+              'la cagnotte.')
+          .trArgs({'cost': challenge.entryCost});
     } else {
-      text = 'Ouvert à tous du ${DateTimeField.format(challenge.startDate.toLocal())} '
-          'au ${DateTimeField.format(challenge.endDate.toLocal())}. Chaque droit '
-          'd\'entrée (${challenge.entryCost} Ballons) rejoint la cagnotte. Le '
-          'participant avec le plus de votes la remporte en entier (égalité : '
-          'le premier inscrit). Aucun vote : chacun est remboursé.';
+      text = ('Ouvert à tous du {start} '
+              'au {end}. Chaque droit '
+              'd\'entrée ({cost} Ballons) rejoint la cagnotte. Le '
+              'participant avec le plus de votes la remporte en entier (égalité : '
+              'le premier inscrit). Aucun vote : chacun est remboursé.')
+          .trArgs({
+        'start': DateTimeField.format(challenge.startDate.toLocal()),
+        'end': DateTimeField.format(challenge.endDate.toLocal()),
+        'cost': challenge.entryCost,
+      });
     }
 
     return Container(
@@ -408,12 +431,12 @@ class _ParticipationTile extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '@${participation.participant?.username ?? 'inconnu'}',
+                  '@${participation.participant?.username ?? 'inconnu'.tr}',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 if (participation.rank != null)
                   Text(
-                    'Rang #${participation.rank}',
+                    'Rang #{rank}'.trArgs({'rank': participation.rank}),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
               ],
@@ -434,10 +457,10 @@ class _ParticipationTile extends ConsumerWidget {
               label: Text('${participation.votesCount}'),
             )
           else if (challenge.status == 'active')
-            Text('En attente', style: Theme.of(context).textTheme.bodySmall)
+            Text('En attente'.tr, style: Theme.of(context).textTheme.bodySmall)
           else
             Text(
-              '${participation.votesCount} votes',
+              '{n} votes'.trArgs({'n': participation.votesCount}),
               style: AppTypography.stat(fontSize: 13),
             ),
         ],
@@ -452,11 +475,11 @@ class _ParticipationTile extends ConsumerWidget {
         );
     if (!context.mounted) return;
     if (ok) {
-      context.showSnackBar('Vote enregistré 🗳️');
+      context.showSnackBar('Vote enregistré 🗳️'.tr);
     } else {
       final failure = ref.read(challengeActionsControllerProvider).error;
       context.showSnackBar(
-        failure is Failure ? failure.message : 'Vote impossible.',
+        failure is Failure ? failure.message : 'Vote impossible.'.tr,
         isError: true,
       );
     }
@@ -493,7 +516,7 @@ class _BattleVersus extends StatelessWidget {
           Text('VS', style: AppTypography.stat(fontSize: 22, color: AppColors.gold)),
           Expanded(
             child: Text(
-              opponent != null ? '@$opponent' : 'Adversaire à trouver',
+              opponent != null ? '@$opponent' : 'Adversaire à trouver'.tr,
               textAlign: TextAlign.center,
               style: context.textTheme.titleMedium?.copyWith(
                 color: opponent != null ? null : AppColors.textSecondary,

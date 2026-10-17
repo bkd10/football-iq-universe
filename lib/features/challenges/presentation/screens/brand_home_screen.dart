@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'brand_account_screen.dart';
 import 'brand_challenges_screen.dart';
@@ -31,16 +32,16 @@ class _BrandHomeScreenState extends State<BrandHomeScreen> {
         currentIndex: _index,
         onTap: (index) => setState(() => _index = index),
         selectedItemColor: AppColors.primary,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            activeIcon: Icon(Icons.emoji_events),
-            label: 'Mes défis',
+            icon: const Icon(Icons.emoji_events_outlined),
+            activeIcon: const Icon(Icons.emoji_events),
+            label: 'Mes défis'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Compte',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: 'Compte'.tr,
           ),
         ],
       ),

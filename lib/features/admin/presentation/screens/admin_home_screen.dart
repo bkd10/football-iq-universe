@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -21,7 +22,7 @@ class AdminHomeScreen extends ConsumerWidget {
     final statsAsync = ref.watch(adminStatsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Administration')),
+      appBar: AppBar(title: Text('Administration'.tr)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(adminStatsProvider),
         child: ListView(
@@ -41,8 +42,8 @@ class AdminHomeScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.lg),
             _ToolTile(
               icon: Icons.flag_outlined,
-              title: 'Signalements',
-              subtitle: 'Retirer ou garder un contenu signalé, avec un message.',
+              title: 'Signalements'.tr,
+              subtitle: 'Retirer ou garder un contenu signalé, avec un message.'.tr,
               badge: statsAsync.valueOrNull?.reportsPending ?? 0,
               onTap: () async {
                 await context.push(RouteNames.adminModeration);
@@ -51,8 +52,8 @@ class AdminHomeScreen extends ConsumerWidget {
             ),
             _ToolTile(
               icon: Icons.people_alt_outlined,
-              title: 'Joueurs',
-              subtitle: 'Rechercher, voir les signalements, bannir.',
+              title: 'Joueurs'.tr,
+              subtitle: 'Rechercher, voir les signalements, bannir.'.tr,
               onTap: () async {
                 await context.push(RouteNames.adminUsers);
                 ref.invalidate(adminStatsProvider);
@@ -60,8 +61,8 @@ class AdminHomeScreen extends ConsumerWidget {
             ),
             _ToolTile(
               icon: Icons.emoji_events_outlined,
-              title: 'Créer un défi officiel',
-              subtitle: 'Gratuit pour les joueurs, mis en avant comme officiel.',
+              title: 'Créer un défi officiel'.tr,
+              subtitle: 'Gratuit pour les joueurs, mis en avant comme officiel.'.tr,
               onTap: () => context.push(RouteNames.adminOfficialChallenge),
             ),
           ],
@@ -79,11 +80,20 @@ class _StatsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      ('Joueurs', '${stats.playersTotal}', '+${stats.playersToday} aujourd\'hui · +${stats.players7d} en 7 j'),
-      ('Vidéos en ligne', '${stats.videosTotal}', '+${stats.videosToday} aujourd\'hui'),
-      ('Défis en cours', '${stats.challengesActive}', null),
-      ('Signalements', '${stats.reportsPending}', 'en attente'),
-      ('Bannis', '${stats.bannedTotal}', null),
+      (
+        'Joueurs'.tr,
+        '${stats.playersTotal}',
+        '+{today} aujourd\'hui · +{week} en 7 j'
+            .trArgs({'today': stats.playersToday, 'week': stats.players7d}),
+      ),
+      (
+        'Vidéos en ligne'.tr,
+        '${stats.videosTotal}',
+        '+{n} aujourd\'hui'.trArgs({'n': stats.videosToday}),
+      ),
+      ('Défis en cours'.tr, '${stats.challengesActive}', null),
+      ('Signalements'.tr, '${stats.reportsPending}', 'en attente'.tr),
+      ('Bannis'.tr, '${stats.bannedTotal}', null),
     ];
     return Wrap(
       spacing: AppSpacing.sm,

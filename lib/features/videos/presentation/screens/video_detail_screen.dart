@@ -13,6 +13,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../moderation/presentation/widgets/report_content_sheet.dart';
 import '../../domain/entities/video.dart';
 import '../providers/video_providers.dart';
@@ -77,7 +78,7 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Text(
-              error is Failure ? error.message : 'Vidéo introuvable.',
+              error is Failure ? error.message : 'Vidéo introuvable.'.tr,
               style: const TextStyle(color: Colors.white),
               textAlign: TextAlign.center,
             ),
@@ -85,10 +86,10 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
         ),
         data: (video) {
           if (video == null) {
-            return const Center(
+            return Center(
               child: Text(
-                'Cette vidéo a été supprimée ou n\'existe plus.',
-                style: TextStyle(color: Colors.white),
+                'Cette vidéo a été supprimée ou n\'existe plus.'.tr,
+                style: const TextStyle(color: Colors.white),
               ),
             );
           }
@@ -129,9 +130,9 @@ class _VideoDetailBody extends ConsumerWidget {
             ),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           top: AppSpacing.md,
-          left: AppSpacing.sm,
+          start: AppSpacing.sm,
           child: SafeArea(
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -139,13 +140,13 @@ class _VideoDetailBody extends ConsumerWidget {
             ),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           top: AppSpacing.md,
-          right: AppSpacing.sm,
+          end: AppSpacing.sm,
           child: SafeArea(
             child: IconButton(
               icon: const Icon(Icons.flag_outlined, color: Colors.white),
-              tooltip: 'Signaler',
+              tooltip: 'Signaler'.tr,
               onPressed: () => showReportContentSheet(
                 context,
                 targetType: 'video',
@@ -189,9 +190,9 @@ class _VideoDetailBody extends ConsumerWidget {
                 child: Icon(Icons.play_arrow_rounded, color: Colors.white70, size: 88),
               ),
             if (c != null)
-              Positioned(
+              PositionedDirectional(
                 top: AppSpacing.xl * 2,
-                right: AppSpacing.md,
+                end: AppSpacing.md,
                 child: IconButton(
                   icon: Icon(c.isMuted ? Icons.volume_off : Icons.volume_up, color: Colors.white),
                   onPressed: () => c.isMuted = !c.isMuted,
@@ -204,8 +205,8 @@ class _VideoDetailBody extends ConsumerWidget {
   }
 
   Widget _buildActionRail(BuildContext context, WidgetRef ref) {
-    return Positioned(
-      right: AppSpacing.sm,
+    return PositionedDirectional(
+      end: AppSpacing.sm,
       bottom: 110,
       child: Column(
         children: [
@@ -235,12 +236,14 @@ class _VideoDetailBody extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           _RailButton(
             icon: Icons.share_outlined,
-            label: 'Partager',
+            label: 'Partager'.tr,
             onTap: () => SharePlus.instance.share(
               ShareParams(
                 text: video.isMove
-                    ? 'Regarde le Move "${video.moveName}" sur Football IQ Universe : ${video.videoUrl}'
-                    : 'Regarde cette vidéo sur Football IQ Universe : ${video.videoUrl}',
+                    ? 'Regarde le Move "{move}" sur Football IQ Universe : {url}'
+                        .trArgs({'move': video.moveName, 'url': video.videoUrl})
+                    : 'Regarde cette vidéo sur Football IQ Universe : {url}'
+                        .trArgs({'url': video.videoUrl}),
               ),
             ),
           ),
@@ -251,9 +254,9 @@ class _VideoDetailBody extends ConsumerWidget {
 
   Widget _buildInfoOverlay(BuildContext context) {
     final creator = video.creator;
-    return Positioned(
-      left: AppSpacing.md,
-      right: 76,
+    return PositionedDirectional(
+      start: AppSpacing.md,
+      end: 76,
       bottom: AppSpacing.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +268,7 @@ class _VideoDetailBody extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '@${creator?.username ?? 'inconnu'}',
+                  '@${creator?.username ?? 'inconnu'.tr}',
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
                 ),
                 if (creator?.isVerified ?? false) ...[
@@ -285,7 +288,7 @@ class _VideoDetailBody extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                '🔥 ${video.moveName ?? 'Move'} — Move original',
+                '🔥 {move} — Move original'.trArgs({'move': video.moveName ?? 'Move'}),
                 style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w600),
               ),
             ),
@@ -293,9 +296,9 @@ class _VideoDetailBody extends ConsumerWidget {
             const SizedBox(height: 6),
             GestureDetector(
               onTap: () => context.push(RouteNames.moveDetailPath(video.originalMoveId!)),
-              child: const Text(
-                'Reproduit un Move',
-                style: TextStyle(color: AppColors.diamond, fontSize: 11, decoration: TextDecoration.underline),
+              child: Text(
+                'Reproduit un Move'.tr,
+                style: const TextStyle(color: AppColors.diamond, fontSize: 11, decoration: TextDecoration.underline),
               ),
             ),
           ],
@@ -305,7 +308,10 @@ class _VideoDetailBody extends ConsumerWidget {
           ],
           const SizedBox(height: 4),
           Text(
-            '#${video.category} · ${Formatters.compactCount(video.viewsCount)} vues',
+            '#{category} · {views} vues'.trArgs({
+              'category': video.category,
+              'views': Formatters.compactCount(video.viewsCount),
+            }),
             style: const TextStyle(color: AppColors.diamond, fontSize: 12),
           ),
         ],

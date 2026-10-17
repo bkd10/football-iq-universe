@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -18,7 +19,7 @@ class BrandAccountScreen extends ConsumerWidget {
     final isVerified = profileAsync.valueOrNull?.isVerified ?? false;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Compte marque')),
+      appBar: AppBar(title: Text('Compte marque'.tr)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -47,10 +48,11 @@ class BrandAccountScreen extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     isVerified
-                        ? 'Compte vérifié — tu peux publier des Défis Sponsorisés.'
-                        : 'Compte en attente de vérification manuelle avant de '
-                            'pouvoir publier un Défi Sponsorisé. Contacte '
-                            'l\'équipe Football IQ Universe pour la demander.',
+                        ? 'Compte vérifié — tu peux publier des Défis Sponsorisés.'.tr
+                        : ('Compte en attente de vérification manuelle avant de '
+                                'pouvoir publier un Défi Sponsorisé. Contacte '
+                                'l\'équipe Football IQ Universe pour la demander.')
+                            .tr,
                     style: context.textTheme.bodyMedium,
                   ),
                 ),
@@ -60,7 +62,7 @@ class BrandAccountScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
           OutlinedButton.icon(
             icon: const Icon(Icons.logout, color: AppColors.error),
-            label: const Text('Se déconnecter', style: TextStyle(color: AppColors.error)),
+            label: Text('Se déconnecter'.tr, style: const TextStyle(color: AppColors.error)),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
               side: const BorderSide(color: AppColors.error),

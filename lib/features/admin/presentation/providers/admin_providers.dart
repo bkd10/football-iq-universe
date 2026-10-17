@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../shared/providers/supabase_provider.dart';
 import '../../data/admin_remote_datasource.dart';
@@ -26,4 +27,4 @@ final adminUsersProvider = FutureProvider.autoDispose<List<AdminUser>>((ref) {
 
 /// Texte lisible pour une erreur du panneau admin (message du serveur).
 String adminErrorText(Object error) =>
-    error is ServerException ? error.message : 'Une erreur est survenue.';
+    error is ServerException ? error.message.trServer : 'Une erreur est survenue.'.tr;

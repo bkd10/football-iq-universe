@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/economy_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -65,7 +66,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false) || _isSubmitting) return;
     if (_endDate.isBefore(_startDate.add(const Duration(hours: 1)))) {
-      context.showSnackBar('La fin doit être au moins 1 heure après le début.', isError: true);
+      context.showSnackBar('La fin doit être au moins 1 heure après le début.'.tr, isError: true);
       return;
     }
 
@@ -89,12 +90,12 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
     setState(() => _isSubmitting = false);
 
     if (challenge != null) {
-      context.showSnackBar('Défi créé !');
+      context.showSnackBar('Défi créé !'.tr);
       context.pushReplacement(RouteNames.challengeDetailPath(challenge.id));
     } else {
       final failure = ref.read(challengeActionsControllerProvider).error;
       context.showSnackBar(
-        failure is Failure ? failure.message : 'Échec de la création du défi.',
+        failure is Failure ? failure.message : 'Échec de la création du défi.'.tr,
         isError: true,
       );
     }
@@ -110,7 +111,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isBrand ? 'Créer un Défi Sponsorisé' : 'Créer un Challenge'),
+        title: Text(isBrand ? 'Créer un Défi Sponsorisé'.tr : 'Créer un Challenge'.tr),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -128,10 +129,11 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                     child: Text(
-                      'Gratuit à créer et à rejoindre : aucun Ballon n\'est '
-                      'débité ni distribué. Le prix que tu décris ci-dessous '
-                      'est un prix réel que tu remets toi-même au vainqueur, '
-                      'hors de l\'app.',
+                      ('Gratuit à créer et à rejoindre : aucun Ballon n\'est '
+                              'débité ni distribué. Le prix que tu décris ci-dessous '
+                              'est un prix réel que tu remets toi-même au vainqueur, '
+                              'hors de l\'app.')
+                          .tr,
                       style: context.textTheme.bodySmall
                           ?.copyWith(color: AppColors.textSecondary),
                     ),
@@ -145,12 +147,16 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                     child: Text(
-                      '🎯 Un Challenge est ouvert à tous les joueurs entre la date de '
-                      'début et la date de fin. Créer coûte '
-                      '${EconomyConstants.createChallengeCost} Ballons ; chaque '
-                      'participant paie ${EconomyConstants.joinChallengeCost} Ballons, '
-                      'qui forment la cagnotte. Le joueur avec le plus de votes la '
-                      'remporte.',
+                      ('🎯 Un Challenge est ouvert à tous les joueurs entre la date de '
+                              'début et la date de fin. Créer coûte '
+                              '{createCost} Ballons ; chaque '
+                              'participant paie {joinCost} Ballons, '
+                              'qui forment la cagnotte. Le joueur avec le plus de votes la '
+                              'remporte.')
+                          .trArgs({
+                        'createCost': EconomyConstants.createChallengeCost,
+                        'joinCost': EconomyConstants.joinChallengeCost,
+                      }),
                       style: context.textTheme.bodySmall
                           ?.copyWith(color: AppColors.textSecondary),
                     ),
@@ -159,16 +165,16 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(labelText: 'Titre'),
+                  decoration: InputDecoration(labelText: 'Titre'.tr),
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Le titre est requis.' : null,
+                      (v == null || v.trim().isEmpty) ? 'Le titre est requis.'.tr : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
+                  decoration: InputDecoration(
+                    labelText: 'Description'.tr,
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -179,12 +185,12 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                     child: TextFormField(
                       controller: _prizeDescriptionController,
                       maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Description du prix (ex : une paire de crampons)',
+                      decoration: InputDecoration(
+                        labelText: 'Description du prix (ex : une paire de crampons)'.tr,
                         alignLabelWithHint: true,
                       ),
                       validator: (v) => (_type == 'sponsored' && (v == null || v.trim().isEmpty))
-                          ? 'La description du prix est requise.'
+                          ? 'La description du prix est requise.'.tr
                           : null,
                     ),
                   ),
@@ -194,13 +200,13 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                     child: TextFormField(
                       controller: _maxParticipantsController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Participants max (optionnel)',
+                      decoration: InputDecoration(
+                        labelText: 'Participants max (optionnel)'.tr,
                       ),
                     ),
                   ),
                 DateTimeField(
-                  label: 'Début',
+                  label: 'Début'.tr,
                   value: _startDate,
                   enabled: !_isSubmitting,
                   firstDate: DateTime.now(),
@@ -213,7 +219,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                   }),
                 ),
                 DateTimeField(
-                  label: 'Fin',
+                  label: 'Fin'.tr,
                   value: _endDate,
                   enabled: !_isSubmitting,
                   firstDate: _startDate,
@@ -222,7 +228,7 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 AppPrimaryButton(
-                  label: isBrand ? 'Publier le défi' : 'Créer le défi',
+                  label: isBrand ? 'Publier le défi'.tr : 'Créer le défi'.tr,
                   isLoading: _isSubmitting,
                   onPressed: _isSubmitting ? null : _submit,
                 ),

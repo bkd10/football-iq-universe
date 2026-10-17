@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -25,7 +26,7 @@ class AdminModerationScreen extends ConsumerWidget {
     final reportsAsync = ref.watch(adminReportsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Signalements')),
+      appBar: AppBar(title: Text('Signalements'.tr)),
       body: reportsAsync.when(
         loading: () => const Center(child: AppLoader()),
         error: (error, _) => Center(
@@ -37,7 +38,7 @@ class AdminModerationScreen extends ConsumerWidget {
         data: (reports) {
           if (reports.isEmpty) {
             return Center(
-              child: Text('Aucun signalement en attente.', style: context.textTheme.bodyMedium),
+              child: Text('Aucun signalement en attente.'.tr, style: context.textTheme.bodyMedium),
             );
           }
           return RefreshIndicator(
@@ -91,10 +92,10 @@ class _ReportCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              _Badge(text: _targetLabels[report.targetType] ?? report.targetType),
+              _Badge(text: _targetLabels[report.targetType]?.tr ?? report.targetType),
               const SizedBox(width: AppSpacing.sm),
               if (report.reportsCount > 1)
-                _Badge(text: '${report.reportsCount} signalements', color: AppColors.error),
+                _Badge(text: '{n} signalements'.trArgs({'n': report.reportsCount}), color: AppColors.error),
               const Spacer(),
               Text(
                 '${report.createdAt.day}/${report.createdAt.month}',
@@ -104,7 +105,7 @@ class _ReportCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            report.reasons.join(' · '),
+            report.reasons.map((r) => r.trServer).join(' · '),
             style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -127,7 +128,7 @@ class _ReportCard extends ConsumerWidget {
                 children: [
                   if (report.thumbnailUrl != null)
                     Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.sm),
+                      padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
@@ -141,7 +142,7 @@ class _ReportCard extends ConsumerWidget {
                     )
                   else if (isVideo)
                     const Padding(
-                      padding: EdgeInsets.only(right: AppSpacing.sm),
+                      padding: EdgeInsetsDirectional.only(end: AppSpacing.sm),
                       child: Icon(Icons.play_circle_outline, size: 40, color: AppColors.primary),
                     ),
                   Expanded(
@@ -149,7 +150,7 @@ class _ReportCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '@${report.authorUsername ?? 'compte supprimé'}',
+                          '@${report.authorUsername ?? 'compte supprimé'.tr}',
                           style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         if ((report.previewText ?? '').isNotEmpty)
@@ -161,17 +162,17 @@ class _ReportCard extends ConsumerWidget {
                           ),
                         if (canOpen)
                           Text(
-                            isVideo ? 'Toucher pour voir la vidéo' : 'Toucher pour voir le profil',
+                            isVideo ? 'Toucher pour voir la vidéo'.tr : 'Toucher pour voir le profil'.tr,
                             style: context.textTheme.bodySmall?.copyWith(color: AppColors.primary),
                           ),
                         if (report.targetStatus == 'deleted')
                           Text(
-                            'Contenu supprimé par son auteur',
+                            'Contenu supprimé par son auteur'.tr,
                             style: context.textTheme.bodySmall?.copyWith(color: AppColors.warning),
                           ),
                         if (report.targetStatus == 'removed' || report.targetStatus == 'banned')
                           Text(
-                            'Déjà retiré',
+                            'Déjà retiré'.tr,
                             style: context.textTheme.bodySmall?.copyWith(color: AppColors.warning),
                           ),
                       ],
@@ -183,7 +184,7 @@ class _ReportCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Signalé par @${report.reporterUsername ?? 'compte supprimé'}',
+            'Signalé par @{name}'.trArgs({'name': report.reporterUsername ?? 'compte supprimé'.tr}),
             style: context.textTheme.bodySmall,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -192,7 +193,7 @@ class _ReportCard extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => _decide(context, ref, remove: false),
-                  child: const Text('Garder'),
+                  child: Text('Garder'.tr),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -200,7 +201,7 @@ class _ReportCard extends ConsumerWidget {
                 child: FilledButton(
                   onPressed: () => _decide(context, ref, remove: true),
                   style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-                  child: Text(isProfile ? 'Bannir' : 'Retirer'),
+                  child: Text(isProfile ? 'Bannir'.tr : 'Retirer'.tr),
                 ),
               ),
             ],
@@ -258,7 +259,7 @@ class _DecisionSheetState extends ConsumerState<_DecisionSheet> {
   Future<void> _confirm() async {
     final isBan = widget.remove && widget.report.targetType == 'profile';
     if (isBan && _authorController.text.trim().isEmpty) {
-      context.showSnackBar('Indique la raison du bannissement.', isError: true);
+      context.showSnackBar('Indique la raison du bannissement.'.tr, isError: true);
       return;
     }
     setState(() => _busy = true);
@@ -272,7 +273,7 @@ class _DecisionSheetState extends ConsumerState<_DecisionSheet> {
           );
       if (!mounted) return;
       Navigator.of(context).pop(true);
-      context.showSnackBar(widget.remove ? 'Contenu retiré.' : 'Contenu gardé.');
+      context.showSnackBar(widget.remove ? 'Contenu retiré.'.tr : 'Contenu gardé.'.tr);
     } catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
@@ -284,8 +285,8 @@ class _DecisionSheetState extends ConsumerState<_DecisionSheet> {
   Widget build(BuildContext context) {
     final isProfile = widget.report.targetType == 'profile';
     final title = widget.remove
-        ? (isProfile ? 'Bannir ce joueur' : 'Retirer ce contenu')
-        : 'Garder ce contenu';
+        ? (isProfile ? 'Bannir ce joueur'.tr : 'Retirer ce contenu'.tr)
+        : 'Garder ce contenu'.tr;
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -300,8 +301,10 @@ class _DecisionSheetState extends ConsumerState<_DecisionSheet> {
               const SizedBox(height: AppSpacing.md),
               _MessageBlock(
                 label: isProfile && widget.remove
-                    ? 'Raison du bannissement'
-                    : 'Message à @${widget.report.authorUsername ?? 'l\'auteur'}',
+                    ? 'Raison du bannissement'.tr
+                    : widget.report.authorUsername != null
+                        ? 'Message à @{name}'.trArgs({'name': widget.report.authorUsername})
+                        : 'Message à @l\'auteur'.tr,
                 enabled: _sendToAuthor || (isProfile && widget.remove),
                 showSwitch: !(isProfile && widget.remove),
                 onEnabledChanged: (v) => setState(() => _sendToAuthor = v),
@@ -311,8 +314,9 @@ class _DecisionSheetState extends ConsumerState<_DecisionSheet> {
               const SizedBox(height: AppSpacing.md),
               _MessageBlock(
                 label: widget.report.reportsCount > 1
-                    ? 'Message aux ${widget.report.reportsCount} joueurs qui ont signalé'
-                    : 'Message au joueur qui a signalé',
+                    ? 'Message aux {n} joueurs qui ont signalé'
+                        .trArgs({'n': widget.report.reportsCount})
+                    : 'Message au joueur qui a signalé'.tr,
                 enabled: _sendToReporters,
                 onEnabledChanged: (v) => setState(() => _sendToReporters = v),
                 presets: _reporterPresets,
@@ -328,7 +332,7 @@ class _DecisionSheetState extends ConsumerState<_DecisionSheet> {
                       : null,
                   child: _busy
                       ? const SizedBox(width: 20, height: 20, child: AppLoader())
-                      : Text(widget.remove ? (isProfile ? 'Bannir' : 'Retirer') : 'Garder'),
+                      : Text(widget.remove ? (isProfile ? 'Bannir'.tr : 'Retirer'.tr) : 'Garder'.tr),
                 ),
               ),
             ],
@@ -390,7 +394,7 @@ class _MessageBlock extends StatelessWidget {
             controller: controller,
             maxLines: 3,
             maxLength: 500,
-            decoration: const InputDecoration(hintText: 'Message (modifiable)'),
+            decoration: InputDecoration(hintText: 'Message (modifiable)'.tr),
           ),
         ],
       ],

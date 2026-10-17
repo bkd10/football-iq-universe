@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
@@ -46,7 +47,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     ref.listen(authControllerProvider, (previous, next) {
       next.whenOrNull(
         error: (error, _) {
-          final message = error is Failure ? error.message : 'Erreur inconnue.';
+          final message = error is Failure ? error.message : 'Erreur inconnue.'.tr;
           context.showSnackBar(message, isError: true);
         },
       );
@@ -72,17 +73,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Mot de passe oublié ?',
+            'Mot de passe oublié ?'.tr,
             style: context.textTheme.displaySmall,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Indique ton email, on t\'envoie un lien de réinitialisation.',
+            'Indique ton email, on t\'envoie un lien de réinitialisation.'.tr,
             style: context.textTheme.bodyLarge,
           ),
           const SizedBox(height: AppSpacing.xl),
           AppTextField(
-            label: 'Email',
+            label: 'Email'.tr,
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.alternate_email,
@@ -91,7 +92,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           ),
           const SizedBox(height: AppSpacing.lg),
           AppPrimaryButton(
-            label: 'Envoyer le lien',
+            label: 'Envoyer le lien'.tr,
             isLoading: isLoading,
             onPressed: _submit,
           ),
@@ -107,14 +108,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         const Icon(Icons.mark_email_read_outlined, size: 72),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          'Email envoyé !',
+          'Email envoyé !'.tr,
           style: context.textTheme.headlineLarge,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Vérifie ta boîte mail (${_emailController.text.trim()}) pour '
-          'réinitialiser ton mot de passe.',
+          ('Vérifie ta boîte mail ({email}) pour '
+                  'réinitialiser ton mot de passe.')
+              .trArgs({'email': _emailController.text.trim()}),
           style: context.textTheme.bodyLarge,
           textAlign: TextAlign.center,
         ),

@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/route_names.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/video/inline_video_controller.dart';
@@ -111,8 +112,9 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '🎉 +${result.reward} Ballons : ${DailyMission.fullWatchTarget} vidéos '
-          'regardées en entier aujourd’hui !',
+          ('🎉 +{reward} Ballons : {target} vidéos '
+                  'regardées en entier aujourd’hui !')
+              .trArgs({'reward': result.reward, 'target': DailyMission.fullWatchTarget}),
         ),
       ),
     );
@@ -156,8 +158,9 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
     SharePlus.instance.share(
       ShareParams(
         text: video.isMove
-            ? 'Regarde le Move "${video.moveName}" sur Football IQ Universe : ${video.videoUrl}'
-            : 'Regarde cette vidéo sur Football IQ Universe : ${video.videoUrl}',
+            ? 'Regarde le Move "{name}" sur Football IQ Universe : {url}'
+                .trArgs({'name': video.moveName, 'url': video.videoUrl})
+            : 'Regarde cette vidéo sur Football IQ Universe : {url}'.trArgs({'url': video.videoUrl}),
       ),
     );
   }
@@ -217,8 +220,8 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
           fit: StackFit.expand,
           children: [
             _buildVideoLayer(),
-            Positioned(
-              left: 10,
+            PositionedDirectional(
+              start: 10,
               top: 10,
               child: _RatingBadge(
                 rating: playerRating(video.creator),
@@ -227,16 +230,16 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                 style: style,
               ),
             ),
-            Positioned(
-              right: 8,
+            PositionedDirectional(
+              end: 8,
               top: 8,
               child: _GlassButton(
                 icon: (controller?.isMuted ?? false) ? Icons.volume_off : Icons.volume_up,
                 onTap: _toggleSound,
               ),
             ),
-            Positioned(
-              left: 10,
+            PositionedDirectional(
+              start: 10,
               bottom: 10,
               child: Wrap(
                 spacing: 6,
@@ -246,14 +249,14 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                     GestureDetector(
                       onTap: () => context.push(RouteNames.moveDetailPath(video.id)),
                       child: _GlassChip(
-                        text: '🔥 Move : ${video.moveName ?? 'original'}',
+                        text: '🔥 Move : {name}'.trArgs({'name': video.moveName ?? 'original'.tr}),
                         highlight: true,
                       ),
                     )
                   else if (video.originalMoveId != null)
                     GestureDetector(
                       onTap: () => context.push(RouteNames.moveDetailPath(video.originalMoveId!)),
-                      child: const _GlassChip(text: 'Reproduit un Move'),
+                      child: _GlassChip(text: 'Reproduit un Move'.tr),
                     ),
                 ],
               ),
@@ -289,9 +292,9 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
     final isMine = ref.read(supabaseClientProvider).auth.currentUser?.id == video.userId;
     final meta = [
       if (countryFlag(creator?.country) != null) countryFlag(creator?.country)!,
-      if (creator?.position != null) creator!.position!,
+      if (creator?.position != null) creator!.position!.tr,
       if (footLabel(creator?.preferredFoot) != null) footLabel(creator?.preferredFoot)!,
-      'Carte ${style.label}',
+      'Carte {tier}'.trArgs({'tier': style.label.tr}),
     ].join(' · ');
 
     return Padding(
@@ -311,7 +314,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                         child: Text(
                           (creator?.displayName?.isNotEmpty ?? false)
                               ? creator!.displayName!.toUpperCase()
-                              : (creator?.username ?? 'Joueur').toUpperCase(),
+                              : (creator?.username ?? 'Joueur'.tr).toUpperCase(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.barlowCondensed(
@@ -363,7 +366,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  isFollowing ? 'Suivi ✓' : 'Suivre',
+                  isFollowing ? 'Suivi ✓'.tr : 'Suivre'.tr,
                   style: TextStyle(
                     color: isFollowing ? style.ink : style.onPanel,
                     fontWeight: FontWeight.w700,
@@ -405,7 +408,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                     ),
                   ),
                   Text(
-                    label,
+                    label.tr,
                     style: TextStyle(
                       color: style.inkSoft,
                       fontSize: 9.5,
@@ -472,9 +475,9 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
             children: [
               const Icon(Icons.videocam_off_outlined, color: AppColors.textSecondary, size: 40),
               const SizedBox(height: 8),
-              const Text(
-                'Vidéo pas encore lisible',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              Text(
+                'Vidéo pas encore lisible'.tr,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               ),
               if (detail != null)
                 Text(detail, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
@@ -490,7 +493,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                   if (widget.isActive) controller.play();
                 },
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Réessayer'),
+                label: Text('Réessayer'.tr),
               ),
             ],
           ),
@@ -667,7 +670,7 @@ class _CardAction extends StatelessWidget {
                 style: TextStyle(color: fg, fontSize: 13, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 1),
-              Text(label, style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.w600)),
+              Text(label.tr, style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.w600)),
             ],
           ),
         ),

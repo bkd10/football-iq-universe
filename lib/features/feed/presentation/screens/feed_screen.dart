@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/economy_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../economy/presentation/providers/economy_providers.dart';
@@ -107,7 +108,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Text(
-                        error is Failure ? error.message : 'Impossible de charger le feed.',
+                        error is Failure ? error.message : 'Impossible de charger le feed.'.tr,
                         style: const TextStyle(color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
@@ -127,7 +128,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               const Text('⚽', style: TextStyle(fontSize: 48)),
                               const SizedBox(height: 12),
                               Text(
-                                'LE TERRAIN EST LIBRE',
+                                'LE TERRAIN EST LIBRE'.tr,
                                 style: GoogleFonts.barlowCondensed(
                                   color: Colors.white,
                                   fontSize: 28,
@@ -135,9 +136,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              const Text(
-                                'Publie la première vidéo et prends la première carte.',
-                                style: TextStyle(color: Colors.white70),
+                              Text(
+                                'Publie la première vidéo et prends la première carte.'.tr,
+                                style: const TextStyle(color: Colors.white70),
                                 textAlign: TextAlign.center,
                               ),
                             ],
@@ -204,7 +205,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.help_outline, color: Colors.white),
-                tooltip: 'Comment ça marche',
+                tooltip: 'Comment ça marche'.tr,
                 onPressed: () => FeedGuideSheet.show(context),
               ),
               IconButton(
@@ -215,7 +216,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.mail_outline, color: Colors.white),
-                tooltip: 'Messages',
+                tooltip: 'Messages'.tr,
                 onPressed: () => context.push(RouteNames.inbox),
               ),
               Consumer(
@@ -240,19 +241,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             child: Row(
               children: [
                 _FeedTabLabel(
-                  label: 'Vestiaire',
+                  label: 'Vestiaire'.tr,
                   active: _tab == _FeedTab.following,
                   onTap: () => _selectTab(_FeedTab.following),
                 ),
                 const SizedBox(width: 8),
                 _FeedTabLabel(
-                  label: 'Ouverture',
+                  label: 'Ouverture'.tr,
                   active: _tab == _FeedTab.forYou,
                   onTap: () => _selectTab(_FeedTab.forYou),
                 ),
                 const SizedBox(width: 8),
                 _FeedTabLabel(
-                  label: 'Tendances',
+                  label: 'Tendances'.tr,
                   active: _tab == _FeedTab.trending,
                   onTap: () => _selectTab(_FeedTab.trending),
                 ),
@@ -261,7 +262,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            _tabHints[_tab]!,
+            _tabHints[_tab]!.tr,
             style: const TextStyle(color: Colors.white60, fontSize: 12),
           ),
         ],
@@ -290,7 +291,7 @@ class _EmptyLockerRoom extends StatelessWidget {
             const Text('👕', style: TextStyle(fontSize: 48)),
             const SizedBox(height: 12),
             Text(
-              'TON VESTIAIRE EST VIDE',
+              'TON VESTIAIRE EST VIDE'.tr,
               style: GoogleFonts.barlowCondensed(
                 color: Colors.white,
                 fontSize: 28,
@@ -298,10 +299,11 @@ class _EmptyLockerRoom extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Suis des joueurs depuis leur carte ou leur profil : '
-              'leurs nouvelles vidéos arriveront ici.',
-              style: TextStyle(color: Colors.white70),
+            Text(
+              ('Suis des joueurs depuis leur carte ou leur profil : '
+                      'leurs nouvelles vidéos arriveront ici.')
+                  .tr,
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           ],

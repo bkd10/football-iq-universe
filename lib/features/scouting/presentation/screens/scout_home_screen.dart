@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../messaging/presentation/screens/inbox_screen.dart';
 import 'scout_account_screen.dart';
@@ -35,21 +36,21 @@ class _ScoutHomeScreenState extends State<ScoutHomeScreen> {
         currentIndex: _index,
         onTap: (index) => setState(() => _index = index),
         selectedItemColor: AppColors.primary,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
-            label: 'Rechercher',
+            icon: const Icon(Icons.search_outlined),
+            activeIcon: const Icon(Icons.search),
+            label: 'Rechercher'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.mail_outline),
-            activeIcon: Icon(Icons.mail),
-            label: 'Messages',
+            icon: const Icon(Icons.mail_outline),
+            activeIcon: const Icon(Icons.mail),
+            label: 'Messages'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Compte',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: 'Compte'.tr,
           ),
         ],
       ),

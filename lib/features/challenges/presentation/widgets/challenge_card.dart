@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -36,7 +37,7 @@ class ChallengeCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                challengeTypeLabels[challenge.type] ?? challenge.type,
+                challengeTypeLabels[challenge.type]?.tr ?? challenge.type,
                 style: const TextStyle(
                   color: AppColors.diamond,
                   fontSize: 11,
@@ -44,9 +45,9 @@ class ChallengeCard extends StatelessWidget {
                 ),
               ),
               if (isCompleted)
-                const Text(
-                  'TERMINÉ',
-                  style: TextStyle(
+                Text(
+                  'TERMINÉ'.tr,
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -56,7 +57,7 @@ class ChallengeCard extends StatelessWidget {
                 Text(
                   challenge.hasStarted
                       ? Formatters.countdown(challenge.timeRemaining)
-                      : 'Dans ${Formatters.countdown(challenge.timeUntilStart)}',
+                      : 'Dans {time}'.trArgs({'time': Formatters.countdown(challenge.timeUntilStart)}),
                   style: AppTypography.stat(fontSize: 12, color: AppColors.gold),
                 ),
             ],
@@ -71,16 +72,20 @@ class ChallengeCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           if (isSponsored && challenge.sponsorName != null) ...[
             Text(
-              'Par ${challenge.sponsorName}',
+              'Par {sponsor}'.trArgs({'sponsor': challenge.sponsorName}),
               style: const TextStyle(color: AppColors.diamond, fontSize: 11),
             ),
             const SizedBox(height: AppSpacing.xs),
           ],
           if (challenge.isBattle)
             Text(
-              '@${challenge.creator?.username ?? '?'} VS '
-              '${challenge.opponent != null ? '@${challenge.opponent!.username}' : 'adversaire à trouver'}'
-              ' · mise ${challenge.entryCost} Ballons',
+              '@{creator} VS {opponent} · mise {stake} Ballons'.trArgs({
+                'creator': challenge.creator?.username ?? '?',
+                'opponent': challenge.opponent != null
+                    ? '@${challenge.opponent!.username}'
+                    : 'adversaire à trouver'.tr,
+                'stake': challenge.entryCost,
+              }),
               style: Theme.of(context).textTheme.bodySmall,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -88,8 +93,12 @@ class ChallengeCard extends StatelessWidget {
           else if (isKing)
             Text(
               challenge.currentRecord != null
-                  ? 'Record : ${challenge.currentRecord} ${challenge.recordUnit ?? ''} — @${challenge.recordHolder?.username ?? '?'}'
-                  : 'Aucun record établi — sois le premier !',
+                  ? 'Record : {record} {unit} — @{holder}'.trArgs({
+                      'record': challenge.currentRecord,
+                      'unit': challenge.recordUnit ?? '',
+                      'holder': challenge.recordHolder?.username ?? '?',
+                    })
+                  : 'Aucun record établi — sois le premier !'.tr,
               style: Theme.of(context).textTheme.bodySmall,
             )
           else if (isSponsored)
@@ -98,7 +107,7 @@ class ChallengeCard extends StatelessWidget {
                 const Icon(Icons.people_outline, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
-                  '${challenge.participantsCount} participants · gratuit',
+                  '{n} participants · gratuit'.trArgs({'n': challenge.participantsCount}),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (challenge.prizeDescription != null) ...[
@@ -122,14 +131,16 @@ class ChallengeCard extends StatelessWidget {
                 const Icon(Icons.people_outline, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
-                  '${challenge.participantsCount}'
-                  '${challenge.maxParticipants != null ? '/${challenge.maxParticipants}' : ''} participants',
+                  '{n} participants'.trArgs({
+                    'n': '${challenge.participantsCount}'
+                        '${challenge.maxParticipants != null ? '/${challenge.maxParticipants}' : ''}',
+                  }),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (challenge.entryCost > 0) ...[
                   const SizedBox(width: AppSpacing.sm),
                   Text(
-                    '· ${challenge.entryCost} Ballons pour participer',
+                    '· {n} Ballons pour participer'.trArgs({'n': challenge.entryCost}),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -138,7 +149,7 @@ class ChallengeCard extends StatelessWidget {
                   const Icon(Icons.paid_outlined, size: 14, color: AppColors.gold),
                   const SizedBox(width: 4),
                   Text(
-                    'Cagnotte : ${challenge.prizePool} Ballons',
+                    'Cagnotte : {n} Ballons'.trArgs({'n': challenge.prizePool}),
                     style: const TextStyle(color: AppColors.gold, fontSize: 12),
                   ),
                 ],

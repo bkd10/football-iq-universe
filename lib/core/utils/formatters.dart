@@ -1,3 +1,5 @@
+import '../l10n/l10n.dart';
+
 /// Formatage de nombres et durées pour l'affichage (compteurs, stats, vidéo).
 class Formatters {
   const Formatters._();
@@ -30,22 +32,22 @@ class Formatters {
   /// Timestamp relatif simple (à la TikTok) : "3h", "2j", "5sem".
   static String relativeTime(DateTime date) {
     final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return 'à l\'instant';
-    if (diff.inHours < 1) return '${diff.inMinutes}min';
-    if (diff.inDays < 1) return '${diff.inHours}h';
-    if (diff.inDays < 7) return '${diff.inDays}j';
-    if (diff.inDays < 30) return '${(diff.inDays / 7).floor()}sem';
-    return '${(diff.inDays / 30).floor()}mois';
+    if (diff.inMinutes < 1) return 'à l\'instant'.tr;
+    if (diff.inHours < 1) return '{n}min'.trArgs({'n': diff.inMinutes});
+    if (diff.inDays < 1) return '{n}h'.trArgs({'n': diff.inHours});
+    if (diff.inDays < 7) return '{n}j'.trArgs({'n': diff.inDays});
+    if (diff.inDays < 30) return '{n}sem'.trArgs({'n': (diff.inDays / 7).floor()});
+    return '{n}mois'.trArgs({'n': (diff.inDays / 30).floor()});
   }
 
   /// Temps restant avant la fin d'un défi : "2j 4h", "3h 12min", "Terminé".
   static String countdown(Duration remaining) {
-    if (remaining.isNegative) return 'Terminé';
+    if (remaining.isNegative) return 'Terminé'.tr;
     final days = remaining.inDays;
     final hours = remaining.inHours.remainder(24);
     final minutes = remaining.inMinutes.remainder(60);
-    if (days > 0) return '${days}j ${hours}h';
-    if (hours > 0) return '${hours}h ${minutes}min';
-    return '${minutes}min';
+    if (days > 0) return '{d}j {h}h'.trArgs({'d': days, 'h': hours});
+    if (hours > 0) return '{h}h {m}min'.trArgs({'h': hours, 'm': minutes});
+    return '{n}min'.trArgs({'n': minutes});
   }
 }

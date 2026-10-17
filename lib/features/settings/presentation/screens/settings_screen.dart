@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -21,13 +22,13 @@ class SettingsScreen extends ConsumerWidget {
     final email = ref.watch(supabaseClientProvider).auth.currentUser?.email;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Réglages')),
+      appBar: AppBar(title: Text('Réglages'.tr)),
       body: ListView(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xs),
             child: Text(
-              'COMPTE',
+              'COMPTE'.tr,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(letterSpacing: 1),
             ),
           ),
@@ -36,19 +37,19 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(
               profileAsync.valueOrNull?.username != null
                   ? '@${profileAsync.valueOrNull!.username}'
-                  : 'Nom d\'utilisateur',
+                  : 'Nom d\'utilisateur'.tr,
             ),
             subtitle: email != null ? Text(email) : null,
           ),
           ListTile(
             leading: const Icon(Icons.edit_outlined),
-            title: const Text('Modifier le profil'),
+            title: Text('Modifier le profil'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(RouteNames.editProfile),
           ),
           ListTile(
             leading: const Icon(Icons.mail_outline),
-            title: const Text('Messages'),
+            title: Text('Messages'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(RouteNames.inbox),
           ),
@@ -56,22 +57,23 @@ class SettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs),
             child: Text(
-              'PROTECTION',
+              'PROTECTION'.tr,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(letterSpacing: 1),
             ),
           ),
-          const ListTile(
-            leading: Icon(Icons.shield_outlined),
-            title: Text('Protection des mineurs'),
+          ListTile(
+            leading: const Icon(Icons.shield_outlined),
+            title: Text('Protection des mineurs'.tr),
             subtitle: Text(
-              'Aucune géolocalisation précise publique. Le contact par un '
-              'recruteur vérifié est toujours médié pour les moins de 18 ans.',
+              ('Aucune géolocalisation précise publique. Le contact par un '
+                      'recruteur vérifié est toujours médié pour les moins de 18 ans.')
+                  .tr,
             ),
           ),
           ListTile(
             leading: const Icon(Icons.verified_user_outlined),
-            title: const Text('J\'ai un code tuteur'),
-            subtitle: const Text('Pour approuver ou refuser un contact recruteur.'),
+            title: Text('J\'ai un code tuteur'.tr),
+            subtitle: Text('Pour approuver ou refuser un contact recruteur.'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(RouteNames.guardianApprovalEntry),
           ),
@@ -79,8 +81,8 @@ class SettingsScreen extends ConsumerWidget {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.admin_panel_settings_outlined),
-              title: const Text('Administration'),
-              subtitle: const Text('Statistiques, signalements, joueurs, défis officiels.'),
+              title: Text('Administration'.tr),
+              subtitle: Text('Statistiques, signalements, joueurs, défis officiels.'.tr),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(RouteNames.adminHome),
             ),
@@ -90,7 +92,7 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
             child: OutlinedButton.icon(
               icon: const Icon(Icons.logout, color: AppColors.error),
-              label: const Text('Se déconnecter', style: TextStyle(color: AppColors.error)),
+              label: Text('Se déconnecter'.tr, style: const TextStyle(color: AppColors.error)),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
                 side: const BorderSide(color: AppColors.error),
@@ -102,9 +104,9 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
             child: TextButton(
               onPressed: () => _confirmDeleteAccount(context, ref),
-              child: const Text(
-                'Supprimer mon compte',
-                style: TextStyle(color: AppColors.error, decoration: TextDecoration.underline),
+              child: Text(
+                'Supprimer mon compte'.tr,
+                style: const TextStyle(color: AppColors.error, decoration: TextDecoration.underline),
               ),
             ),
           ),
@@ -117,20 +119,21 @@ class SettingsScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Supprimer ton compte ?'),
-        content: const Text(
-          'Cette action est définitive. Ton profil, tes vidéos, tes défis et '
-          'ton historique seront supprimés pour de bon — impossible de '
-          'revenir en arrière.',
+        title: Text('Supprimer ton compte ?'.tr),
+        content: Text(
+          ('Cette action est définitive. Ton profil, tes vidéos, tes défis et '
+                  'ton historique seront supprimés pour de bon — impossible de '
+                  'revenir en arrière.')
+              .tr,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Annuler'),
+            child: Text('Annuler'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Supprimer', style: TextStyle(color: AppColors.error)),
+            child: Text('Supprimer'.tr, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -145,7 +148,7 @@ class SettingsScreen extends ConsumerWidget {
       context.go(RouteNames.login);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('La suppression a échoué. Réessaie plus tard.')),
+        SnackBar(content: Text('La suppression a échoué. Réessaie plus tard.'.tr)),
       );
     }
   }

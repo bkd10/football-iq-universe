@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/constants/economy_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -18,66 +19,70 @@ class EarnBallonsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Comment gagner des Ballons')),
+      appBar: AppBar(title: Text('Comment gagner des Ballons'.tr)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           Text(
-            'Les Ballons se gagnent uniquement en jouant — aucune de ces '
-            'méthodes ne coûte rien.',
+            ('Les Ballons se gagnent uniquement en jouant — aucune de ces '
+                    'méthodes ne coûte rien.')
+                .tr,
             style: context.textTheme.bodyMedium
                 ?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.lg),
-          const _EarnTile(
+          _EarnTile(
             icon: Icons.celebration_outlined,
-            title: 'Inscription',
-            detail: 'Une seule fois, à la création de ton compte.',
+            title: 'Inscription'.tr,
+            detail: 'Une seule fois, à la création de ton compte.'.tr,
             amountLabel: '+${EconomyConstants.welcomeBonus}',
           ),
-          const _EarnTile(
+          _EarnTile(
             icon: Icons.videocam_outlined,
-            title: 'Publier une vidéo',
-            detail: 'Jusqu\'à ${EconomyConstants.maxPostVideoRewardsPerDay} '
-                'vidéos récompensées par jour.',
-            amountLabel: '+${EconomyConstants.postVideoReward}/vidéo',
+            title: 'Publier une vidéo'.tr,
+            detail: 'Jusqu\'à {n} vidéos récompensées par jour.'
+                .trArgs({'n': EconomyConstants.maxPostVideoRewardsPerDay}),
+            amountLabel: '+{n}/vidéo'.trArgs({'n': EconomyConstants.postVideoReward}),
           ),
-          const _EarnTile(
+          _EarnTile(
             icon: Icons.play_circle_outline,
-            title: 'Regarder ${EconomyConstants.fullWatchTarget} vidéos en entier',
-            detail: 'Dans la journée, jusqu\'au bout. Une fois par jour.',
+            title: 'Regarder {n} vidéos en entier'
+                .trArgs({'n': EconomyConstants.fullWatchTarget}),
+            detail: 'Dans la journée, jusqu\'au bout. Une fois par jour.'.tr,
             amountLabel: '+${EconomyConstants.fullWatchReward}',
           ),
-          const _EarnTile(
+          _EarnTile(
             icon: Icons.emoji_events_outlined,
-            title: 'Gagner un Défi ou une Battle',
-            detail: 'Le joueur avec le plus de votes remporte toute la '
-                'cagnotte (droits d\'entrée ou mises de la Battle), plus '
-                '100 Stars.',
-            amountLabel: 'Cagnotte + 100 ★',
+            title: 'Gagner un Défi ou une Battle'.tr,
+            detail: ('Le joueur avec le plus de votes remporte toute la '
+                    'cagnotte (droits d\'entrée ou mises de la Battle), plus '
+                    '100 Stars.')
+                .tr,
+            amountLabel: 'Cagnotte + 100 ★'.tr,
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Bientôt disponible', style: context.textTheme.titleMedium),
+          Text('Bientôt disponible'.tr, style: context.textTheme.titleMedium),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Ces méthodes sont prévues mais pas encore actives dans '
-            'l\'app.',
+            ('Ces méthodes sont prévues mais pas encore actives dans '
+                    'l\'app.')
+                .tr,
             style: context.textTheme.bodySmall
                 ?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.md),
-          const _EarnTile(
+          _EarnTile(
             icon: Icons.smart_display_outlined,
-            title: 'Regarder une publicité',
-            detail: 'Jusqu\'à ${EconomyConstants.maxAdWatchedPerDay} '
-                'publicités par jour.',
+            title: 'Regarder une publicité'.tr,
+            detail: 'Jusqu\'à {n} publicités par jour.'
+                .trArgs({'n': EconomyConstants.maxAdWatchedPerDay}),
             amountLabel: '+${EconomyConstants.adWatchedReward}',
             comingSoon: true,
           ),
-          const _EarnTile(
+          _EarnTile(
             icon: Icons.person_add_alt_outlined,
-            title: 'Inviter un ami',
-            detail: 'Quand ton ami rejoint Football IQ Universe.',
+            title: 'Inviter un ami'.tr,
+            detail: 'Quand ton ami rejoint Football IQ Universe.'.tr,
             amountLabel: '+${EconomyConstants.inviteFriendReward}',
             comingSoon: true,
           ),
@@ -141,9 +146,9 @@ class _EarnTile extends StatelessWidget {
                             color: AppColors.surfaceLight,
                             borderRadius: BorderRadius.circular(100),
                           ),
-                          child: const Text(
-                            'Bientôt',
-                            style: TextStyle(
+                          child: Text(
+                            'Bientôt'.tr,
+                            style: const TextStyle(
                               fontSize: 10,
                               color: AppColors.textSecondary,
                             ),
