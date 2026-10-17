@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -66,7 +67,7 @@ class _AdminOfficialChallengeScreenState extends ConsumerState<AdminOfficialChal
       if (!mounted) return;
       ref.invalidate(adminStatsProvider);
       context
-        ..showSnackBar('Défi officiel publié.')
+        ..showSnackBar('Défi officiel publié.'.tr)
         ..pushReplacement(RouteNames.challengeDetailPath(id));
     } catch (e) {
       if (!mounted) return;
@@ -77,11 +78,14 @@ class _AdminOfficialChallengeScreenState extends ConsumerState<AdminOfficialChal
 
   @override
   Widget build(BuildContext context) {
-    final end = '${_endDate.day}/${_endDate.month}/${_endDate.year} à '
-        '${_endDate.hour.toString().padLeft(2, '0')}h${_endDate.minute.toString().padLeft(2, '0')}';
+    final end = '{date} à {hour}h{minute}'.trArgs({
+      'date': '${_endDate.day}/${_endDate.month}/${_endDate.year}',
+      'hour': _endDate.hour.toString().padLeft(2, '0'),
+      'minute': _endDate.minute.toString().padLeft(2, '0'),
+    });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Défi officiel')),
+      appBar: AppBar(title: Text('Défi officiel'.tr)),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -90,37 +94,37 @@ class _AdminOfficialChallengeScreenState extends ConsumerState<AdminOfficialChal
             TextFormField(
               controller: _titleController,
               maxLength: 80,
-              decoration: const InputDecoration(labelText: 'Titre', hintText: 'Défi Ballon d\'Or'),
-              validator: (v) => (v == null || v.trim().length < 3) ? '3 caractères minimum.' : null,
+              decoration: InputDecoration(labelText: 'Titre'.tr, hintText: 'Défi Ballon d\'Or'.tr),
+              validator: (v) => (v == null || v.trim().length < 3) ? '3 caractères minimum.'.tr : null,
             ),
             TextFormField(
               controller: _descriptionController,
               maxLength: 1000,
               maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Règles du défi',
-                hintText: 'Ex : ton plus beau but de la semaine, en une seule prise.',
+              decoration: InputDecoration(
+                labelText: 'Règles du défi'.tr,
+                hintText: 'Ex : ton plus beau but de la semaine, en une seule prise.'.tr,
               ),
             ),
             TextFormField(
               controller: _prizeController,
               maxLength: 500,
-              decoration: const InputDecoration(
-                labelText: 'Récompense (optionnel)',
-                hintText: 'Ex : le gagnant est mis en avant sur la page d\'accueil',
+              decoration: InputDecoration(
+                labelText: 'Récompense (optionnel)'.tr,
+                hintText: 'Ex : le gagnant est mis en avant sur la page d\'accueil'.tr,
               ),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.event),
-              title: const Text('Fin du défi'),
+              title: Text('Fin du défi'.tr),
               subtitle: Text(end),
               trailing: const Icon(Icons.edit_calendar),
               onTap: _pickEndDate,
             ),
             const SizedBox(height: AppSpacing.lg),
             AppPrimaryButton(
-              label: 'Publier le défi officiel',
+              label: 'Publier le défi officiel'.tr,
               isLoading: _isSubmitting,
               onPressed: _submit,
             ),

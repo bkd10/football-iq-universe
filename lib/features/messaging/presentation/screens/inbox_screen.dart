@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -30,7 +31,7 @@ class InboxScreen extends ConsumerWidget {
         child: conversationsAsync.when(
           loading: () => const AppFullScreenLoader(),
           error: (error, _) => Center(
-            child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+            child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
           ),
           data: (conversations) {
             if (conversations.isEmpty) {
@@ -39,7 +40,7 @@ class InboxScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Text(
-                      'Aucune conversation pour l\'instant.',
+                      'Aucune conversation pour l\'instant.'.tr,
                       textAlign: TextAlign.center,
                       style: context.textTheme.bodyLarge,
                     ),
@@ -68,9 +69,9 @@ class _ConversationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitle = switch (conversation.status) {
-      'pending_guardian_approval' => 'En attente d\'approbation du tuteur',
-      'declined' => 'Contact refusé',
-      _ => 'Discussion active',
+      'pending_guardian_approval' => 'En attente d\'approbation du tuteur'.tr,
+      'declined' => 'Contact refusé'.tr,
+      _ => 'Discussion active'.tr,
     };
     final subtitleColor = switch (conversation.status) {
       'pending_guardian_approval' => AppColors.warning,
@@ -92,7 +93,7 @@ class _ConversationTile extends StatelessWidget {
       title: Text(
         conversation.otherDisplayName?.isNotEmpty == true
             ? conversation.otherDisplayName!
-            : '@${conversation.otherUsername ?? 'inconnu'}',
+            : '@${conversation.otherUsername ?? 'inconnu'.tr}',
         style: TextStyle(
           fontWeight: conversation.hasUnread ? FontWeight.w700 : FontWeight.w400,
         ),

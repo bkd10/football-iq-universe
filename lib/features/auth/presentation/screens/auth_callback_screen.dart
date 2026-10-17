@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/route_names.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -42,7 +43,7 @@ class AuthCallbackScreen extends StatelessWidget {
                       const Icon(Icons.error_outline, size: 64, color: AppColors.error),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Lien invalide ou expiré',
+                        'Lien invalide ou expiré'.tr,
                         style: context.textTheme.displaySmall,
                         textAlign: TextAlign.center,
                       ),
@@ -55,18 +56,18 @@ class AuthCallbackScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.xl),
                       TextButton(
                         onPressed: () => context.go(RouteNames.login),
-                        child: const Text('Retour à la connexion'),
+                        child: Text('Retour à la connexion'.tr),
                       ),
                     ]
-                  : const [
-                      CircularProgressIndicator(color: AppColors.primary),
-                      SizedBox(height: AppSpacing.lg),
+                  : [
+                      const CircularProgressIndicator(color: AppColors.primary),
+                      const SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Confirmation en cours…',
+                        'Confirmation en cours…'.tr,
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: AppSpacing.sm),
-                      Text(
+                      const SizedBox(height: AppSpacing.sm),
+                      const Text(
                         AppConstants.appName,
                         textAlign: TextAlign.center,
                       ),

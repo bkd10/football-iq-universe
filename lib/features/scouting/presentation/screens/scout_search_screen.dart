@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -51,7 +52,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
     final resultsAsync = ref.watch(scoutSearchResultsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Rechercher des joueurs')),
+      appBar: AppBar(title: Text('Rechercher des joueurs'.tr)),
       body: Column(
         children: [
           Padding(
@@ -60,9 +61,9 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
               children: [
                 TextField(
                   controller: _queryController,
-                  decoration: const InputDecoration(
-                    labelText: 'Pseudo',
-                    prefixIcon: Icon(Icons.search),
+                  decoration: InputDecoration(
+                    labelText: 'Pseudo'.tr,
+                    prefixIcon: const Icon(Icons.search),
                   ),
                   textInputAction: TextInputAction.search,
                   onSubmitted: (_) => _applyFilters(),
@@ -73,13 +74,13 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         initialValue: _position,
-                        decoration: const InputDecoration(labelText: 'Poste'),
+                        decoration: InputDecoration(labelText: 'Poste'.tr),
                         items: [
-                          const DropdownMenuItem<String>(child: Text('Tous')),
+                          DropdownMenuItem<String>(child: Text('Tous'.tr)),
                           ...AppConstants.playerPositions.map(
                             (p) => DropdownMenuItem(
                               value: p,
-                              child: Text(p.capitalize),
+                              child: Text(p.capitalize.tr),
                             ),
                           ),
                         ],
@@ -90,7 +91,7 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                     Expanded(
                       child: TextField(
                         controller: _countryController,
-                        decoration: const InputDecoration(labelText: 'Pays'),
+                        decoration: InputDecoration(labelText: 'Pays'.tr),
                       ),
                     ),
                   ],
@@ -103,9 +104,9 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primary,
                     ),
-                    child: const Text(
-                      'Rechercher',
-                      style: TextStyle(color: AppColors.background),
+                    child: Text(
+                      'Rechercher'.tr,
+                      style: const TextStyle(color: AppColors.background),
                     ),
                   ),
                 ),
@@ -118,14 +119,14 @@ class _ScoutSearchScreenState extends ConsumerState<ScoutSearchScreen> {
               loading: () => const AppFullScreenLoader(),
               error: (error, _) => Center(
                 child: Text(
-                  error is Failure ? error.message : 'Erreur de chargement.',
+                  error is Failure ? error.message : 'Erreur de chargement.'.tr,
                 ),
               ),
               data: (results) {
                 if (results.isEmpty) {
                   return Center(
                     child: Text(
-                      'Aucun joueur trouvé.',
+                      'Aucun joueur trouvé.'.tr,
                       style: context.textTheme.bodyMedium,
                     ),
                   );
@@ -179,9 +180,9 @@ class _PlayerTile extends StatelessWidget {
                 color: AppColors.warning.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(100),
               ),
-              child: const Text(
-                'Mineur',
-                style: TextStyle(
+              child: Text(
+                'Mineur'.tr,
+                style: const TextStyle(
                   fontSize: 10,
                   color: AppColors.warning,
                   fontWeight: FontWeight.w700,
@@ -193,7 +194,7 @@ class _PlayerTile extends StatelessWidget {
       ),
       subtitle: Text(
         [
-          if (player.position != null) player.position!.capitalize,
+          if (player.position != null) player.position!.capitalize.tr,
           if (player.city != null) player.city!,
           if (player.country != null) player.country!,
         ].join(' · '),

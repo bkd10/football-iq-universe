@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
+
 /// Ligne « date + heure » cliquable des formulaires de défi.
 class DateTimeField extends StatelessWidget {
   const DateTimeField({
@@ -19,9 +21,11 @@ class DateTimeField extends StatelessWidget {
   final DateTime lastDate;
   final bool enabled;
 
-  static String format(DateTime d) =>
-      '${d.day}/${d.month}/${d.year} à ${d.hour.toString().padLeft(2, '0')}:'
-      '${d.minute.toString().padLeft(2, '0')}';
+  static String format(DateTime d) => '{date} à {time}'.trArgs({
+        'date': '${d.day}/${d.month}/${d.year}',
+        'time': '${d.hour.toString().padLeft(2, '0')}:'
+            '${d.minute.toString().padLeft(2, '0')}',
+      });
 
   Future<void> _pick(BuildContext context) async {
     final date = await showDatePicker(

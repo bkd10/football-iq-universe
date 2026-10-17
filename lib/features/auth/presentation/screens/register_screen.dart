@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/extensions/string_extensions.dart';
@@ -65,7 +66,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!mounted) return;
     switch (outcome) {
       case SignUpOutcome.success:
-        context.showSnackBar('Bienvenue sur ${AppConstants.appName} !');
+        context.showSnackBar(
+          'Bienvenue sur {app} !'.trArgs({'app': AppConstants.appName}),
+        );
       case SignUpOutcome.needsEmailConfirmation:
         // Aucune session n'existe encore : ne JAMAIS compter sur le
         // `redirect` de GoRouter ici (il n'a rien à voir avec une
@@ -82,7 +85,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     ref.listen(authControllerProvider, (previous, next) {
       next.whenOrNull(
         error: (error, _) {
-          final message = error is Failure ? error.message : 'Erreur inconnue.';
+          final message = error is Failure ? error.message : 'Erreur inconnue.'.tr;
           context.showSnackBar(message, isError: true);
         },
       );
@@ -100,15 +103,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Crée ton profil', style: context.textTheme.displaySmall),
+                Text('Crée ton profil'.tr, style: context.textTheme.displaySmall),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Gratuit, sans engagement. Le talent parle, pas les followers.',
+                  'Gratuit, sans engagement. Le talent parle, pas les followers.'.tr,
                   style: context.textTheme.bodyLarge,
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 AppTextField(
-                  label: 'Pseudo',
+                  label: 'Pseudo'.tr,
                   controller: _usernameController,
                   prefixIcon: Icons.person_outline,
                   textInputAction: TextInputAction.next,
@@ -116,7 +119,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
-                  label: 'Email',
+                  label: 'Email'.tr,
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: Icons.alternate_email,
@@ -126,7 +129,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
-                  label: 'Mot de passe',
+                  label: 'Mot de passe'.tr,
                   controller: _passwordController,
                   obscureText: true,
                   prefixIcon: Icons.lock_outline,
@@ -135,7 +138,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
-                  label: 'Confirme le mot de passe',
+                  label: 'Confirme le mot de passe'.tr,
                   controller: _confirmPasswordController,
                   obscureText: true,
                   prefixIcon: Icons.lock_outline,
@@ -147,7 +150,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
-                  label: 'Pays (optionnel)',
+                  label: 'Pays (optionnel)'.tr,
                   controller: _countryController,
                   prefixIcon: Icons.public,
                   textInputAction: TextInputAction.next,
@@ -156,12 +159,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
                     initialValue: _position,
-                    decoration: const InputDecoration(labelText: 'Poste'),
+                    decoration: InputDecoration(labelText: 'Poste'.tr),
                     items: AppConstants.playerPositions
                         .map(
                           (p) => DropdownMenuItem(
                             value: p,
-                            child: Text(p.capitalize),
+                            child: Text(p.capitalize.tr),
                           ),
                         )
                         .toList(),
@@ -170,12 +173,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String>(
                     initialValue: _preferredFoot,
-                    decoration: const InputDecoration(labelText: 'Pied fort'),
+                    decoration: InputDecoration(labelText: 'Pied fort'.tr),
                     items: AppConstants.preferredFeet
                         .map(
                           (f) => DropdownMenuItem(
                             value: f,
-                            child: Text(f.fromSnakeCaseToTitle),
+                            child: Text(f.fromSnakeCaseToTitle.tr),
                           ),
                         )
                         .toList(),
@@ -186,15 +189,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ],
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'Type de compte',
+                  'Type de compte'.tr,
                   style: context.textTheme.bodySmall?.copyWith(letterSpacing: 1),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'player', label: Text('Joueur')),
-                    ButtonSegment(value: 'scout', label: Text('Recruteur')),
-                    ButtonSegment(value: 'brand', label: Text('Marque')),
+                  segments: [
+                    ButtonSegment(value: 'player', label: Text('Joueur'.tr)),
+                    ButtonSegment(value: 'scout', label: Text('Recruteur'.tr)),
+                    ButtonSegment(value: 'brand', label: Text('Marque'.tr)),
                   ],
                   selected: {_accountType},
                   onSelectionChanged: (value) =>
@@ -203,22 +206,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   switch (_accountType) {
-                    'scout' => 'Compte pro pour repérer des joueurs et les '
-                        'contacter (abonnement requis).',
-                    'brand' => 'Compte marque pour publier des Défis '
-                        'Sponsorisés avec un vrai prix (vérification '
-                        'manuelle requise avant publication).',
-                    _ => 'Compte joueur classique : vidéos, défis, '
-                        'classement.',
+                    'scout' => ('Compte pro pour repérer des joueurs et les '
+                            'contacter (abonnement requis).')
+                        .tr,
+                    'brand' => ('Compte marque pour publier des Défis '
+                            'Sponsorisés avec un vrai prix (vérification '
+                            'manuelle requise avant publication).')
+                        .tr,
+                    _ => ('Compte joueur classique : vidéos, défis, '
+                            'classement.')
+                        .tr,
                   },
                   style: context.textTheme.bodySmall,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 AppPrimaryButton(
                   label: switch (_accountType) {
-                    'scout' => 'Créer mon compte recruteur',
-                    'brand' => 'Créer mon compte marque',
-                    _ => 'Créer mon compte',
+                    'scout' => 'Créer mon compte recruteur'.tr,
+                    'brand' => 'Créer mon compte marque'.tr,
+                    _ => 'Créer mon compte'.tr,
                   },
                   isLoading: isLoading,
                   onPressed: _submit,

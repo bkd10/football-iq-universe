@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -45,19 +46,19 @@ class MyVideoPickerSheet extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('Choisis ta vidéo', style: context.textTheme.titleLarge),
+            Text('Choisis ta vidéo'.tr, style: context.textTheme.titleLarge),
             const SizedBox(height: AppSpacing.md),
             Expanded(
               child: videosAsync.when(
                 loading: () => const Center(child: AppLoader()),
                 error: (error, _) => Center(
-                  child: Text(error is Failure ? error.message : 'Erreur.'),
+                  child: Text(error is Failure ? error.message : 'Erreur.'.tr),
                 ),
                 data: (videos) {
                   if (videos.isEmpty) {
                     return Center(
                       child: Text(
-                        'Publie d\'abord une vidéo pour pouvoir participer.',
+                        'Publie d\'abord une vidéo pour pouvoir participer.'.tr,
                         style: context.textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
@@ -101,9 +102,11 @@ class MyVideoTile extends StatelessWidget {
     final caption = video.caption.trim();
     final title = video.isMove && video.moveName != null
         ? '🔥 ${video.moveName}'
-        : (caption.isNotEmpty ? caption : 'Vidéo sans légende');
+        : (caption.isNotEmpty ? caption : 'Vidéo sans légende'.tr);
     final age = Formatters.relativeTime(video.createdAt);
-    final published = age.startsWith('à ') ? 'Publiée $age' : 'Publiée il y a $age';
+    final published = DateTime.now().difference(video.createdAt).inMinutes < 1
+        ? 'Publiée {age}'.trArgs({'age': age})
+        : 'Publiée il y a {age}'.trArgs({'age': age});
     return ListTile(
       onTap: onTap,
       leading: ClipRRect(
@@ -125,7 +128,10 @@ class MyVideoTile extends StatelessWidget {
       ),
       title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Text(
-        '$published · ${Formatters.compactCount(video.viewsCount)} vues',
+        '{published} · {views} vues'.trArgs({
+          'published': published,
+          'views': Formatters.compactCount(video.viewsCount),
+        }),
       ),
       trailing: trailing,
     );

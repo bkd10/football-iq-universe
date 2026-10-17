@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -41,7 +42,7 @@ class _ConfirmEmailScreenState extends ConsumerState<ConfirmEmailScreen> {
     setState(() => _resending = false);
     result.fold(
       (failure) => context.showSnackBar(failure.message, isError: true),
-      (_) => context.showSnackBar('E-mail renvoyé — vérifie ta boîte de réception.'),
+      (_) => context.showSnackBar('E-mail renvoyé — vérifie ta boîte de réception.'.tr),
     );
   }
 
@@ -64,28 +65,29 @@ class _ConfirmEmailScreenState extends ConsumerState<ConfirmEmailScreen> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'Confirme ton e-mail',
+                  'Confirme ton e-mail'.tr,
                   style: context.textTheme.displaySmall,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'On a envoyé un lien de confirmation à ${widget.email}. '
-                  'Clique dessus pour activer ton compte — cette page passera '
-                  'automatiquement à l\'app une fois confirmé.',
+                  ('On a envoyé un lien de confirmation à {email}. '
+                          'Clique dessus pour activer ton compte — cette page passera '
+                          'automatiquement à l\'app une fois confirmé.')
+                      .trArgs({'email': widget.email}),
                   style: context.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 AppPrimaryButton(
-                  label: 'Renvoyer l\'e-mail',
+                  label: 'Renvoyer l\'e-mail'.tr,
                   isLoading: _resending,
                   onPressed: _resend,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextButton(
                   onPressed: () => context.go(RouteNames.login),
-                  child: const Text('Retour à la connexion'),
+                  child: Text('Retour à la connexion'.tr),
                 ),
               ],
             ),

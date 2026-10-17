@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -59,13 +60,13 @@ class _NoPepiteBody extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Ici, un inconnu peut devenir une star.',
+            'Ici, un inconnu peut devenir une star.'.tr,
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
           AppPrimaryButton(
-            label: 'Voir le feed',
+            label: 'Voir le feed'.tr,
             onPressed: () => context.go(RouteNames.feed),
           ),
         ],
@@ -91,7 +92,7 @@ class _PepiteBody extends StatelessWidget {
               Container(width: 34, height: 2, color: AppColors.primary),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'LA PÉPITE DU JOUR',
+                'LA PÉPITE DU JOUR'.tr,
                 style: AppTypography.stat(fontSize: 12, color: AppColors.primary),
               ),
             ],
@@ -127,19 +128,19 @@ class _PepiteBody extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _MiniStat(value: Formatters.compactCount(pepite.viewsCount), label: 'vues'),
-              _MiniStat(value: Formatters.compactCount(pepite.stars), label: 'Stars'),
-              _MiniStat(value: '#${pepite.worldRank}', label: 'mondial'),
+              _MiniStat(value: Formatters.compactCount(pepite.viewsCount), label: 'vues'.tr),
+              _MiniStat(value: Formatters.compactCount(pepite.stars), label: 'Stars'.tr),
+              _MiniStat(value: '#${pepite.worldRank}', label: 'mondial'.tr),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'À ton tour.',
+            'À ton tour.'.tr,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.primary),
           ),
           const SizedBox(height: AppSpacing.md),
           AppPrimaryButton(
-            label: 'Voir le feed →',
+            label: 'Voir le feed →'.tr,
             onPressed: () => context.go(RouteNames.feed),
           ),
         ],

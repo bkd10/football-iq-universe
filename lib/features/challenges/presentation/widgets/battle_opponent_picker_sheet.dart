@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -61,16 +62,16 @@ class _BattleOpponentPickerSheetState extends ConsumerState<BattleOpponentPicker
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Text('Choisis ton adversaire', style: context.textTheme.titleLarge),
+              Text('Choisis ton adversaire'.tr, style: context.textTheme.titleLarge),
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: TextField(
                   controller: _searchController,
                   autocorrect: false,
                   textInputAction: TextInputAction.search,
-                  decoration: const InputDecoration(
-                    hintText: 'Rechercher un @pseudo',
-                    prefixIcon: Icon(Icons.search),
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher un @pseudo'.tr,
+                    prefixIcon: const Icon(Icons.search),
                   ),
                   onChanged: (value) => setState(() => _query = value),
                 ),
@@ -79,7 +80,7 @@ class _BattleOpponentPickerSheetState extends ConsumerState<BattleOpponentPicker
                 child: suggestions.when(
                   loading: () => const Center(child: AppLoader()),
                   error: (error, _) => Center(
-                    child: Text(error is Failure ? error.message : 'Erreur.'),
+                    child: Text(error is Failure ? error.message : 'Erreur.'.tr),
                   ),
                   data: (opponents) => ListView(
                     children: [
@@ -92,16 +93,17 @@ class _BattleOpponentPickerSheetState extends ConsumerState<BattleOpponentPicker
                             backgroundColor: AppColors.surfaceLight,
                             child: Icon(Icons.alternate_email),
                           ),
-                          title: Text('Défier @$_typedUsername'),
-                          subtitle: const Text('Joueur hors de tes abonnés'),
+                          title: Text('Défier @{user}'.trArgs({'user': _typedUsername})),
+                          subtitle: Text('Joueur hors de tes abonnés'.tr),
                           onTap: () => Navigator.of(context).pop(_typedUsername),
                         ),
                       if (opponents.isEmpty && _typedUsername.isEmpty)
                         Padding(
                           padding: const EdgeInsets.all(AppSpacing.lg),
                           child: Text(
-                            'Tu ne suis encore personne et personne ne te suit. '
-                            'Tape le @pseudo d\'un joueur, ou choisis « Aléatoire ».',
+                            ('Tu ne suis encore personne et personne ne te suit. '
+                                    'Tape le @pseudo d\'un joueur, ou choisis « Aléatoire ».')
+                                .tr,
                             style: context.textTheme.bodyMedium
                                 ?.copyWith(color: AppColors.textSecondary),
                             textAlign: TextAlign.center,
@@ -136,7 +138,7 @@ class _OpponentTile extends StatelessWidget {
       ),
       title: Text('@${opponent.username}', overflow: TextOverflow.ellipsis),
       subtitle: Text(
-        [if (name != null && name.isNotEmpty) name, opponent.relationLabel].join(' · '),
+        [if (name != null && name.isNotEmpty) name, opponent.relationLabel.tr].join(' · '),
         overflow: TextOverflow.ellipsis,
       ),
       onTap: () => Navigator.of(context).pop(opponent.username),

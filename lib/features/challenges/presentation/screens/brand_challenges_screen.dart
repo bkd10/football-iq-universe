@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -25,17 +26,17 @@ class BrandChallengesScreen extends ConsumerWidget {
     final challengesAsync = ref.watch(challengesProvider('sponsored'));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mes Défis Sponsorisés')),
+      appBar: AppBar(title: Text('Mes Défis Sponsorisés'.tr)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(RouteNames.createChallenge),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.background),
-        label: const Text('Nouveau défi', style: TextStyle(color: AppColors.background)),
+        label: Text('Nouveau défi'.tr, style: const TextStyle(color: AppColors.background)),
       ),
       body: challengesAsync.when(
         loading: () => const AppFullScreenLoader(),
         error: (error, _) => Center(
-          child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+          child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
         ),
         data: (challenges) {
           final mine = challenges.where((c) => c.creator?.id == myId).toList();
@@ -44,8 +45,9 @@ class BrandChallengesScreen extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Text(
-                  'Aucun défi publié pour l\'instant. Crée ton premier Défi '
-                  'Sponsorisé avec le bouton ci-dessous.',
+                  ('Aucun défi publié pour l\'instant. Crée ton premier Défi '
+                          'Sponsorisé avec le bouton ci-dessous.')
+                      .tr,
                   textAlign: TextAlign.center,
                   style: context.textTheme.bodyLarge,
                 ),

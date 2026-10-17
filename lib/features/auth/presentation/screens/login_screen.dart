@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
@@ -49,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             context.go(RouteNames.confirmEmail, extra: _emailController.text.trim());
             return;
           }
-          final message = error is Failure ? error.message : 'Erreur inconnue.';
+          final message = error is Failure ? error.message : 'Erreur inconnue.'.tr;
           context.showSnackBar(message, isError: true);
         },
       );
@@ -68,18 +69,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 const SizedBox(height: AppSpacing.xxl),
                 Text(
-                  'Content de te revoir',
+                  'Content de te revoir'.tr,
                   style: context.textTheme.displaySmall,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Connecte-toi pour continuer ta progression sur '
-                  '${AppConstants.appName}.',
+                  ('Connecte-toi pour continuer ta progression sur '
+                          '{app}.')
+                      .trArgs({'app': AppConstants.appName}),
                   style: context.textTheme.bodyLarge,
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 AppTextField(
-                  label: 'Email',
+                  label: 'Email'.tr,
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
@@ -89,7 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
-                  label: 'Mot de passe',
+                  label: 'Mot de passe'.tr,
                   controller: _passwordController,
                   obscureText: true,
                   textInputAction: TextInputAction.done,
@@ -101,12 +103,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => context.push(RouteNames.forgotPassword),
-                    child: const Text('Mot de passe oublié ?'),
+                    child: Text('Mot de passe oublié ?'.tr),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppPrimaryButton(
-                  label: 'Se connecter',
+                  label: 'Se connecter'.tr,
                   isLoading: isLoading,
                   onPressed: _submit,
                 ),
@@ -115,20 +117,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Pas encore de compte ?',
+                      'Pas encore de compte ?'.tr,
                       style: context.textTheme.bodyMedium,
                     ),
                     TextButton(
                       onPressed: () => context.push(RouteNames.register),
-                      child: const Text('Inscris-toi'),
+                      child: Text('Inscris-toi'.tr),
                     ),
                   ],
                 ),
                 Center(
                   child: TextButton(
                     onPressed: () => context.push(RouteNames.guardianApprovalEntry),
-                    child: const Text(
-                      'Tu es le tuteur d\'un joueur ? Approuver un contact',
+                    child: Text(
+                      'Tu es le tuteur d\'un joueur ? Approuver un contact'.tr,
                     ),
                   ),
                 ),

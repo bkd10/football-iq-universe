@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/economy_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -72,11 +73,11 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false) || _isSubmitting) return;
     if (_video == null) {
-      context.showSnackBar('Choisis ta vidéo pour la Battle.', isError: true);
+      context.showSnackBar('Choisis ta vidéo pour la Battle.'.tr, isError: true);
       return;
     }
     if (_opponentMode == _OpponentMode.chosen && _opponentUsername == null) {
-      context.showSnackBar('Choisis ton adversaire.', isError: true);
+      context.showSnackBar('Choisis ton adversaire.'.tr, isError: true);
       return;
     }
 
@@ -94,12 +95,12 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
     setState(() => _isSubmitting = false);
 
     if (battle != null) {
-      context.showSnackBar('Battle lancée ! ⚔️');
+      context.showSnackBar('Battle lancée ! ⚔️'.tr);
       context.pushReplacement(RouteNames.challengeDetailPath(battle.id));
     } else {
       final failure = ref.read(challengeActionsControllerProvider).error;
       context.showSnackBar(
-        failure is Failure ? failure.message : 'Impossible de lancer la Battle.',
+        failure is Failure ? failure.message : 'Impossible de lancer la Battle.'.tr,
         isError: true,
       );
     }
@@ -110,7 +111,7 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
     final coins = ref.watch(currentProfileProvider).valueOrNull?.coins;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lancer une Battle')),
+      appBar: AppBar(title: Text('Lancer une Battle'.tr)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -126,31 +127,32 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                   child: Text(
-                    '⚔️ Toi contre un autre joueur. Tu fixes les règles et la mise. '
-                    'Ton adversaire mise la même somme pour relever le défi, puis '
-                    'les utilisateurs votent. Le gagnant remporte les deux mises. '
-                    'Égalité ou personne en face : chacun récupère sa mise.',
+                    ('⚔️ Toi contre un autre joueur. Tu fixes les règles et la mise. '
+                            'Ton adversaire mise la même somme pour relever le défi, puis '
+                            'les utilisateurs votent. Le gagnant remporte les deux mises. '
+                            'Égalité ou personne en face : chacun récupère sa mise.')
+                        .tr,
                     style: context.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Titre',
-                    hintText: 'Ex : le plus beau but',
+                  decoration: InputDecoration(
+                    labelText: 'Titre'.tr,
+                    hintText: 'Ex : le plus beau but'.tr,
                   ),
                   validator: (v) => (v == null || v.trim().length < 3)
-                      ? 'Donne un titre (3 caractères minimum).'
+                      ? 'Donne un titre (3 caractères minimum).'.tr
                       : null,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _rulesController,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Règles',
-                    hintText: 'Ex : qui fait ce geste ? Le plus beau geste gagne.',
+                  decoration: InputDecoration(
+                    labelText: 'Règles'.tr,
+                    hintText: 'Ex : qui fait ce geste ? Le plus beau geste gagne.'.tr,
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -159,41 +161,43 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                   controller: _stakeController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Mise (Ballons)',
-                    helperText: coins != null ? 'Tu as $coins Ballons' : null,
+                    labelText: 'Mise (Ballons)'.tr,
+                    helperText: coins != null ? 'Tu as {coins} Ballons'.trArgs({'coins': coins}) : null,
                   ),
                   validator: (v) {
                     final stake = int.tryParse(v?.trim() ?? '');
                     if (stake == null ||
                         stake < EconomyConstants.battleMinStake ||
                         stake > EconomyConstants.battleMaxStake) {
-                      return 'Entre ${EconomyConstants.battleMinStake} et '
-                          '${EconomyConstants.battleMaxStake} Ballons.';
+                      return 'Entre {min} et {max} Ballons.'.trArgs({
+                        'min': EconomyConstants.battleMinStake,
+                        'max': EconomyConstants.battleMaxStake,
+                      });
                     }
-                    if (coins != null && stake > coins) return 'Tu n\'as que $coins Ballons.';
+                    if (coins != null && stake > coins) return 'Tu n\'as que {coins} Ballons.'.trArgs({'coins': coins});
                     return null;
                   },
                 ),
                 const SizedBox(height: AppSpacing.md),
-                Text('Adversaire', style: context.textTheme.titleSmall),
+                Text('Adversaire'.tr, style: context.textTheme.titleSmall),
                 const SizedBox(height: AppSpacing.sm),
                 SegmentedButton<_OpponentMode>(
                   showSelectedIcon: false,
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: _OpponentMode.open,
-                      label: Text('Ouvert'),
-                      icon: Icon(Icons.public),
+                      label: Text('Ouvert'.tr),
+                      icon: const Icon(Icons.public),
                     ),
                     ButtonSegment(
                       value: _OpponentMode.chosen,
-                      label: Text('Choisir'),
-                      icon: Icon(Icons.person_search),
+                      label: Text('Choisir'.tr),
+                      icon: const Icon(Icons.person_search),
                     ),
                     ButtonSegment(
                       value: _OpponentMode.random,
-                      label: Text('Aléatoire'),
-                      icon: Icon(Icons.casino_outlined),
+                      label: Text('Aléatoire'.tr),
+                      icon: const Icon(Icons.casino_outlined),
                     ),
                   ],
                   selected: {_opponentMode},
@@ -209,11 +213,11 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 switch (_opponentMode) {
-                  _OpponentMode.open => const _OpponentHint(
-                      'Le premier joueur qui relève la Battle sera ton adversaire.',
+                  _OpponentMode.open => _OpponentHint(
+                      'Le premier joueur qui relève la Battle sera ton adversaire.'.tr,
                     ),
-                  _OpponentMode.random => const _OpponentHint(
-                      'Un joueur tiré au hasard sera défié et prévenu.',
+                  _OpponentMode.random => _OpponentHint(
+                      'Un joueur tiré au hasard sera défié et prévenu.'.tr,
                     ),
                   _OpponentMode.chosen => ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -221,33 +225,33 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                       title: Text(
                         _opponentUsername != null
                             ? '@$_opponentUsername'
-                            : 'Choisir parmi tes abonnés et abonnements',
+                            : 'Choisir parmi tes abonnés et abonnements'.tr,
                       ),
-                      subtitle: _opponentUsername != null ? const Text('Changer') : null,
+                      subtitle: _opponentUsername != null ? Text('Changer'.tr) : null,
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _isSubmitting ? null : _pickOpponent,
                     ),
                 },
                 const SizedBox(height: AppSpacing.md),
-                Text('Ta vidéo', style: context.textTheme.titleSmall),
+                Text('Ta vidéo'.tr, style: context.textTheme.titleSmall),
                 if (_video != null)
                   MyVideoTile(
                     video: _video!,
                     onTap: _isSubmitting ? null : _pickVideo,
-                    trailing: const Text('Changer'),
+                    trailing: Text('Changer'.tr),
                   )
                 else
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.videocam_outlined),
-                    title: const Text('Choisir ma vidéo'),
-                    subtitle: const Text('La vidéo avec laquelle tu affrontes ton adversaire'),
+                    title: Text('Choisir ma vidéo'.tr),
+                    subtitle: Text('La vidéo avec laquelle tu affrontes ton adversaire'.tr),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _isSubmitting ? null : _pickVideo,
                   ),
                 const SizedBox(height: AppSpacing.sm),
                 DateTimeField(
-                  label: 'Fin des votes',
+                  label: 'Fin des votes'.tr,
                   value: _endDate,
                   enabled: !_isSubmitting,
                   firstDate: DateTime.now(),
@@ -256,7 +260,7 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 AppPrimaryButton(
-                  label: 'Lancer la Battle',
+                  label: 'Lancer la Battle'.tr,
                   isLoading: _isSubmitting,
                   onPressed: _isSubmitting ? null : _submit,
                 ),

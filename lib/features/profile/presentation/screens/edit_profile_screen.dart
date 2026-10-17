@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -69,7 +70,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         );
     if (!mounted) return;
     if (!success) {
-      context.showSnackBar('Échec de la mise à jour.', isError: true);
+      context.showSnackBar('Échec de la mise à jour.'.tr, isError: true);
       return;
     }
 
@@ -83,14 +84,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (!mounted) return;
       if (!guardianSuccess) {
         context.showSnackBar(
-          'Profil mis à jour, mais échec de l\'enregistrement du contact tuteur.',
+          'Profil mis à jour, mais échec de l\'enregistrement du contact tuteur.'.tr,
           isError: true,
         );
         return;
       }
     }
 
-    context.showSnackBar('Profil mis à jour.');
+    context.showSnackBar('Profil mis à jour.'.tr);
     context.pop();
   }
 
@@ -119,7 +120,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Modifier le profil')),
+      appBar: AppBar(title: Text('Modifier le profil'.tr)),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('$error')),
@@ -134,7 +135,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     AppTextField(
-                      label: 'Nom affiché',
+                      label: 'Nom affiché'.tr,
                       controller: _displayNameController,
                       textInputAction: TextInputAction.next,
                     ),
@@ -146,14 +147,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     AppTextField(
-                      label: 'Pays',
+                      label: 'Pays'.tr,
                       controller: _countryController,
                       prefixIcon: Icons.public,
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     AppTextField(
-                      label: 'Ville',
+                      label: 'Ville'.tr,
                       controller: _cityController,
                       prefixIcon: Icons.location_city,
                       textInputAction: TextInputAction.done,
@@ -161,18 +162,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
                       initialValue: _position,
-                      decoration: const InputDecoration(labelText: 'Poste'),
+                      decoration: InputDecoration(labelText: 'Poste'.tr),
                       items: AppConstants.playerPositions
-                          .map((p) => DropdownMenuItem(value: p, child: Text(p.capitalize)))
+                          .map((p) => DropdownMenuItem(value: p, child: Text(p.capitalize.tr)))
                           .toList(),
                       onChanged: (value) => setState(() => _position = value),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
                       initialValue: _preferredFoot,
-                      decoration: const InputDecoration(labelText: 'Pied fort'),
+                      decoration: InputDecoration(labelText: 'Pied fort'.tr),
                       items: AppConstants.preferredFeet
-                          .map((f) => DropdownMenuItem(value: f, child: Text(f.fromSnakeCaseToTitle)))
+                          .map((f) => DropdownMenuItem(value: f, child: Text(f.fromSnakeCaseToTitle.tr)))
                           .toList(),
                       onChanged: (value) {
                         if (value != null) setState(() => _preferredFoot = value);
@@ -181,26 +182,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     if (profile.isMinor) ...[
                       const SizedBox(height: AppSpacing.xl),
                       Text(
-                        'CONTACT D\'UN TUTEUR',
+                        'CONTACT D\'UN TUTEUR'.tr,
                         style: context.textTheme.bodySmall?.copyWith(letterSpacing: 1),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        'Un recruteur vérifié ne peut te contacter qu\'après '
-                        'approbation d\'un tuteur — renseigne son contact pour '
-                        'pouvoir être approché.',
+                        ('Un recruteur vérifié ne peut te contacter qu\'après '
+                                'approbation d\'un tuteur — renseigne son contact pour '
+                                'pouvoir être approché.')
+                            .tr,
                         style: context.textTheme.bodySmall
                             ?.copyWith(color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       AppTextField(
-                        label: 'Nom du tuteur (optionnel)',
+                        label: 'Nom du tuteur (optionnel)'.tr,
                         controller: _guardianNameController,
                         textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: AppSpacing.md),
                       AppTextField(
-                        label: 'Email du tuteur',
+                        label: 'Email du tuteur'.tr,
                         controller: _guardianEmailController,
                         prefixIcon: Icons.alternate_email,
                         keyboardType: TextInputType.emailAddress,
@@ -213,7 +215,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ],
                     const SizedBox(height: AppSpacing.xl),
                     AppPrimaryButton(
-                      label: 'Enregistrer',
+                      label: 'Enregistrer'.tr,
                       isLoading: isLoading,
                       onPressed: _submit,
                     ),

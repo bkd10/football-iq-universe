@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/ranking_category.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -44,7 +45,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
     final rankingsAsync = ref.watch(rankingsProvider(query));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Classements')),
+      appBar: AppBar(title: Text('Classements'.tr)),
       body: Column(
         children: [
           SizedBox(
@@ -61,7 +62,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                 final category = RankingCategory.all[index];
                 final selected = category == _category;
                 return ChoiceChip(
-                  label: Text(RankingCategory.labels[category] ?? category),
+                  label: Text((RankingCategory.labels[category] ?? category).tr),
                   selected: selected,
                   selectedColor: AppColors.primary.withValues(alpha: 0.2),
                   labelStyle: TextStyle(
@@ -82,19 +83,19 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
             child: Row(
               children: [
                 _RegionTab(
-                  label: '🌍 Mondial',
+                  label: '🌍 Mondial'.tr,
                   active: _region == _Region.world,
                   onTap: () => setState(() => _region = _Region.world),
                 ),
                 _RegionTab(
-                  label: '🏳️ Mon pays',
+                  label: '🏳️ Mon pays'.tr,
                   active: _region == _Region.country,
                   onTap: myProfile?.country == null
                       ? null
                       : () => setState(() => _region = _Region.country),
                 ),
                 _RegionTab(
-                  label: '📍 Ma ville',
+                  label: '📍 Ma ville'.tr,
                   active: _region == _Region.city,
                   onTap: myProfile?.city == null
                       ? null
@@ -109,7 +110,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
               loading: () => const Center(child: AppLoader()),
               error: (error, _) => Center(
                 child: Text(
-                  error is Failure ? error.message : 'Erreur de chargement.',
+                  error is Failure ? error.message : 'Erreur de chargement.'.tr,
                   style: context.textTheme.bodyMedium,
                 ),
               ),
@@ -117,7 +118,7 @@ class _RankingsScreenState extends ConsumerState<RankingsScreen> {
                 if (entries.isEmpty) {
                   return Center(
                     child: Text(
-                      'Aucun classement disponible pour l\'instant.',
+                      'Aucun classement disponible pour l\'instant.'.tr,
                       style: context.textTheme.bodyMedium,
                     ),
                   );
@@ -218,7 +219,7 @@ class _RankingRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isMe ? 'Toi (@${entry.username})' : '@${entry.username}',
+                  isMe ? 'Toi (@{username})'.trArgs({'username': entry.username}) : '@${entry.username}',
                   style: Theme.of(context).textTheme.bodyLarge,
                   overflow: TextOverflow.ellipsis,
                 ),

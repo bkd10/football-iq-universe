@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import 'player_card_style.dart';
 
 const _sheetBg = Color(0xFF0D2418);
@@ -59,16 +60,16 @@ class FeedGuideSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'COMMENT ÇA MARCHE',
+            'COMMENT ÇA MARCHE'.tr,
             style: GoogleFonts.barlowCondensed(
               color: Colors.white,
               fontSize: 28,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const Text(
-            'Ici, le talent parle plus que les followers.',
-            style: TextStyle(color: _lime, fontWeight: FontWeight.w600),
+          Text(
+            'Ici, le talent parle plus que les followers.'.tr,
+            style: const TextStyle(color: _lime, fontWeight: FontWeight.w600),
           ),
           const _Section('Les onglets du feed'),
           const _Line(
@@ -105,10 +106,11 @@ class FeedGuideSheet extends StatelessWidget {
           const _Line(icon: '📊', title: 'Classement', text: 'Les meilleurs joueurs du moment.'),
           const _Line(icon: '👤', title: 'Profil', text: 'Ta carte, tes stats et tes badges.'),
           const _Section('Les couleurs des cartes'),
-          const Text(
-            'Ta carte change de couleur avec les points de Respect que tu reçois, '
-            'comme un disque d’or.',
-            style: TextStyle(color: Colors.white70, height: 1.35),
+          Text(
+            ('Ta carte change de couleur avec les points de Respect que tu reçois, '
+                    'comme un disque d’or.')
+                .tr,
+            style: const TextStyle(color: Colors.white70, height: 1.35),
           ),
           const SizedBox(height: 12),
           for (final tier in PlayerCardStyle.tiers) _TierRow(tier),
@@ -175,11 +177,12 @@ class FeedGuideSheet extends StatelessWidget {
             text: 'Remporte une Battle ou un Challenge et la cagnotte est pour toi.',
           ),
           const _Section('La note sur 99'),
-          const Text(
-            'Elle monte avec ce que le joueur accomplit : vidéos publiées, '
-            'points de Respect, Stars, défis gagnés et Moves inventés. '
-            'Son nombre d’abonnés ne compte pas.',
-            style: TextStyle(color: Colors.white70, height: 1.35),
+          Text(
+            ('Elle monte avec ce que le joueur accomplit : vidéos publiées, '
+                    'points de Respect, Stars, défis gagnés et Moves inventés. '
+                    'Son nombre d’abonnés ne compte pas.')
+                .tr,
+            style: const TextStyle(color: Colors.white70, height: 1.35),
           ),
           const SizedBox(height: 24),
           FilledButton(
@@ -190,7 +193,7 @@ class FeedGuideSheet extends StatelessWidget {
               textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
             ),
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('C’est parti !'),
+            child: Text('C’est parti !'.tr),
           ),
         ],
       ),
@@ -208,7 +211,7 @@ class _Section extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 10),
       child: Text(
-        title.toUpperCase(),
+        title.tr.toUpperCase(),
         style: GoogleFonts.barlowCondensed(
           color: _lime,
           fontSize: 18,
@@ -243,10 +246,10 @@ class _Line extends StatelessWidget {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: '$title  ',
+                    text: '${title.tr}  ',
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
                   ),
-                  TextSpan(text: text),
+                  TextSpan(text: text.tr),
                 ],
               ),
               style: const TextStyle(color: Colors.white70, height: 1.35, fontSize: 14),
@@ -265,7 +268,9 @@ class _TierRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final threshold = tier.minPoints == 0 ? 'Au départ' : 'Dès ${_format(tier.minPoints)} points';
+    final threshold = tier.minPoints == 0
+        ? 'Au départ'.tr
+        : 'Dès {points} points'.trArgs({'points': _format(tier.minPoints)});
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -276,7 +281,7 @@ class _TierRow extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            'CARTE ${tier.label.toUpperCase()}',
+            'CARTE {tier}'.trArgs({'tier': tier.label.tr.toUpperCase()}),
             style: GoogleFonts.barlowCondensed(
               color: tier.ink,
               fontSize: 18,

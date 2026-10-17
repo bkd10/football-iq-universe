@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -25,7 +26,7 @@ class ShopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Boutique')),
+      appBar: AppBar(title: Text('Boutique'.tr)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -42,9 +43,10 @@ class ShopScreen extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    'L\'achat de Ballons n\'est pas encore disponible. Ces packs '
-                    'montrent ce qui arrivera — en attendant, tous les Ballons '
-                    's\'obtiennent en jouant.',
+                    ('L\'achat de Ballons n\'est pas encore disponible. Ces packs '
+                            'montrent ce qui arrivera — en attendant, tous les Ballons '
+                            's\'obtiennent en jouant.')
+                        .tr,
                     style: context.textTheme.bodySmall,
                   ),
                 ),
@@ -123,7 +125,7 @@ class _PackTile extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  'Ballons',
+                  'Ballons'.tr,
                   style: context.textTheme.bodySmall
                       ?.copyWith(color: AppColors.textSecondary),
                 ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
@@ -24,19 +25,19 @@ class NotificationsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text('Notifications'.tr),
         actions: [
           TextButton(
             onPressed: () =>
                 ref.read(notificationsControllerProvider.notifier).markAllAsRead(),
-            child: const Text('Tout marquer lu'),
+            child: Text('Tout marquer lu'.tr),
           ),
         ],
       ),
       body: notificationsAsync.when(
         loading: () => const AppFullScreenLoader(),
         error: (error, _) => Center(
-          child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+          child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
         ),
         data: (notifications) {
           if (notifications.isEmpty) {
@@ -44,7 +45,7 @@ class NotificationsScreen extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Text(
-                  'Aucune notification pour l\'instant. Poste une vidéo ou rejoins un défi pour commencer à en recevoir.',
+                  'Aucune notification pour l\'instant. Poste une vidéo ou rejoins un défi pour commencer à en recevoir.'.tr,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -186,7 +187,7 @@ class _NotificationTile extends ConsumerWidget {
             )
           : icon,
       title: Text(
-        notification.title,
+        notification.title.trServer,
         style: TextStyle(
           fontWeight: notification.isRead ? FontWeight.w400 : FontWeight.w700,
         ),
@@ -194,12 +195,12 @@ class _NotificationTile extends ConsumerWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (notification.body != null) Text(notification.body!),
+          if (notification.body != null) Text(notification.body!.trServer),
           if (showActor && username != null)
             GestureDetector(
               onTap: () => _openActor(context, ref),
               child: Text(
-                '@$username · voir le profil',
+                '@{username} · voir le profil'.trArgs({'username': username}),
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall
@@ -236,7 +237,7 @@ class _NotificationFollowButton extends ConsumerWidget {
           ? OutlinedButton(
               onPressed: toggle,
               style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-              child: const Text('Abonné ✓', style: TextStyle(fontSize: 12)),
+              child: Text('Abonné ✓'.tr, style: const TextStyle(fontSize: 12)),
             )
           : FilledButton(
               onPressed: toggle,
@@ -244,9 +245,9 @@ class _NotificationFollowButton extends ConsumerWidget {
                 backgroundColor: AppColors.primary,
                 padding: EdgeInsets.zero,
               ),
-              child: const Text(
-                'Suivre',
-                style: TextStyle(color: AppColors.background, fontSize: 12),
+              child: Text(
+                'Suivre'.tr,
+                style: const TextStyle(color: AppColors.background, fontSize: 12),
               ),
             ),
     );

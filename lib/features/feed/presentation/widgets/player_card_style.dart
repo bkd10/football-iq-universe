@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../videos/domain/entities/video_creator.dart';
 
 /// Habillage « carte joueur » du feed. La couleur de la carte se gagne par
@@ -110,26 +111,26 @@ double _log10(num x) => math.log(x) / math.ln10;
 String positionShort(String? position) {
   switch (position) {
     case 'attaquant':
-      return 'ATT';
+      return 'ATT'.tr;
     case 'milieu':
-      return 'MIL';
+      return 'MIL'.tr;
     case 'defenseur':
-      return 'DÉF';
+      return 'DÉF'.tr;
     case 'gardien':
-      return 'GB';
+      return 'GB'.tr;
     default:
-      return 'JOU';
+      return 'JOU'.tr;
   }
 }
 
 String? footLabel(String? foot) {
   switch (foot) {
     case 'droit':
-      return 'pied droit';
+      return 'pied droit'.tr;
     case 'gauche':
-      return 'pied gauche';
+      return 'pied gauche'.tr;
     case 'les_deux':
-      return 'deux pieds';
+      return 'deux pieds'.tr;
     default:
       return null;
   }
