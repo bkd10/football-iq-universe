@@ -8,6 +8,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../profile/presentation/providers/social_providers.dart';
 import '../../domain/entities/app_notification.dart';
 import '../providers/notifications_providers.dart';
 
@@ -123,26 +125,130 @@ class _NotificationTile extends ConsumerWidget {
     }
   }
 
+  /// Notifications venant d'un autre joueur (réaction, commentaire,
+  /// abonnement...) : on peut ouvrir son profil et le suivre directement.
+  bool get _fromPlayer =>
+      notification.actorId != null &&
+      const {'new_follower', 'like', 'masterclass', 'comment', 'move_reproduced'}
+          .contains(notification.type);
+
+  void _openActor(BuildContext context, WidgetRef ref) {
+    ref.read(notificationsControllerProvider.notifier).markAsRead(notification.id);
+    context.push(RouteNames.otherProfilePath(notification.actorId!));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final myId = ref.watch(currentProfileProvider).valueOrNull?.id;
+    final showActor = _fromPlayer && notification.actorId != myId;
+    final avatarUrl = notification.actorAvatarUrl;
+    final username = notification.actorUsername;
+
+    final icon = CircleAvatar(
+      backgroundColor: AppColors.surfaceLight,
+      child: Icon(_icon, color: AppColors.primary, size: 20),
+    );
+
     return ListTile(
       onTap: () => _onTap(context, ref),
       tileColor: notification.isRead ? null : AppColors.primary.withValues(alpha: 0.06),
-      leading: CircleAvatar(
-        backgroundColor: AppColors.surfaceLight,
-        child: Icon(_icon, color: AppColors.primary, size: 20),
-      ),
+      leading: showActor
+          ? GestureDetector(
+              onTap: () => _openActor(context, ref),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: AppColors.surfaceLight,
+                    backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                    child: avatarUrl == null
+                        ? Text(
+                            username != null && username.isNotEmpty
+                                ? username[0].toUpperCase()
+                                : '?',
+                          )
+                        : null,
+                  ),
+                  Positioned(
+                    right: -4,
+                    bottom: -4,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: AppColors.surface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(_icon, color: AppColors.primary, size: 12),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : icon,
       title: Text(
         notification.title,
         style: TextStyle(
           fontWeight: notification.isRead ? FontWeight.w400 : FontWeight.w700,
         ),
       ),
-      subtitle: notification.body != null ? Text(notification.body!) : null,
-      trailing: Text(
-        Formatters.relativeTime(notification.createdAt),
-        style: Theme.of(context).textTheme.bodySmall,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (notification.body != null) Text(notification.body!),
+          if (showActor && username != null)
+            GestureDetector(
+              onTap: () => _openActor(context, ref),
+              child: Text(
+                '@$username · voir le profil',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+              ),
+            ),
+          const SizedBox(height: 2),
+          Text(
+            Formatters.relativeTime(notification.createdAt),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ),
+      trailing: showActor ? _NotificationFollowButton(userId: notification.actorId!) : null,
+    );
+  }
+}
+
+class _NotificationFollowButton extends ConsumerWidget {
+  const _NotificationFollowButton({required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final followingAsync = ref.watch(followControllerProvider(userId));
+    if (!followingAsync.hasValue) return const SizedBox(width: 88);
+    final isFollowing = followingAsync.value!;
+    void toggle() => ref.read(followControllerProvider(userId).notifier).toggle();
+
+    return SizedBox(
+      width: 88,
+      child: isFollowing
+          ? OutlinedButton(
+              onPressed: toggle,
+              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+              child: const Text('Abonné ✓', style: TextStyle(fontSize: 12)),
+            )
+          : FilledButton(
+              onPressed: toggle,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: EdgeInsets.zero,
+              ),
+              child: const Text(
+                'Suivre',
+                style: TextStyle(color: AppColors.background, fontSize: 12),
+              ),
+            ),
     );
   }
 }
