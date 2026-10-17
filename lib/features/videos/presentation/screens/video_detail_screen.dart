@@ -130,9 +130,9 @@ class _VideoDetailBody extends ConsumerWidget {
             ),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           top: AppSpacing.md,
-          left: AppSpacing.sm,
+          start: AppSpacing.sm,
           child: SafeArea(
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -140,9 +140,9 @@ class _VideoDetailBody extends ConsumerWidget {
             ),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           top: AppSpacing.md,
-          right: AppSpacing.sm,
+          end: AppSpacing.sm,
           child: SafeArea(
             child: IconButton(
               icon: const Icon(Icons.flag_outlined, color: Colors.white),
@@ -190,9 +190,9 @@ class _VideoDetailBody extends ConsumerWidget {
                 child: Icon(Icons.play_arrow_rounded, color: Colors.white70, size: 88),
               ),
             if (c != null)
-              Positioned(
+              PositionedDirectional(
                 top: AppSpacing.xl * 2,
-                right: AppSpacing.md,
+                end: AppSpacing.md,
                 child: IconButton(
                   icon: Icon(c.isMuted ? Icons.volume_off : Icons.volume_up, color: Colors.white),
                   onPressed: () => c.isMuted = !c.isMuted,
@@ -205,8 +205,8 @@ class _VideoDetailBody extends ConsumerWidget {
   }
 
   Widget _buildActionRail(BuildContext context, WidgetRef ref) {
-    return Positioned(
-      right: AppSpacing.sm,
+    return PositionedDirectional(
+      end: AppSpacing.sm,
       bottom: 110,
       child: Column(
         children: [
@@ -254,9 +254,9 @@ class _VideoDetailBody extends ConsumerWidget {
 
   Widget _buildInfoOverlay(BuildContext context) {
     final creator = video.creator;
-    return Positioned(
-      left: AppSpacing.md,
-      right: 76,
+    return PositionedDirectional(
+      start: AppSpacing.md,
+      end: 76,
       bottom: AppSpacing.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

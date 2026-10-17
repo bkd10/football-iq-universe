@@ -170,8 +170,8 @@ class _NotificationTile extends ConsumerWidget {
                           )
                         : null,
                   ),
-                  Positioned(
-                    right: -4,
+                  PositionedDirectional(
+                    end: -4,
                     bottom: -4,
                     child: Container(
                       padding: const EdgeInsets.all(3),

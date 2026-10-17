@@ -211,8 +211,8 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
           fit: StackFit.expand,
           children: [
             _buildVideoLayer(),
-            Positioned(
-              left: 10,
+            PositionedDirectional(
+              start: 10,
               top: 10,
               child: _RatingBadge(
                 rating: playerRating(video.creator),
@@ -220,16 +220,16 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                 style: style,
               ),
             ),
-            Positioned(
-              right: 8,
+            PositionedDirectional(
+              end: 8,
               top: 8,
               child: _GlassButton(
                 icon: (controller?.isMuted ?? false) ? Icons.volume_off : Icons.volume_up,
                 onTap: _toggleSound,
               ),
             ),
-            Positioned(
-              left: 10,
+            PositionedDirectional(
+              start: 10,
               bottom: 10,
               child: Wrap(
                 spacing: 6,

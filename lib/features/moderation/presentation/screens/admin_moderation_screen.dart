@@ -128,7 +128,7 @@ class _ReportCard extends ConsumerWidget {
                 children: [
                   if (report.thumbnailUrl != null)
                     Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.sm),
+                      padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
@@ -142,7 +142,7 @@ class _ReportCard extends ConsumerWidget {
                     )
                   else if (isVideo)
                     const Padding(
-                      padding: EdgeInsets.only(right: AppSpacing.sm),
+                      padding: EdgeInsetsDirectional.only(end: AppSpacing.sm),
                       child: Icon(Icons.play_circle_outline, size: 40, color: AppColors.primary),
                     ),
                   Expanded(

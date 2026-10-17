@@ -270,7 +270,7 @@ class _IqBars extends StatelessWidget {
                 width: 32,
                 child: Text(
                   '${entry.value}',
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   style: context.textTheme.bodySmall,
                 ),
               ),

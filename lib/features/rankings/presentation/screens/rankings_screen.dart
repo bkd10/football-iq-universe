@@ -233,7 +233,7 @@ class _RankingRow extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            margin: const EdgeInsets.only(right: 6),
+            margin: const EdgeInsetsDirectional.only(end: 6),
             decoration: BoxDecoration(color: levelColor, shape: BoxShape.circle),
           ),
           Text(

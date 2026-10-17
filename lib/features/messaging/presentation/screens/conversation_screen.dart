@@ -254,7 +254,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isMine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
       child: Container(
         constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.75),
         margin: const EdgeInsets.symmetric(vertical: 4),

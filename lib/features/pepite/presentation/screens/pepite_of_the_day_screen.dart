@@ -115,9 +115,9 @@ class _PepiteBody extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Container(
-            padding: const EdgeInsets.only(left: AppSpacing.md),
+            padding: const EdgeInsetsDirectional.only(start: AppSpacing.md),
             decoration: const BoxDecoration(
-              border: Border(left: BorderSide(color: AppColors.primary, width: 2)),
+              border: BorderDirectional(start: BorderSide(color: AppColors.primary, width: 2)),
             ),
             child: Text(
               pepite.caption,

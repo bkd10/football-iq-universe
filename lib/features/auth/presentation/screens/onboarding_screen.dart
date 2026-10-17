@@ -90,7 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             Align(
-              alignment: Alignment.topRight,
+              alignment: AlignmentDirectional.topEnd,
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: TextButton(

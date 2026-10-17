@@ -100,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   validator: Validators.password,
                 ),
                 Align(
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: TextButton(
                     onPressed: () => context.push(RouteNames.forgotPassword),
                     child: Text('Mot de passe oublié ?'.tr),
