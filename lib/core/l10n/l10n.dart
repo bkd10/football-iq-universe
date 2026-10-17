@@ -13,7 +13,7 @@ class L10n {
 
   static const sourceLanguage = 'fr';
   static const fallbackLanguage = 'en';
-  static const supportedLanguages = ['fr', 'en'];
+  static const supportedLanguages = ['fr', 'en', 'es', 'pt', 'de', 'it', 'ar', 'ru', 'sv', 'tr'];
 
   static String _language = sourceLanguage;
   static String get language => _language;
