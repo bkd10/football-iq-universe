@@ -141,7 +141,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     AppTextField(
-                      label: 'Bio',
+                      label: 'Bio'.tr,
                       controller: _bioController,
                       textInputAction: TextInputAction.next,
                     ),

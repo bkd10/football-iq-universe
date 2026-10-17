@@ -24,7 +24,7 @@ class InboxScreen extends ConsumerWidget {
     final conversationsAsync = ref.watch(conversationsControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Messages')),
+      appBar: AppBar(title: Text('Messages'.tr)),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () => ref.read(conversationsControllerProvider.notifier).refresh(),

@@ -2,7 +2,9 @@
 // Chaque fichier expose `const <nom>Translations = {'en': {'texte fr': 'text'}}`.
 
 import 'auth.dart';
+import 'auth_errors.dart';
 import 'challenges.dart';
+import 'common_words.dart';
 import 'core.dart';
 import 'economy.dart';
 import 'lang_ar.dart';
@@ -29,7 +31,9 @@ class ServerPattern {
 
 const List<Map<String, Map<String, String>>> _allTables = [
   coreTranslations,
+  commonWordsTranslations,
   authTranslations,
+  authErrorsTranslations,
   challengesTranslations,
   economyTranslations,
   profileTranslations,

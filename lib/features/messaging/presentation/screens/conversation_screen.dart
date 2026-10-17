@@ -120,7 +120,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               ? conversation!.otherDisplayName!
               : conversation != null
                   ? '@${conversation.otherUsername ?? 'inconnu'.tr}'
-                  : 'Conversation',
+                  : 'Conversation'.tr,
         ),
       ),
       body: Column(

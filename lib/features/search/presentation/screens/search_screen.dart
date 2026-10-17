@@ -97,7 +97,7 @@ class _SearchResultsList extends StatelessWidget {
           ),
         ],
         if (results.moves.isNotEmpty) ...[
-          const _SectionLabel(label: 'Moves'),
+          _SectionLabel(label: 'Moves'.tr),
           ...results.moves.map(
             (v) => ListTile(
               leading: const CircleAvatar(

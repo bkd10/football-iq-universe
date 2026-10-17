@@ -58,7 +58,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.paid_outlined),
-                    tooltip: 'Wallet',
+                    tooltip: 'Wallet'.tr,
                     onPressed: () => context.push(RouteNames.wallet),
                   ),
                   IconButton(
@@ -160,7 +160,7 @@ class _ProfileBody extends ConsumerWidget {
                   children: [
                     if (isMe)
                       _StatTile(label: 'Ballons'.tr, value: profile.coins, color: AppColors.gold),
-                    _StatTile(label: 'Stars', value: profile.stars, color: AppColors.primary),
+                    _StatTile(label: 'Stars'.tr, value: profile.stars, color: AppColors.primary),
                     _StatTile(label: 'Football IQ', value: profile.footballIqTotal),
                   ],
                 ),
@@ -189,8 +189,8 @@ class _ProfileBody extends ConsumerWidget {
             TabBar(
               tabs: [
                 Tab(text: 'Vidéos'.tr),
-                const Tab(text: 'Moves'),
-                const Tab(text: 'Badges'),
+                Tab(text: 'Moves'.tr),
+                Tab(text: 'Badges'.tr),
               ],
             ),
           ),
