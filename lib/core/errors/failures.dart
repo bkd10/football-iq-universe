@@ -1,44 +1,50 @@
 import 'package:equatable/equatable.dart';
 
+import '../l10n/l10n.dart';
+
 /// Représente un échec métier propagé jusqu'à la couche presentation via
 /// `Either<Failure, T>` (dartz). Contrairement aux [Exception]s (couche
 /// data), les [Failure]s sont ce que l'UI sait afficher.
 sealed class Failure extends Equatable {
-  const Failure(this.message);
+  const Failure(this.rawMessage);
 
-  final String message;
+  /// Message d'origine, en français (code ou serveur).
+  final String rawMessage;
+
+  /// Message affiché, dans la langue du téléphone.
+  String get message => rawMessage.trServer;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [rawMessage];
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure([super.message = 'Une erreur serveur est survenue.']);
+  const ServerFailure([super.rawMessage = 'Une erreur serveur est survenue.']);
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure([super.message = 'Vérifie ta connexion internet.']);
+  const NetworkFailure([super.rawMessage = 'Vérifie ta connexion internet.']);
 }
 
 class AuthFailure extends Failure {
-  const AuthFailure([super.message = 'Échec de l\'authentification.']);
+  const AuthFailure([super.rawMessage = 'Échec de l\'authentification.']);
 }
 
 class ValidationFailure extends Failure {
-  const ValidationFailure(super.message);
+  const ValidationFailure(super.rawMessage);
 }
 
 /// Solde de Ballons insuffisant pour l'action demandée (spend-coins).
 class InsufficientCoinsFailure extends Failure {
   const InsufficientCoinsFailure([
-    super.message = 'Solde de Ballons insuffisant.',
+    super.rawMessage = 'Solde de Ballons insuffisant.',
   ]);
 }
 
 /// Limite quotidienne atteinte pour une action (ex : 3 vidéos/jour).
 class DailyLimitReachedFailure extends Failure {
   const DailyLimitReachedFailure([
-    super.message = 'Limite quotidienne atteinte pour cette action.',
+    super.rawMessage = 'Limite quotidienne atteinte pour cette action.',
   ]);
 }
 
@@ -48,10 +54,10 @@ class DailyLimitReachedFailure extends Failure {
 /// générique.
 class EmailNotConfirmedFailure extends Failure {
   const EmailNotConfirmedFailure([
-    super.message = 'Confirme ton e-mail avant de te connecter.',
+    super.rawMessage = 'Confirme ton e-mail avant de te connecter.',
   ]);
 }
 
 class UnknownFailure extends Failure {
-  const UnknownFailure([super.message = 'Une erreur inattendue est survenue.']);
+  const UnknownFailure([super.rawMessage = 'Une erreur inattendue est survenue.']);
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -43,16 +44,16 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     final usersAsync = ref.watch(adminUsersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Joueurs')),
+      appBar: AppBar(title: Text('Joueurs'.tr)),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: TextField(
               onChanged: _onSearch,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Pseudo, nom ou e-mail',
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: 'Pseudo, nom ou e-mail'.tr,
               ),
             ),
           ),
@@ -62,7 +63,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
               error: (error, _) => Center(child: Text(adminErrorText(error))),
               data: (users) {
                 if (users.isEmpty) {
-                  return const Center(child: Text('Aucun joueur trouvé.'));
+                  return Center(child: Text('Aucun joueur trouvé.'.tr));
                 }
                 return RefreshIndicator(
                   onRefresh: () async => ref.invalidate(adminUsersProvider),
@@ -103,9 +104,9 @@ class _UserTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final details = [
       if (user.email != null) user.email!,
-      '${user.videosCount} vidéos',
-      '${user.followersCount} abonnés',
-      if (user.reportsCount > 0) '${user.reportsCount} signalements',
+      '{n} vidéos'.trArgs({'n': user.videosCount}),
+      '{n} abonnés'.trArgs({'n': user.followersCount}),
+      if (user.reportsCount > 0) '{n} signalements'.trArgs({'n': user.reportsCount}),
     ].join(' · ');
 
     return ListTile(
@@ -124,7 +125,7 @@ class _UserTile extends ConsumerWidget {
           ],
           if (user.isBanned) ...[
             const SizedBox(width: AppSpacing.xs),
-            Text('BANNI', style: context.textTheme.bodySmall?.copyWith(color: AppColors.error)),
+            Text('BANNI'.tr, style: context.textTheme.bodySmall?.copyWith(color: AppColors.error)),
           ],
         ],
       ),
@@ -155,7 +156,7 @@ class _UserActionsSheetState extends ConsumerState<_UserActionsSheet> {
 
   Future<void> _setBan(bool banned) async {
     if (banned && _reasonController.text.trim().isEmpty) {
-      context.showSnackBar('Indique la raison du bannissement.', isError: true);
+      context.showSnackBar('Indique la raison du bannissement.'.tr, isError: true);
       return;
     }
     setState(() => _busy = true);
@@ -167,7 +168,10 @@ class _UserActionsSheetState extends ConsumerState<_UserActionsSheet> {
           );
       if (!mounted) return;
       Navigator.of(context).pop(true);
-      context.showSnackBar(banned ? '@${widget.user.username} est banni.' : '@${widget.user.username} est débanni.');
+      context.showSnackBar(
+        (banned ? '@{name} est banni.' : '@{name} est débanni.')
+            .trArgs({'name': widget.user.username}),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
@@ -190,11 +194,11 @@ class _UserActionsSheetState extends ConsumerState<_UserActionsSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('@${user.username}', style: context.textTheme.titleLarge),
-              Text('Inscrit le $joined', style: context.textTheme.bodySmall),
+              Text('Inscrit le {date}'.trArgs({'date': joined}), style: context.textTheme.bodySmall),
               const SizedBox(height: AppSpacing.md),
               OutlinedButton.icon(
                 icon: const Icon(Icons.person_outline),
-                label: const Text('Voir le profil'),
+                label: Text('Voir le profil'.tr),
                 onPressed: () {
                   Navigator.of(context).pop();
                   context.push(RouteNames.otherProfilePath(user.id));
@@ -202,22 +206,23 @@ class _UserActionsSheetState extends ConsumerState<_UserActionsSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               if (user.isBanned) ...[
-                Text('Banni : ${user.banReason ?? 'sans raison indiquée'}',
+                Text('Banni : {reason}'.trArgs({'reason': user.banReason?.trServer ?? 'sans raison indiquée'.tr}),
                     style: context.textTheme.bodyMedium?.copyWith(color: AppColors.error),),
                 const SizedBox(height: AppSpacing.md),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: _busy ? null : () => _setBan(false),
-                    child: const Text('Débannir'),
+                    child: Text('Débannir'.tr),
                   ),
                 ),
               ] else if (user.role != 'admin') ...[
-                Text('Bannir ce joueur',
+                Text('Bannir ce joueur'.tr,
                     style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),),
                 Text(
-                  'Il ne pourra plus se connecter et ses vidéos seront masquées. '
-                  'Réversible à tout moment.',
+                  ('Il ne pourra plus se connecter et ses vidéos seront masquées. '
+                          'Réversible à tout moment.')
+                      .tr,
                   style: context.textTheme.bodySmall,
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -236,14 +241,14 @@ class _UserActionsSheetState extends ConsumerState<_UserActionsSheet> {
                 TextField(
                   controller: _reasonController,
                   maxLength: 500,
-                  decoration: const InputDecoration(hintText: 'Raison'),
+                  decoration: InputDecoration(hintText: 'Raison'.tr),
                 ),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: _busy ? null : () => _setBan(true),
                     style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-                    child: const Text('Bannir'),
+                    child: Text('Bannir'.tr),
                   ),
                 ),
               ],

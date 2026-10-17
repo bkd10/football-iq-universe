@@ -21,6 +21,7 @@ class VideoCreatorModel {
     this.likesReceivedCount = 0,
     this.movesCreatedCount = 0,
     this.challengesWonCount = 0,
+    this.formScore = 0,
   });
 
   factory VideoCreatorModel.fromJson(Map<String, dynamic> json) =>
@@ -42,6 +43,7 @@ class VideoCreatorModel {
   final int likesReceivedCount;
   final int movesCreatedCount;
   final int challengesWonCount;
+  final int formScore;
 
   VideoCreator toEntity() {
     return VideoCreator(
@@ -59,6 +61,7 @@ class VideoCreatorModel {
       likesReceivedCount: likesReceivedCount,
       movesCreatedCount: movesCreatedCount,
       challengesWonCount: challengesWonCount,
+      formScore: formScore,
     );
   }
 }

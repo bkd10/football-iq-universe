@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/l10n.dart';
+
 /// Coquille de navigation principale — 5 onglets, voir PARTIE 9.1 :
 /// Feed / Défis / Créer (bouton central proéminent) / Classements / Profil.
 ///
@@ -31,31 +33,31 @@ class MainShell extends StatelessWidget {
         unselectedItemColor: Colors.white54,
         selectedFontSize: 11,
         unselectedFontSize: 11,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Feed',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: 'Feed'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            activeIcon: Icon(Icons.emoji_events),
-            label: 'Défis',
+            icon: const Icon(Icons.emoji_events_outlined),
+            activeIcon: const Icon(Icons.emoji_events),
+            label: 'Défis'.tr,
           ),
           BottomNavigationBarItem(
-            icon: _CreateTabIcon(),
-            activeIcon: _CreateTabIcon(),
-            label: 'Créer',
+            icon: const _CreateTabIcon(),
+            activeIcon: const _CreateTabIcon(),
+            label: 'Créer'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.leaderboard_outlined),
-            activeIcon: Icon(Icons.leaderboard),
-            label: 'Classement',
+            icon: const Icon(Icons.leaderboard_outlined),
+            activeIcon: const Icon(Icons.leaderboard),
+            label: 'Classement'.tr,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profil',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: 'Profil'.tr,
           ),
         ],
       ),

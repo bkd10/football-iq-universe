@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -45,7 +46,7 @@ class WalletScreen extends ConsumerWidget {
     final coins = profileAsync.valueOrNull?.coins;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Wallet')),
+      appBar: AppBar(title: Text('Wallet'.tr)),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
@@ -62,7 +63,7 @@ class WalletScreen extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.emoji_events_outlined, size: 18),
-                    label: const Text('Comment gagner'),
+                    label: Text('Comment gagner'.tr),
                     onPressed: () => context.push(RouteNames.earnBallons),
                   ),
                 ),
@@ -70,14 +71,14 @@ class WalletScreen extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.storefront_outlined, size: 18),
-                    label: const Text('Boutique'),
+                    label: Text('Boutique'.tr),
                     onPressed: () => context.push(RouteNames.shop),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
-            Text('Historique', style: context.textTheme.titleLarge),
+            Text('Historique'.tr, style: context.textTheme.titleLarge),
             const SizedBox(height: AppSpacing.md),
             transactionsAsync.when(
               loading: () => const Padding(
@@ -87,7 +88,7 @@ class WalletScreen extends ConsumerWidget {
               error: (error, _) => Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Text(
-                  error is Failure ? error.message : 'Erreur de chargement.',
+                  error is Failure ? error.message : 'Erreur de chargement.'.tr,
                   style: context.textTheme.bodyMedium,
                 ),
               ),
@@ -96,7 +97,7 @@ class WalletScreen extends ConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Text(
-                      'Aucune transaction pour l\'instant.',
+                      'Aucune transaction pour l\'instant.'.tr,
                       style: context.textTheme.bodyMedium,
                     ),
                   );
@@ -141,7 +142,7 @@ class _BalanceCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Solde de Ballons',
+                'Solde de Ballons'.tr,
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall
@@ -167,7 +168,7 @@ class _TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPositive = transaction.amount >= 0;
-    final label = _reasonLabels[transaction.reason] ??
+    final label = _reasonLabels[transaction.reason]?.tr ??
         transaction.reason.fromSnakeCaseToTitle;
 
     return Padding(

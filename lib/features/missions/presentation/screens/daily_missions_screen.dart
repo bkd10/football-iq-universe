@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -25,7 +26,7 @@ class DailyMissionsScreen extends ConsumerWidget {
     final streakDays = ref.watch(currentProfileProvider).valueOrNull?.streakDays ?? 0;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Missions du jour')),
+      appBar: AppBar(title: Text('Missions du jour'.tr)),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async => ref.invalidate(todayMissionProvider),
@@ -33,7 +34,7 @@ class DailyMissionsScreen extends ConsumerWidget {
           loading: () => const Center(child: AppLoader()),
           error: (error, _) => Center(
             child: Text(
-              error is Failure ? error.message : 'Erreur de chargement.',
+              error is Failure ? error.message : 'Erreur de chargement.'.tr,
               style: context.textTheme.bodyMedium,
             ),
           ),
@@ -46,14 +47,14 @@ class DailyMissionsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.md),
               _MissionTile(
                 icon: Icons.videocam_outlined,
-                label: 'Publier une vidéo',
-                reward: '+5 Ballons',
+                label: 'Publier une vidéo'.tr,
+                reward: '+5 Ballons'.tr,
                 done: mission.videoPosted,
               ),
               _MissionTile(
                 icon: Icons.play_circle_outline,
-                label: 'Regarder ${DailyMission.fullWatchTarget} vidéos en entier',
-                reward: '+${DailyMission.fullWatchReward} Ballons',
+                label: 'Regarder {n} vidéos en entier'.trArgs({'n': DailyMission.fullWatchTarget}),
+                reward: '+{n} Ballons'.trArgs({'n': DailyMission.fullWatchReward}),
                 done: mission.fullWatchRewarded,
                 progressLabel:
                     '${mission.fullVideosWatched.clamp(0, DailyMission.fullWatchTarget)}/${DailyMission.fullWatchTarget}',
@@ -61,7 +62,7 @@ class DailyMissionsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               Center(
                 child: Text(
-                  '${mission.coinsEarned} Ballons gagnés aujourd\'hui',
+                  '{n} Ballons gagnés aujourd\'hui'.trArgs({'n': mission.coinsEarned}),
                   style: AppTypography.stat(color: AppColors.gold, fontSize: 18),
                 ),
               ),
@@ -89,9 +90,9 @@ class _StreakCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Série en cours', style: context.textTheme.bodyMedium),
+                Text('Série en cours'.tr, style: context.textTheme.bodyMedium),
                 Text(
-                  '$streakDays jour${streakDays > 1 ? 's' : ''}',
+                  (streakDays > 1 ? '{n} jours' : '{n} jour').trArgs({'n': streakDays}),
                   style: context.textTheme.headlineMedium,
                 ),
               ],
@@ -100,7 +101,7 @@ class _StreakCard extends StatelessWidget {
           if (streakDays >= 7)
             const Icon(Icons.emoji_events, color: AppColors.gold)
           else
-            Text('7j : badge', style: context.textTheme.bodySmall),
+            Text('7j : badge'.tr, style: context.textTheme.bodySmall),
         ],
       ),
     );
@@ -121,7 +122,7 @@ class _ProgressHeader extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Progression', style: context.textTheme.titleLarge),
+            Text('Progression'.tr, style: context.textTheme.titleLarge),
             Text(
               '${mission.completedCount}/${DailyMission.totalMissions}',
               style: context.textTheme.titleLarge,

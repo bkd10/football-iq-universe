@@ -31,6 +31,9 @@ mixin _$VideoCreator {
   int get movesCreatedCount => throw _privateConstructorUsedError;
   int get challengesWonCount => throw _privateConstructorUsedError;
 
+  /// Forme sur les 30 derniers jours (-6 à +10), calculée côté serveur.
+  int get formScore => throw _privateConstructorUsedError;
+
   /// Create a copy of VideoCreator
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -58,7 +61,8 @@ abstract class $VideoCreatorCopyWith<$Res> {
       int videosCount,
       int likesReceivedCount,
       int movesCreatedCount,
-      int challengesWonCount});
+      int challengesWonCount,
+      int formScore});
 }
 
 /// @nodoc
@@ -90,6 +94,7 @@ class _$VideoCreatorCopyWithImpl<$Res, $Val extends VideoCreator>
     Object? likesReceivedCount = null,
     Object? movesCreatedCount = null,
     Object? challengesWonCount = null,
+    Object? formScore = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -148,6 +153,10 @@ class _$VideoCreatorCopyWithImpl<$Res, $Val extends VideoCreator>
           ? _value.challengesWonCount
           : challengesWonCount // ignore: cast_nullable_to_non_nullable
               as int,
+      formScore: null == formScore
+          ? _value.formScore
+          : formScore // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -174,7 +183,8 @@ abstract class _$$VideoCreatorImplCopyWith<$Res>
       int videosCount,
       int likesReceivedCount,
       int movesCreatedCount,
-      int challengesWonCount});
+      int challengesWonCount,
+      int formScore});
 }
 
 /// @nodoc
@@ -204,6 +214,7 @@ class __$$VideoCreatorImplCopyWithImpl<$Res>
     Object? likesReceivedCount = null,
     Object? movesCreatedCount = null,
     Object? challengesWonCount = null,
+    Object? formScore = null,
   }) {
     return _then(_$VideoCreatorImpl(
       id: null == id
@@ -262,6 +273,10 @@ class __$$VideoCreatorImplCopyWithImpl<$Res>
           ? _value.challengesWonCount
           : challengesWonCount // ignore: cast_nullable_to_non_nullable
               as int,
+      formScore: null == formScore
+          ? _value.formScore
+          : formScore // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -283,7 +298,8 @@ class _$VideoCreatorImpl implements _VideoCreator {
       this.videosCount = 0,
       this.likesReceivedCount = 0,
       this.movesCreatedCount = 0,
-      this.challengesWonCount = 0});
+      this.challengesWonCount = 0,
+      this.formScore = 0});
 
   @override
   final String id;
@@ -321,9 +337,14 @@ class _$VideoCreatorImpl implements _VideoCreator {
   @JsonKey()
   final int challengesWonCount;
 
+  /// Forme sur les 30 derniers jours (-6 à +10), calculée côté serveur.
+  @override
+  @JsonKey()
+  final int formScore;
+
   @override
   String toString() {
-    return 'VideoCreator(id: $id, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, level: $level, isVerified: $isVerified, country: $country, position: $position, preferredFoot: $preferredFoot, stars: $stars, videosCount: $videosCount, likesReceivedCount: $likesReceivedCount, movesCreatedCount: $movesCreatedCount, challengesWonCount: $challengesWonCount)';
+    return 'VideoCreator(id: $id, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, level: $level, isVerified: $isVerified, country: $country, position: $position, preferredFoot: $preferredFoot, stars: $stars, videosCount: $videosCount, likesReceivedCount: $likesReceivedCount, movesCreatedCount: $movesCreatedCount, challengesWonCount: $challengesWonCount, formScore: $formScore)';
   }
 
   @override
@@ -354,7 +375,9 @@ class _$VideoCreatorImpl implements _VideoCreator {
             (identical(other.movesCreatedCount, movesCreatedCount) ||
                 other.movesCreatedCount == movesCreatedCount) &&
             (identical(other.challengesWonCount, challengesWonCount) ||
-                other.challengesWonCount == challengesWonCount));
+                other.challengesWonCount == challengesWonCount) &&
+            (identical(other.formScore, formScore) ||
+                other.formScore == formScore));
   }
 
   @override
@@ -373,7 +396,8 @@ class _$VideoCreatorImpl implements _VideoCreator {
       videosCount,
       likesReceivedCount,
       movesCreatedCount,
-      challengesWonCount);
+      challengesWonCount,
+      formScore);
 
   /// Create a copy of VideoCreator
   /// with the given fields replaced by the non-null parameter values.
@@ -399,7 +423,8 @@ abstract class _VideoCreator implements VideoCreator {
       final int videosCount,
       final int likesReceivedCount,
       final int movesCreatedCount,
-      final int challengesWonCount}) = _$VideoCreatorImpl;
+      final int challengesWonCount,
+      final int formScore}) = _$VideoCreatorImpl;
 
   @override
   String get id;
@@ -429,6 +454,10 @@ abstract class _VideoCreator implements VideoCreator {
   int get movesCreatedCount;
   @override
   int get challengesWonCount;
+
+  /// Forme sur les 30 derniers jours (-6 à +10), calculée côté serveur.
+  @override
+  int get formScore;
 
   /// Create a copy of VideoCreator
   /// with the given fields replaced by the non-null parameter values.

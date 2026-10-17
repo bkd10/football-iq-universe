@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -40,7 +41,7 @@ class _GuardianApprovalScreenState extends ConsumerState<GuardianApprovalScreen>
     final token = _tokenController.text.trim();
     if (token.isEmpty) {
       setState(() {
-        _resultMessage = 'Renseigne le code reçu du joueur.';
+        _resultMessage = 'Renseigne le code reçu du joueur.'.tr;
         _resultIsError = true;
       });
       return;
@@ -62,16 +63,16 @@ class _GuardianApprovalScreenState extends ConsumerState<GuardianApprovalScreen>
       _resultIsError = !success;
       _resultMessage = success
           ? (approve
-              ? 'Contact approuvé — le joueur peut désormais échanger avec ce recruteur.'
-              : 'Contact refusé.')
-          : (error is Failure ? error.message : 'Une erreur est survenue.');
+              ? 'Contact approuvé — le joueur peut désormais échanger avec ce recruteur.'.tr
+              : 'Contact refusé.'.tr)
+          : (error is Failure ? error.message : 'Une erreur est survenue.'.tr);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Approbation tuteur')),
+      appBar: AppBar(title: Text('Approbation tuteur'.tr)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -79,21 +80,22 @@ class _GuardianApprovalScreenState extends ConsumerState<GuardianApprovalScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Un recruteur vérifié souhaite contacter un joueur mineur.',
+                'Un recruteur vérifié souhaite contacter un joueur mineur.'.tr,
                 style: context.textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Football IQ Universe médie systématiquement tout contact '
-                'avec un joueur mineur : ce contact ne sera possible que si '
-                'tu l\'approuves ici, en tant que tuteur.',
+                ('Football IQ Universe médie systématiquement tout contact '
+                        'avec un joueur mineur : ce contact ne sera possible que si '
+                        'tu l\'approuves ici, en tant que tuteur.')
+                    .tr,
                 style: context.textTheme.bodyMedium
                     ?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSpacing.xl),
               TextField(
                 controller: _tokenController,
-                decoration: const InputDecoration(labelText: 'Code reçu du joueur'),
+                decoration: InputDecoration(labelText: 'Code reçu du joueur'.tr),
               ),
               const SizedBox(height: AppSpacing.lg),
               if (_resultMessage != null) ...[
@@ -114,14 +116,14 @@ class _GuardianApprovalScreenState extends ConsumerState<GuardianApprovalScreen>
                 const SizedBox(height: AppSpacing.lg),
               ],
               AppPrimaryButton(
-                label: 'Approuver le contact',
+                label: 'Approuver le contact'.tr,
                 isLoading: _isSubmitting,
                 onPressed: _isSubmitting ? null : () => _act(true),
               ),
               const SizedBox(height: AppSpacing.sm),
               OutlinedButton(
                 onPressed: _isSubmitting ? null : () => _act(false),
-                child: const Text('Refuser le contact'),
+                child: Text('Refuser le contact'.tr),
               ),
             ],
           ),

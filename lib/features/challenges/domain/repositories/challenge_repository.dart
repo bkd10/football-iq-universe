@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../entities/battle_opponent.dart';
 import '../entities/challenge.dart';
 import '../entities/challenge_participation.dart';
 
@@ -52,5 +53,11 @@ abstract class ChallengeRepository {
     required String videoId,
     required DateTime endDate,
     String? opponentUsername,
+    bool randomOpponent = false,
   });
+
+  /// Joueurs que l'on suit ou qui nous suivent, pour choisir un adversaire.
+  Future<Either<Failure, List<BattleOpponent>>> getBattleOpponentSuggestions(
+    String? query,
+  );
 }

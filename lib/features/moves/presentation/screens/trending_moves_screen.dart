@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
@@ -20,17 +21,17 @@ class TrendingMovesScreen extends ConsumerWidget {
     final movesAsync = ref.watch(trendingMovesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Moves du moment')),
+      appBar: AppBar(title: Text('Moves du moment'.tr)),
       body: movesAsync.when(
         loading: () => const Center(child: AppLoader()),
         error: (error, _) => Center(
-          child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+          child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
         ),
         data: (moves) {
           if (moves.isEmpty) {
             return Center(
               child: Text(
-                'Aucun Move pour l\'instant — sois le premier à en créer un !',
+                'Aucun Move pour l\'instant — sois le premier à en créer un !'.tr,
                 style: context.textTheme.bodyMedium,
               ),
             );

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 import '../../../../core/errors/exceptions.dart';
+import '../../domain/entities/battle_opponent.dart';
 import '../models/challenge_model.dart';
 import '../models/challenge_participation_model.dart';
 
@@ -180,6 +181,7 @@ class ChallengeRemoteDataSource {
     required String videoId,
     required DateTime endDate,
     String? opponentUsername,
+    bool randomOpponent = false,
   }) async {
     try {
       final result = await _client.rpc<Map<String, dynamic>>(
@@ -191,6 +193,7 @@ class ChallengeRemoteDataSource {
           'p_video_id': videoId,
           'p_end_date': endDate.toUtc().toIso8601String(),
           'p_opponent_username': opponentUsername,
+          'p_random_opponent': randomOpponent,
         },
       );
       final created = await getChallengeById(result['challenge_id'] as String);
@@ -198,6 +201,25 @@ class ChallengeRemoteDataSource {
         throw const ServerException('Battle créée mais introuvable.');
       }
       return created;
+    } on supa.PostgrestException catch (e) {
+      throw _mapRpcError(e);
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Joueurs que l'utilisateur suit ou qui le suivent, filtrés par
+  /// [query] (pseudo ou nom) : les adversaires proposés pour une Battle.
+  Future<List<BattleOpponent>> getBattleOpponentSuggestions(String? query) async {
+    try {
+      final rows = await _client.rpc<List<dynamic>>(
+        'battle_opponent_suggestions',
+        params: {'p_query': query},
+      );
+      return rows
+          .map((row) => BattleOpponent.fromJson(row as Map<String, dynamic>))
+          .toList();
     } on supa.PostgrestException catch (e) {
       throw _mapRpcError(e);
     } catch (e) {

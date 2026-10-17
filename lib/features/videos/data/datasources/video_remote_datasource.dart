@@ -11,7 +11,7 @@ import '../models/video_model.dart';
 const _creatorSelect =
     'id, username, display_name, avatar_url, level, is_verified, country, position, '
     'preferred_foot, stars, videos_count, likes_received_count, moves_created_count, '
-    'challenges_won_count';
+    'challenges_won_count, form_score';
 
 class VideoRemoteDataSource {
   const VideoRemoteDataSource(this._client, this._storageService);
@@ -38,6 +38,39 @@ class VideoRemoteDataSource {
           .order('created_at', ascending: false)
           .limit(limit);
 
+      return rows.map((row) => VideoModel.fromJson(row)).toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Vestiaire : les vidéos des joueurs que l'utilisateur suit, des plus
+  /// récentes aux plus anciennes.
+  Future<List<VideoModel>> getFollowingFeed({
+    int limit = 10,
+    DateTime? beforeCreatedAt,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    try {
+      final follows = await _client
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', userId);
+      final ids = [for (final row in follows) row['following_id'] as String];
+      if (ids.isEmpty) return const [];
+
+      final baseQuery = _client
+          .from('videos')
+          .select('*, creator:profiles($_creatorSelect)')
+          .eq('status', 'active')
+          .inFilter('user_id', ids);
+
+      final filtered = beforeCreatedAt != null
+          ? baseQuery.lt('created_at', beforeCreatedAt.toIso8601String())
+          : baseQuery;
+
+      final rows = await filtered.order('created_at', ascending: false).limit(limit);
       return rows.map((row) => VideoModel.fromJson(row)).toList();
     } catch (e) {
       throw ServerException(e.toString());

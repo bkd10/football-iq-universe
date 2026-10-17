@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -27,16 +28,16 @@ class MoveDetailScreen extends ConsumerWidget {
     final moveAsync = ref.watch(videoByIdProvider(moveId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Move')),
+      appBar: AppBar(title: Text('Move'.tr)),
       body: moveAsync.when(
         loading: () => const Center(child: AppLoader()),
         error: (error, _) => Center(
-          child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+          child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
         ),
         data: (move) {
           if (move == null) {
             return Center(
-              child: Text('Ce Move est introuvable.', style: context.textTheme.bodyLarge),
+              child: Text('Ce Move est introuvable.'.tr, style: context.textTheme.bodyLarge),
             );
           }
 
@@ -51,7 +52,7 @@ class MoveDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Inventé par @${move.creator?.username ?? 'inconnu'}',
+                'Inventé par @{user}'.trArgs({'user': move.creator?.username ?? 'inconnu'.tr}),
                 style: context.textTheme.bodyLarge,
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -59,16 +60,16 @@ class MoveDetailScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _StatColumn(
-                    label: 'Vues',
+                    label: 'Vues'.tr,
                     value: Formatters.compactCount(move.viewsCount),
                   ),
                   _StatColumn(
-                    label: 'Reproductions',
+                    label: 'Reproductions'.tr,
                     value: Formatters.compactCount(move.reproductionsCount),
                     color: AppColors.primary,
                   ),
                   _StatColumn(
-                    label: 'Masterclass',
+                    label: 'Masterclass'.tr,
                     value: Formatters.compactCount(move.masterclassCount),
                     color: AppColors.gold,
                   ),
@@ -76,24 +77,24 @@ class MoveDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.xl),
               AppPrimaryButton(
-                label: 'Essayer ce Move',
+                label: 'Essayer ce Move'.tr,
                 icon: Icons.videocam,
                 onPressed: () => context.push(
                   '${RouteNames.create}?originalMoveId=$moveId',
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Text('Meilleures reproductions', style: context.textTheme.titleLarge),
+              Text('Meilleures reproductions'.tr, style: context.textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               reproductionsAsync.when(
                 loading: () => const Center(child: AppLoader()),
                 error: (error, _) => Text(
-                  error is Failure ? error.message : 'Erreur de chargement.',
+                  error is Failure ? error.message : 'Erreur de chargement.'.tr,
                 ),
                 data: (reproductions) {
                   if (reproductions.isEmpty) {
                     return Text(
-                      'Personne n\'a encore reproduit ce Move — sois le premier !',
+                      'Personne n\'a encore reproduit ce Move — sois le premier !'.tr,
                       style: context.textTheme.bodyMedium,
                     );
                   }

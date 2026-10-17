@@ -12,6 +12,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/extensions/string_extensions.dart';
 import '../../../../core/widgets/buttons/app_primary_button.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../economy/presentation/providers/economy_providers.dart';
 import '../providers/video_providers.dart';
 
@@ -63,7 +64,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
     } catch (_) {
       await controller.dispose();
       if (mounted) {
-        context.showSnackBar('Impossible de lire cette vidéo.', isError: true);
+        context.showSnackBar('Impossible de lire cette vidéo.'.tr, isError: true);
       }
       return;
     }
@@ -76,9 +77,9 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
     if (duration == null) {
       durationError = null;
     } else if (duration.inSeconds < AppConstants.minVideoDurationSeconds) {
-      durationError = 'La vidéo doit durer au moins ${AppConstants.minVideoDurationSeconds}s.';
+      durationError = 'La vidéo doit durer au moins {n}s.'.trArgs({'n': AppConstants.minVideoDurationSeconds});
     } else if (duration.inSeconds > AppConstants.maxVideoDurationSeconds) {
-      durationError = 'La vidéo doit durer ${AppConstants.maxVideoDurationSeconds}s maximum.';
+      durationError = 'La vidéo doit durer {n}s maximum.'.trArgs({'n': AppConstants.maxVideoDurationSeconds});
     } else {
       durationError = null;
     }
@@ -116,13 +117,13 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
     if (picked == null || _isUploading) return;
 
     if (_isMove && _moveNameController.text.trim().isEmpty) {
-      context.showSnackBar('Donne un nom à ton Move.', isError: true);
+      context.showSnackBar('Donne un nom à ton Move.'.tr, isError: true);
       return;
     }
 
     setState(() {
       _isUploading = true;
-      _statusMessage = 'Préparation de la vidéo...';
+      _statusMessage = 'Préparation de la vidéo...'.tr;
     });
 
     final controller = _previewController;
@@ -131,7 +132,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
         await ref.read(videoSourceServiceProvider).prepareForUpload(picked);
 
     if (!mounted) return;
-    setState(() => _statusMessage = 'Publication en cours...');
+    setState(() => _statusMessage = 'Publication en cours...'.tr);
 
     final result = await ref.read(uploadVideoUseCaseProvider)(
       videoFile: prepared.file,
@@ -158,7 +159,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
               EconomyReason.postVideo,
               referenceId: video.id,
             );
-        context.showSnackBar('Vidéo publiée !');
+        context.showSnackBar('Vidéo publiée !'.tr);
         _reset();
         context.go(RouteNames.feed);
       },
@@ -168,7 +169,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Créer')),
+      appBar: AppBar(title: Text('Créer'.tr)),
       body: SafeArea(
         child: _pickedVideo == null ? _buildPicker(context) : _buildForm(context),
       ),
@@ -185,14 +186,16 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
             const Icon(Icons.videocam_outlined, size: 64, color: AppColors.primary),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Filme ton geste (${AppConstants.minVideoDurationSeconds}-'
-              '${AppConstants.maxVideoDurationSeconds}s)',
+              'Filme ton geste ({min}-{max}s)'.trArgs({
+                'min': AppConstants.minVideoDurationSeconds,
+                'max': AppConstants.maxVideoDurationSeconds,
+              }),
               style: context.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
             AppPrimaryButton(
-              label: 'Filmer',
+              label: 'Filmer'.tr,
               icon: Icons.videocam,
               onPressed: () => _pick(true),
             ),
@@ -200,7 +203,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
             OutlinedButton.icon(
               onPressed: () => _pick(false),
               icon: const Icon(Icons.photo_library_outlined),
-              label: const Text('Choisir dans la galerie'),
+              label: Text('Choisir dans la galerie'.tr),
             ),
           ],
         ),
@@ -233,7 +236,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
           TextButton.icon(
             onPressed: _isUploading ? null : _reset,
             icon: const Icon(Icons.refresh),
-            label: const Text('Changer de vidéo'),
+            label: Text('Changer de vidéo'.tr),
           ),
           if (widget.originalMoveId != null) ...[
             _ReproducingMoveBanner(moveId: widget.originalMoveId!),
@@ -243,15 +246,15 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
           TextField(
             controller: _captionController,
             maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Caption',
+            decoration: InputDecoration(
+              labelText: 'Caption'.tr,
               alignLabelWithHint: true,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String>(
             initialValue: _category,
-            decoration: const InputDecoration(labelText: 'Catégorie'),
+            decoration: InputDecoration(labelText: 'Catégorie'.tr),
             items: AppConstants.videoCategories
                 .map((c) => DropdownMenuItem(value: c, child: Text(c.capitalize)))
                 .toList(),
@@ -265,9 +268,9 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
             const SizedBox(height: AppSpacing.md),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Créer un Move'),
-              subtitle: const Text(
-                'Nomme ce geste — les reproductions te créditeront à vie.',
+              title: Text('Créer un Move'.tr),
+              subtitle: Text(
+                'Nomme ce geste — les reproductions te créditeront à vie.'.tr,
               ),
               value: _isMove,
               activeThumbColor: AppColors.primary,
@@ -278,7 +281,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _moveNameController,
-              decoration: const InputDecoration(labelText: 'Nom du Move'),
+              decoration: InputDecoration(labelText: 'Nom du Move'.tr),
             ),
           ],
           const SizedBox(height: AppSpacing.xl),
@@ -291,7 +294,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
             const SizedBox(height: AppSpacing.sm),
           ],
           AppPrimaryButton(
-            label: 'Publier',
+            label: 'Publier'.tr,
             isLoading: _isUploading,
             onPressed: _isUploading ? null : _publish,
           ),
@@ -323,12 +326,15 @@ class _ReproducingMoveBanner extends ConsumerWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: moveAsync.when(
-              loading: () => const Text('Chargement du Move...'),
-              error: (_, __) => const Text('Tu reproduis un Move.'),
+              loading: () => Text('Chargement du Move...'.tr),
+              error: (_, __) => Text('Tu reproduis un Move.'.tr),
               data: (move) => Text(
                 move != null
-                    ? 'Tu reproduis "${move.moveName}" de @${move.creator?.username ?? 'inconnu'}'
-                    : 'Ce Move est introuvable.',
+                    ? 'Tu reproduis "{move}" de @{user}'.trArgs({
+                        'move': move.moveName,
+                        'user': move.creator?.username ?? 'inconnu'.tr,
+                      })
+                    : 'Ce Move est introuvable.'.tr,
                 style: const TextStyle(color: AppColors.primary, fontSize: 12.5),
               ),
             ),

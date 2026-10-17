@@ -7,11 +7,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/economy_constants.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../economy/presentation/providers/economy_providers.dart';
 import '../../../notifications/presentation/providers/notifications_providers.dart';
+import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/video_providers.dart';
 import '../widgets/feed_guide_sheet.dart';
 import '../widgets/feed_video_tile.dart';
@@ -21,8 +22,7 @@ enum _FeedTab { forYou, following, trending }
 /// Feed vidéo : une carte de joueur par vidéo, qu'on fait défiler — voir
 /// PARTIE 8.1. "Ouverture" (algorithme Talent
 /// First) est le feed branché en MVP ; "Tendances" ouvre les Moves du moment
-/// (PARTIE 9.2) ; "Vestiaire" est prévu mais pas encore implémenté
-/// (PARTIE 20, Semaines à venir).
+/// (PARTIE 9.2) ; "Vestiaire" montre les vidéos des joueurs suivis.
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
 
@@ -56,10 +56,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     super.dispose();
   }
 
+  AsyncNotifierProvider<FeedController, List<Video>> get _feed =>
+      _tab == _FeedTab.following ? followingFeedControllerProvider : feedControllerProvider;
+
   void _onPageChanged(int index, int total) {
     setState(() => _activeIndex = index);
     if (index >= total - 3) {
-      ref.read(feedControllerProvider.notifier).loadMore();
+      ref.read(_feed.notifier).loadMore();
     }
   }
 
@@ -69,18 +72,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       return;
     }
     if (tab == _tab) return;
-    if (tab != _FeedTab.forYou) {
-      context.showSnackBar(
-        'Le Vestiaire arrive bientôt : tu y verras les vidéos des joueurs que tu suis.',
-      );
-      return;
-    }
-    setState(() => _tab = tab);
+    setState(() {
+      _tab = tab;
+      _activeIndex = 0;
+    });
+    if (_pageController.hasClients) _pageController.jumpToPage(0);
+    // Le Vestiaire se recharge à chaque visite : on vient peut-être de
+    // suivre quelqu'un.
+    if (tab == _FeedTab.following) ref.invalidate(followingFeedControllerProvider);
   }
 
   @override
   Widget build(BuildContext context) {
-    final feedAsync = ref.watch(feedControllerProvider);
+    final feedAsync = ref.watch(_feed);
 
     return Scaffold(
       backgroundColor: _pitch,
@@ -104,13 +108,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Text(
-                        error is Failure ? error.message : 'Impossible de charger le feed.',
+                        error is Failure ? error.message : 'Impossible de charger le feed.'.tr,
                         style: const TextStyle(color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
                     ),
                   ),
                   data: (videos) {
+                    if (videos.isEmpty && _tab == _FeedTab.following) {
+                      return const _EmptyLockerRoom();
+                    }
                     if (videos.isEmpty) {
                       return Center(
                         child: Padding(
@@ -121,7 +128,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               const Text('⚽', style: TextStyle(fontSize: 48)),
                               const SizedBox(height: 12),
                               Text(
-                                'LE TERRAIN EST LIBRE',
+                                'LE TERRAIN EST LIBRE'.tr,
                                 style: GoogleFonts.barlowCondensed(
                                   color: Colors.white,
                                   fontSize: 28,
@@ -129,9 +136,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              const Text(
-                                'Publie la première vidéo et prends la première carte.',
-                                style: TextStyle(color: Colors.white70),
+                              Text(
+                                'Publie la première vidéo et prends la première carte.'.tr,
+                                style: const TextStyle(color: Colors.white70),
                                 textAlign: TextAlign.center,
                               ),
                             ],
@@ -142,7 +149,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     return RefreshIndicator(
                       color: AppColors.primary,
                       backgroundColor: AppColors.surface,
-                      onRefresh: () => ref.read(feedControllerProvider.notifier).refresh(),
+                      onRefresh: () => ref.read(_feed.notifier).refresh(),
                       child: PageView.builder(
                         controller: _pageController,
                         // Sur ordinateur aussi, on fait défiler les cartes à la souris.
@@ -154,8 +161,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         onPageChanged: (index) => _onPageChanged(index, videos.length),
                         itemBuilder: (context, index) {
                           return FeedVideoTile(
+                            key: ValueKey('${_tab.name}-${videos[index].id}'),
                             video: videos[index],
                             isActive: index == _activeIndex,
+                            feed: _feed,
                           );
                         },
                       ),
@@ -196,7 +205,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.help_outline, color: Colors.white),
-                tooltip: 'Comment ça marche',
+                tooltip: 'Comment ça marche'.tr,
                 onPressed: () => FeedGuideSheet.show(context),
               ),
               IconButton(
@@ -207,7 +216,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.mail_outline, color: Colors.white),
-                tooltip: 'Messages',
+                tooltip: 'Messages'.tr,
                 onPressed: () => context.push(RouteNames.inbox),
               ),
               Consumer(
@@ -232,19 +241,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             child: Row(
               children: [
                 _FeedTabLabel(
-                  label: 'Vestiaire',
+                  label: 'Vestiaire'.tr,
                   active: _tab == _FeedTab.following,
                   onTap: () => _selectTab(_FeedTab.following),
                 ),
                 const SizedBox(width: 8),
                 _FeedTabLabel(
-                  label: 'Ouverture',
+                  label: 'Ouverture'.tr,
                   active: _tab == _FeedTab.forYou,
                   onTap: () => _selectTab(_FeedTab.forYou),
                 ),
                 const SizedBox(width: 8),
                 _FeedTabLabel(
-                  label: 'Tendances',
+                  label: 'Tendances'.tr,
                   active: _tab == _FeedTab.trending,
                   onTap: () => _selectTab(_FeedTab.trending),
                 ),
@@ -253,7 +262,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            _tabHints[_tab]!,
+            _tabHints[_tab]!.tr,
             style: const TextStyle(color: Colors.white60, fontSize: 12),
           ),
         ],
@@ -267,6 +276,42 @@ const _tabHints = {
   _FeedTab.following: 'Les vidéos des joueurs que tu suis.',
   _FeedTab.trending: 'Les Moves du moment.',
 };
+
+class _EmptyLockerRoom extends StatelessWidget {
+  const _EmptyLockerRoom();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('👕', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 12),
+            Text(
+              'TON VESTIAIRE EST VIDE'.tr,
+              style: GoogleFonts.barlowCondensed(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              ('Suis des joueurs depuis leur carte ou leur profil : '
+                      'leurs nouvelles vidéos arriveront ici.')
+                  .tr,
+              style: const TextStyle(color: Colors.white70),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 const _pitch = Color(0xFF0D2418);
 const _lime = Color(0xFFD8F34A);

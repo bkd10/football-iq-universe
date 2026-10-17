@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/services/onboarding_prefs_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -89,12 +90,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             Align(
-              alignment: Alignment.topRight,
+              alignment: AlignmentDirectional.topEnd,
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: TextButton(
                   onPressed: _skipToLogin,
-                  child: const Text('Passer'),
+                  child: Text('Passer'.tr),
                 ),
               ),
             ),
@@ -118,13 +119,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             .slideY(begin: 0.1, end: 0),
                         const SizedBox(height: AppSpacing.xl),
                         Text(
-                          page.title,
+                          page.title.tr,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.displaySmall,
                         ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
                         const SizedBox(height: AppSpacing.md),
                         Text(
-                          page.description,
+                          page.description.tr,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
@@ -153,7 +154,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: AppPrimaryButton(
-                label: isLast ? 'Rejoindre l\'aventure' : 'Suivant',
+                label: isLast ? 'Rejoindre l\'aventure'.tr : 'Suivant'.tr,
                 onPressed: _next,
               ),
             ),

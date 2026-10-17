@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/battle_opponent.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/challenge_participation.dart';
 import '../../domain/repositories/challenge_repository.dart';
@@ -143,6 +144,7 @@ class ChallengeRepositoryImpl implements ChallengeRepository {
     required String videoId,
     required DateTime endDate,
     String? opponentUsername,
+    bool randomOpponent = false,
   }) async {
     try {
       final model = await _remoteDataSource.createBattle(
@@ -152,10 +154,26 @@ class ChallengeRepositoryImpl implements ChallengeRepository {
         videoId: videoId,
         endDate: endDate,
         opponentUsername: opponentUsername,
+        randomOpponent: randomOpponent,
       );
       return Right(model.toEntity());
     } on InsufficientCoinsException catch (e) {
       return Left(InsufficientCoinsFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(UnknownFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<BattleOpponent>>> getBattleOpponentSuggestions(
+    String? query,
+  ) async {
+    try {
+      return Right(await _remoteDataSource.getBattleOpponentSuggestions(query));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } on ServerException catch (e) {

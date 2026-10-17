@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
@@ -32,7 +33,7 @@ class PlaceholderScreen extends StatelessWidget {
               Icon(icon, size: 64, color: AppColors.textSecondary),
               const SizedBox(height: AppSpacing.md),
               Text(
-                subtitle,
+                subtitle.tr,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),

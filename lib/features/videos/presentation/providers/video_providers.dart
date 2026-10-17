@@ -1,4 +1,7 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/errors/failures.dart';
 
 import '../../../../core/services/storage_service.dart';
 import '../../../../core/services/video_source/video_source_service.dart';
@@ -43,6 +46,9 @@ final videoRepositoryProvider = Provider<VideoRepository>((ref) {
 
 final getFeedUseCaseProvider = Provider(
   (ref) => GetFeed(ref.watch(videoRepositoryProvider)),
+);
+final getFollowingFeedUseCaseProvider = Provider(
+  (ref) => GetFollowingFeed(ref.watch(videoRepositoryProvider)),
 );
 final toggleLikeUseCaseProvider = Provider(
   (ref) => ToggleLike(ref.watch(videoRepositoryProvider)),
@@ -111,10 +117,14 @@ class FeedController extends AsyncNotifier<List<Video>> {
   Future<List<Video>> build() => _fetchPage();
 
   Future<List<Video>> _fetchPage({DateTime? before}) async {
-    final result = await ref.read(getFeedUseCaseProvider)(
-      beforeCreatedAt: before,
-    );
+    final result = await fetch(before);
     return result.fold((failure) => throw failure, (videos) => videos);
+  }
+
+  /// La source du feed : « Ouverture » par défaut, le Vestiaire dans
+  /// [FollowingFeedController].
+  Future<Either<Failure, List<Video>>> fetch(DateTime? before) {
+    return ref.read(getFeedUseCaseProvider)(beforeCreatedAt: before);
   }
 
   Future<void> refresh() async {
@@ -216,6 +226,17 @@ class FeedController extends AsyncNotifier<List<Video>> {
 
 final feedControllerProvider =
     AsyncNotifierProvider<FeedController, List<Video>>(FeedController.new);
+
+/// Vestiaire : mêmes interactions que le feed, vidéos des joueurs suivis.
+class FollowingFeedController extends FeedController {
+  @override
+  Future<Either<Failure, List<Video>>> fetch(DateTime? before) {
+    return ref.read(getFollowingFeedUseCaseProvider)(beforeCreatedAt: before);
+  }
+}
+
+final followingFeedControllerProvider =
+    AsyncNotifierProvider<FeedController, List<Video>>(FollowingFeedController.new);
 
 /// Commentaires d'une vidéo, invalidés (`ref.invalidate`) après l'ajout
 /// d'un nouveau commentaire pour rafraîchir la liste.

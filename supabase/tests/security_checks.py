@@ -330,10 +330,18 @@ def main():
     s, r = rpc("vote_for_participant", {"p_challenge_id": bid, "p_participant_id": b}, c_tok)
     check("un joueur avec vidéo vote", s == 200, r)
     b_coins, b_stars = profile(b)["coins"], profile(b)["stars"]
+    sql("select refresh_form_scores()")
+    form_before = {r["id"]: r["form_score"] for r in sel(f"profiles?id=in.({a},{b})&select=id,form_score")[1]}
     sql(f"update challenges set end_date = now() - interval '1 minute' where id='{bid}'")
     sql("select resolve_expired_challenges()")
     check("le gagnant de la Battle prend les 2 mises + 100 Stars",
           profile(b)["coins"] == b_coins + 60 and profile(b)["stars"] == b_stars + 100, profile(b))
+    sql("select refresh_form_scores()")
+    after = {r["id"]: r["form_score"] for r in sel(f"profiles?id=in.({a},{b})&select=id,form_score")[1]}
+    check("forme : la Battle gagnée fait monter, la perdue fait baisser",
+          after.get(b) == form_before[b] + 2 and after.get(a) == form_before[a] - 2, (form_before, after))
+    s, r = upd(f"profiles?id=eq.{a}", {"form_score": 10}, a_tok)
+    check("FRAUDE modifier sa propre forme refusé", s in (401, 403), r)
 
     a_coins = profile(a)["coins"]
     s, r = rpc("create_battle", {"p_title": "Qui jongle le plus", "p_rules": "x", "p_stake": 20,

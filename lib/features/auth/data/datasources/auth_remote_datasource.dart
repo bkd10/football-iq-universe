@@ -48,7 +48,7 @@ class AuthRemoteDataSource {
           'Confirme ton e-mail avant de te connecter — vérifie ta boîte de réception.',
         );
       }
-      throw core_errors.AuthException(e.message);
+      throw core_errors.AuthException(_authMessage(e));
     } catch (e) {
       throw core_errors.ServerException(e.toString());
     }
@@ -98,7 +98,7 @@ class AuthRemoteDataSource {
     } on core_errors.AuthException {
       rethrow;
     } on supa.AuthException catch (e) {
-      throw core_errors.AuthException(e.message);
+      throw core_errors.AuthException(_authMessage(e));
     } catch (e) {
       throw core_errors.ServerException(e.toString());
     }
@@ -149,7 +149,7 @@ class AuthRemoteDataSource {
     try {
       await _client.auth.resend(type: supa.OtpType.signup, email: email);
     } on supa.AuthException catch (e) {
-      throw core_errors.AuthException(e.message);
+      throw core_errors.AuthException(_authMessage(e));
     } catch (e) {
       throw core_errors.ServerException(e.toString());
     }
@@ -159,7 +159,7 @@ class AuthRemoteDataSource {
     try {
       await _client.auth.resetPasswordForEmail(email);
     } on supa.AuthException catch (e) {
-      throw core_errors.AuthException(e.message);
+      throw core_errors.AuthException(_authMessage(e));
     } catch (e) {
       throw core_errors.ServerException(e.toString());
     }
@@ -271,5 +271,27 @@ class AuthRemoteDataSource {
     }
 
     return profile;
+  }
+
+  /// Supabase Auth répond en anglais : on ramène les cas courants à un
+  /// message français, traduit ensuite dans la langue du téléphone.
+  String _authMessage(supa.AuthException e) {
+    final message = e.message.toLowerCase();
+    if (message.contains('invalid login credentials')) {
+      return 'E-mail ou mot de passe incorrect.';
+    }
+    if (message.contains('already registered') || message.contains('already been registered')) {
+      return 'Un compte existe déjà avec cet e-mail.';
+    }
+    if (message.contains('password should be at least')) {
+      return 'Le mot de passe est trop court (6 caractères minimum).';
+    }
+    if (message.contains('invalid format') || message.contains('email address') && message.contains('invalid')) {
+      return 'Adresse e-mail invalide.';
+    }
+    if (message.contains('rate limit') || message.contains('security purposes') || e.statusCode == '429') {
+      return 'Trop de tentatives. Réessaie dans quelques minutes.';
+    }
+    return e.message;
   }
 }

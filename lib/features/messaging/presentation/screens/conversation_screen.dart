@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -71,7 +72,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           .read(messagesControllerProvider(widget.conversationId).notifier)
           .refresh();
     } else {
-      context.showSnackBar('Échec de l\'envoi.', isError: true);
+      context.showSnackBar('Échec de l\'envoi.'.tr, isError: true);
     }
   }
 
@@ -81,18 +82,19 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         .getGuardianApprovalToken(widget.conversationId);
     if (!mounted) return;
     if (token == null) {
-      context.showSnackBar('Impossible de générer le lien.', isError: true);
+      context.showSnackBar('Impossible de générer le lien.'.tr, isError: true);
       return;
     }
     final myUsername =
-        ref.read(currentProfileProvider).valueOrNull?.username ?? 'ce joueur';
-    final text = 'Un recruteur vérifié souhaite contacter $myUsername sur '
-        'Football IQ Universe. Pour approuver ou refuser ce contact, ouvre '
-        'l\'app, va dans Réglages > "J\'ai un code tuteur" et saisis ce '
-        'code : $token';
+        ref.read(currentProfileProvider).valueOrNull?.username ?? 'ce joueur'.tr;
+    final text = ('Un recruteur vérifié souhaite contacter {username} sur '
+            'Football IQ Universe. Pour approuver ou refuser ce contact, ouvre '
+            'l\'app, va dans Réglages > "J\'ai un code tuteur" et saisis ce '
+            'code : {token}')
+        .trArgs({'username': myUsername, 'token': token});
     await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
-    context.showSnackBar('Message copié — colle-le dans SMS/WhatsApp pour ton tuteur.');
+    context.showSnackBar('Message copié — colle-le dans SMS/WhatsApp pour ton tuteur.'.tr);
   }
 
   @override
@@ -117,8 +119,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           conversation?.otherDisplayName?.isNotEmpty == true
               ? conversation!.otherDisplayName!
               : conversation != null
-                  ? '@${conversation.otherUsername ?? 'inconnu'}'
-                  : 'Conversation',
+                  ? '@${conversation.otherUsername ?? 'inconnu'.tr}'
+                  : 'Conversation'.tr,
         ),
       ),
       body: Column(
@@ -128,28 +130,28 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               color: AppColors.warning,
               icon: Icons.hourglass_top,
               text: isMePlayer
-                  ? 'En attente d\'approbation d\'un tuteur avant de pouvoir échanger.'
-                  : 'En attente d\'approbation du tuteur du joueur.',
-              actionLabel: isMePlayer ? 'Copier le lien pour ton tuteur' : null,
+                  ? 'En attente d\'approbation d\'un tuteur avant de pouvoir échanger.'.tr
+                  : 'En attente d\'approbation du tuteur du joueur.'.tr,
+              actionLabel: isMePlayer ? 'Copier le lien pour ton tuteur'.tr : null,
               onAction: isMePlayer ? _shareGuardianLink : null,
             ),
           if (conversation != null && conversation.isDeclined)
-            const _StatusBanner(
+            _StatusBanner(
               color: AppColors.error,
               icon: Icons.block,
-              text: 'Ce contact a été refusé.',
+              text: 'Ce contact a été refusé.'.tr,
             ),
           Expanded(
             child: messagesAsync.when(
               loading: () => const AppFullScreenLoader(),
               error: (error, _) => Center(
-                child: Text(error is Failure ? error.message : 'Erreur de chargement.'),
+                child: Text(error is Failure ? error.message : 'Erreur de chargement.'.tr),
               ),
               data: (messages) {
                 if (messages.isEmpty) {
                   return Center(
                     child: Text(
-                      'Aucun message pour l\'instant.',
+                      'Aucun message pour l\'instant.'.tr,
                       style: context.textTheme.bodyMedium,
                     ),
                   );
@@ -177,7 +179,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     Expanded(
                       child: TextField(
                         controller: _inputController,
-                        decoration: const InputDecoration(hintText: 'Message...'),
+                        decoration: InputDecoration(hintText: 'Message...'.tr),
                         maxLines: 4,
                         minLines: 1,
                         textInputAction: TextInputAction.send,
@@ -252,7 +254,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isMine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
       child: Container(
         constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.75),
         margin: const EdgeInsets.symmetric(vertical: 4),

@@ -34,13 +34,13 @@ class VideoThumbnailTile extends StatelessWidget {
                 : const Icon(Icons.videocam_outlined, color: AppColors.textSecondary),
           ),
           if (video.isMove)
-            const Positioned(
+            const PositionedDirectional(
               top: 4,
-              left: 4,
+              start: 4,
               child: Text('🔥', style: TextStyle(fontSize: 14)),
             ),
-          Positioned(
-            left: 4,
+          PositionedDirectional(
+            start: 4,
             bottom: 4,
             child: Row(
               children: [

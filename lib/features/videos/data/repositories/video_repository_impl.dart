@@ -48,6 +48,24 @@ class VideoRepositoryImpl implements VideoRepository {
   }
 
   @override
+  Future<Either<Failure, List<Video>>> getFollowingFeed({
+    int limit = 10,
+    DateTime? beforeCreatedAt,
+  }) async {
+    try {
+      final models = await _remoteDataSource.getFollowingFeed(
+        limit: limit,
+        beforeCreatedAt: beforeCreatedAt,
+      );
+      return Right(await _withReactions(models));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(UnknownFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Video>>> getVideosByUser(String userId) async {
     try {
       final models = await _remoteDataSource.getVideosByUser(userId);

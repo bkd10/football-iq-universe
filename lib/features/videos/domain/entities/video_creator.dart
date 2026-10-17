@@ -22,5 +22,8 @@ class VideoCreator with _$VideoCreator {
     @Default(0) int likesReceivedCount,
     @Default(0) int movesCreatedCount,
     @Default(0) int challengesWonCount,
+
+    /// Forme sur les 30 derniers jours (-6 à +10), calculée côté serveur.
+    @Default(0) int formScore,
   }) = _VideoCreator;
 }

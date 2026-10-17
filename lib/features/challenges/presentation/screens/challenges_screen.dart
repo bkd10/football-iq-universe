@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -50,14 +51,14 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
           children: [
             ListTile(
               leading: const Text('⚔️', style: TextStyle(fontSize: 24)),
-              title: const Text('Battle'),
-              subtitle: const Text('Toi contre un joueur. Tu fixes les règles et la mise.'),
+              title: Text('Battle'.tr),
+              subtitle: Text('Toi contre un joueur. Tu fixes les règles et la mise.'.tr),
               onTap: () => Navigator.of(context).pop(RouteNames.createBattle),
             ),
             ListTile(
               leading: const Text('🎯', style: TextStyle(fontSize: 24)),
-              title: const Text('Challenge'),
-              subtitle: const Text('Ouvert à tous, avec une date de début et de fin.'),
+              title: Text('Challenge'.tr),
+              subtitle: Text('Ouvert à tous, avec une date de début et de fin.'.tr),
               onTap: () => Navigator.of(context).pop(RouteNames.createChallenge),
             ),
           ],
@@ -73,11 +74,11 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Défis'),
+        title: Text('Défis'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
-            tooltip: 'Créer un défi',
+            tooltip: 'Créer un défi'.tr,
             onPressed: () => _showCreateChoice(context),
           ),
         ],
@@ -98,7 +99,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                 final filter = _filters[index];
                 final selected = _selectedType == filter.type;
                 return ChoiceChip(
-                  label: Text(filter.label),
+                  label: Text(filter.label.tr),
                   selected: selected,
                   selectedColor: AppColors.primary.withValues(alpha: 0.2),
                   labelStyle: TextStyle(
@@ -119,7 +120,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
               loading: () => const Center(child: AppLoader()),
               error: (error, _) => Center(
                 child: Text(
-                  error is Failure ? error.message : 'Erreur de chargement.',
+                  error is Failure ? error.message : 'Erreur de chargement.'.tr,
                   style: context.textTheme.bodyMedium,
                 ),
               ),
@@ -127,7 +128,7 @@ class _ChallengesScreenState extends ConsumerState<ChallengesScreen> {
                 if (challenges.isEmpty) {
                   return Center(
                     child: Text(
-                      'Aucun défi pour l\'instant — lance le premier !',
+                      'Aucun défi pour l\'instant — lance le premier !'.tr,
                       style: context.textTheme.bodyMedium,
                     ),
                   );

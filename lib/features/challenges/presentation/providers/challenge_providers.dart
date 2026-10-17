@@ -4,6 +4,7 @@ import '../../../../shared/providers/supabase_provider.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../data/datasources/challenge_remote_datasource.dart';
 import '../../data/repositories/challenge_repository_impl.dart';
+import '../../domain/entities/battle_opponent.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/challenge_participation.dart';
 import '../../domain/repositories/challenge_repository.dart';
@@ -20,6 +21,15 @@ final challengeRemoteDataSourceProvider = Provider<ChallengeRemoteDataSource>((r
 
 final challengeRepositoryProvider = Provider<ChallengeRepository>((ref) {
   return ChallengeRepositoryImpl(ref.watch(challengeRemoteDataSourceProvider));
+});
+
+/// Adversaires proposés pour une Battle (abonnés et abonnements), filtrés
+/// par la recherche saisie.
+final battleOpponentSuggestionsProvider =
+    FutureProvider.autoDispose.family<List<BattleOpponent>, String>((ref, query) async {
+  final result =
+      await ref.watch(challengeRepositoryProvider).getBattleOpponentSuggestions(query);
+  return result.fold((failure) => throw failure, (opponents) => opponents);
 });
 
 final getChallengesUseCaseProvider = Provider(
@@ -153,6 +163,7 @@ class ChallengeActionsController extends AsyncNotifier<void> {
     required String videoId,
     required DateTime endDate,
     String? opponentUsername,
+    bool randomOpponent = false,
   }) async {
     state = const AsyncLoading();
     final result = await ref.read(challengeRepositoryProvider).createBattle(
@@ -162,6 +173,7 @@ class ChallengeActionsController extends AsyncNotifier<void> {
           videoId: videoId,
           endDate: endDate,
           opponentUsername: opponentUsername,
+          randomOpponent: randomOpponent,
         );
     return result.fold(
       (failure) {

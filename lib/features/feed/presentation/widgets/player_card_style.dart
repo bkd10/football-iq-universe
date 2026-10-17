@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../videos/domain/entities/video_creator.dart';
 
 /// Habillage « carte joueur » du feed. La couleur de la carte se gagne par
@@ -87,22 +88,28 @@ class PlayerCardStyle {
   final int minPoints;
 }
 
-/// Note globale affichée sur la carte (45 à 99), calculée à partir de ce
-/// que le joueur a réellement accompli : vidéos publiées, Respect reçus,
-/// Stars, défis gagnés, Moves inventés. Le talent compte, pas les abonnés.
+/// Note globale affichée sur la carte (40 à 99) = carrière + forme.
 ///
-/// La note monte lentement : le Respect suit une échelle logarithmique
-/// jusqu'au palier Diamant (500 000 points), et 99 demande d'avoir tout
-/// accompli. Repères : Argent ≈ 58, Or ≈ 63, Platine ≈ 68, Diamant ≈ 73,
-/// avant les défis gagnés.
+/// La carrière (45 à 89) ne baisse jamais : vidéos publiées, Respect reçus
+/// (échelle logarithmique jusqu'au palier Diamant), Stars, défis gagnés,
+/// Moves inventés. Le talent compte, pas les abonnés.
+///
+/// La forme (-6 à +10) suit les 30 derniers jours : Respect récents,
+/// Battles gagnées ou perdues, inactivité. C'est elle qui fait baisser la
+/// note d'un joueur qui ne joue plus ou perd ses Battles. Calculée par le
+/// serveur (`profiles.form_score`).
 int playerRating(VideoCreator? creator) {
   if (creator == null) return 45;
-  final respect = math.min((_log10(1 + creator.likesReceivedCount) * 5).round(), 28);
+  return (careerRating(creator) + creator.formScore).clamp(40, 99);
+}
+
+int careerRating(VideoCreator creator) {
+  final respect = math.min((_log10(1 + creator.likesReceivedCount) * 4).round(), 22);
   final videos = math.min(creator.videosCount, 6);
-  final stars = math.min((_log10(1 + creator.stars) * 1.5).round(), 4);
-  final wins = math.min(creator.challengesWonCount * 2, 12);
-  final moves = math.min(creator.movesCreatedCount, 4);
-  return (45 + respect + videos + stars + wins + moves).clamp(45, 99);
+  final stars = math.min(_log10(1 + creator.stars).round(), 3);
+  final wins = math.min(creator.challengesWonCount * 2, 10);
+  final moves = math.min(creator.movesCreatedCount, 3);
+  return 45 + respect + videos + stars + wins + moves;
 }
 
 double _log10(num x) => math.log(x) / math.ln10;
@@ -110,26 +117,26 @@ double _log10(num x) => math.log(x) / math.ln10;
 String positionShort(String? position) {
   switch (position) {
     case 'attaquant':
-      return 'ATT';
+      return 'ATT'.tr;
     case 'milieu':
-      return 'MIL';
+      return 'MIL'.tr;
     case 'defenseur':
-      return 'DÉF';
+      return 'DÉF'.tr;
     case 'gardien':
-      return 'GB';
+      return 'GB'.tr;
     default:
-      return 'JOU';
+      return 'JOU'.tr;
   }
 }
 
 String? footLabel(String? foot) {
   switch (foot) {
     case 'droit':
-      return 'pied droit';
+      return 'pied droit'.tr;
     case 'gauche':
-      return 'pied gauche';
+      return 'pied gauche'.tr;
     case 'les_deux':
-      return 'deux pieds';
+      return 'deux pieds'.tr;
     default:
       return null;
   }
