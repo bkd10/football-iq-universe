@@ -25,10 +25,19 @@ import 'player_card_style.dart';
 /// poste, stats du joueur) avec ses actions (Respect, Masterclass,
 /// commentaires, partage, suivre) — voir PARTIE 8.1.
 class FeedVideoTile extends ConsumerStatefulWidget {
-  const FeedVideoTile({required this.video, required this.isActive, super.key});
+  const FeedVideoTile({
+    required this.video,
+    required this.isActive,
+    this.feed,
+    super.key,
+  });
 
   final Video video;
   final bool isActive;
+
+  /// Le feed qui affiche la carte (Ouverture ou Vestiaire), pour que les
+  /// Respect et les vues mettent à jour la bonne liste.
+  final AsyncNotifierProvider<FeedController, List<Video>>? feed;
 
   @override
   ConsumerState<FeedVideoTile> createState() => _FeedVideoTileState();
@@ -87,7 +96,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
     _viewTimer?.cancel();
     _viewTimer = Timer(AppConstants.minWatchTimeForView, () {
       if (!mounted) return;
-      ref.read(feedControllerProvider.notifier).registerView(widget.video.id);
+      ref.read((widget.feed ?? feedControllerProvider).notifier).registerView(widget.video.id);
       ref.read(missionsControllerProvider.notifier).registerVideoWatched();
     });
   }
@@ -137,7 +146,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
 
   void _onDoubleTap() {
     if (!widget.video.hasLiked) {
-      ref.read(feedControllerProvider.notifier).toggleLike(widget.video.id, isMasterclass: false);
+      ref.read((widget.feed ?? feedControllerProvider).notifier).toggleLike(widget.video.id, isMasterclass: false);
     }
     setState(() => _heartBurstId++);
   }
@@ -424,7 +433,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
           active: video.hasLiked,
           onTap: () {
             if (!video.hasLiked) setState(() => _heartBurstId++);
-            ref.read(feedControllerProvider.notifier).toggleLike(video.id, isMasterclass: false);
+            ref.read((widget.feed ?? feedControllerProvider).notifier).toggleLike(video.id, isMasterclass: false);
           },
         ),
         const SizedBox(width: 5),
@@ -435,7 +444,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
           count: video.masterclassCount,
           active: video.hasMasterclassed,
           onTap: () =>
-              ref.read(feedControllerProvider.notifier).toggleLike(video.id, isMasterclass: true),
+              ref.read((widget.feed ?? feedControllerProvider).notifier).toggleLike(video.id, isMasterclass: true),
         ),
         const SizedBox(width: 5),
         _CardAction(

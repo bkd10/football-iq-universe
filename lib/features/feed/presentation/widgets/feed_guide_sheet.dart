@@ -83,7 +83,7 @@ class FeedGuideSheet extends StatelessWidget {
           ),
           const _Line(
             icon: '👕',
-            title: 'Vestiaire (bientôt)',
+            title: 'Vestiaire',
             text: 'Les vidéos des joueurs que tu suis.',
           ),
           const _Section('En bas de l’écran'),

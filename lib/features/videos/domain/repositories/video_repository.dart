@@ -16,6 +16,12 @@ abstract class VideoRepository {
     DateTime? beforeCreatedAt,
   });
 
+  /// Vestiaire : vidéos des joueurs suivis, les plus récentes d'abord.
+  Future<Either<Failure, List<Video>>> getFollowingFeed({
+    int limit = 10,
+    DateTime? beforeCreatedAt,
+  });
+
   Future<Either<Failure, List<Video>>> getVideosByUser(String userId);
 
   Future<Either<Failure, Video?>> getVideoById(String videoId);

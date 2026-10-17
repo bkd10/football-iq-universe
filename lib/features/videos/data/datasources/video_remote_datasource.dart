@@ -44,6 +44,39 @@ class VideoRemoteDataSource {
     }
   }
 
+  /// Vestiaire : les vidéos des joueurs que l'utilisateur suit, des plus
+  /// récentes aux plus anciennes.
+  Future<List<VideoModel>> getFollowingFeed({
+    int limit = 10,
+    DateTime? beforeCreatedAt,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    try {
+      final follows = await _client
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', userId);
+      final ids = [for (final row in follows) row['following_id'] as String];
+      if (ids.isEmpty) return const [];
+
+      final baseQuery = _client
+          .from('videos')
+          .select('*, creator:profiles($_creatorSelect)')
+          .eq('status', 'active')
+          .inFilter('user_id', ids);
+
+      final filtered = beforeCreatedAt != null
+          ? baseQuery.lt('created_at', beforeCreatedAt.toIso8601String())
+          : baseQuery;
+
+      final rows = await filtered.order('created_at', ascending: false).limit(limit);
+      return rows.map((row) => VideoModel.fromJson(row)).toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
   Future<List<VideoModel>> getVideosByUser(String userId) async {
     try {
       final rows = await _client
