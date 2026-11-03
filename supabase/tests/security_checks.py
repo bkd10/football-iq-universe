@@ -144,6 +144,44 @@ def minors_checks():
     check("achats : majeur autorisé", can(o) == "t", can(o))
 
 
+def purchase_checks():
+    sfx = uuid.uuid4().hex[:6]
+    today = datetime.date.today()
+    a_tok, a = signup("buyer" + sfx)
+    s, r = rpc("prepare_purchase", {"p_pack_id": "pack_550"}, a_tok)
+    check("préparer un achat (prix fixé par le serveur)", s == 200 and r and r[0]["amount_cents"] == 499
+          and r[0]["coins"] == 550, r)
+    pid = r[0]["purchase_id"]
+    sql(f"select attach_checkout_session('{pid}', 'cs_test_{sfx}')")
+    s, r = rpc("complete_purchase", {"p_session_id": f"cs_test_{sfx}", "p_amount_total": 499, "p_currency": "eur"}, a_tok)
+    check("FRAUDE se créditer un achat soi-même refusé", s in (401, 403, 404), r)
+    s, r = ins("purchases", {"user_id": a, "pack_id": "pack_2500", "coins": 99999, "amount_cents": 1,
+                             "currency": "eur", "status": "paid"}, a_tok)
+    check("FRAUDE inventer un achat refusé", s in (401, 403), r)
+    bad = subprocess.run(["psql", DB_URL, "-Atqc", f"select complete_purchase('cs_test_{sfx}', 1, 'eur')"],
+                         capture_output=True, text=True)
+    check("FRAUDE montant payé trop bas refusé", "Montant" in bad.stderr, bad.stderr)
+    before = profile(a)["coins"]
+    out = sql(f"select complete_purchase('cs_test_{sfx}', 499, 'eur', 'pi_{sfx}')")
+    again = sql(f"select complete_purchase('cs_test_{sfx}', 499, 'eur', 'pi_{sfx}')")
+    check("paiement Stripe : Ballons crédités une seule fois", out == "credited" and again == "already_paid"
+          and profile(a)["coins"] == before + 550, (out, again, profile(a)))
+    s, r = rpc("my_wallet", {}, a_tok)
+    check("Ballons payés comptés comme achetés", s == 200 and r[0]["purchased_coins"] == 550, r)
+    out = sql(f"select refund_purchase('pi_{sfx}')")
+    check("remboursement : Ballons retirés", out == "refunded" and profile(a)["coins"] == before, (out, profile(a)))
+    teen = today.replace(year=today.year - 15).isoformat()
+    t_tok, t = signup("teenbuy" + sfx, birth=teen, guardian="parent@test.dev")
+    for i in range(2):
+        s, r = rpc("prepare_purchase", {"p_pack_id": "pack_2500"}, t_tok)
+        sql(f"update purchases set status='paid', paid_at=now() where id='{r[0]['purchase_id']}'")
+    s, r = rpc("prepare_purchase", {"p_pack_id": "pack_2500"}, t_tok)
+    check("MINEURS plafond d'achat sur 30 jours", s == 400 and "Limite" in str(r), r)
+    s, r = req("POST", "/auth/v1/signup", {"email": f"legacybuy{sfx}@test.dev", "password": "Passw0rd!123", "data": {}})
+    s, r = rpc("prepare_purchase", {"p_pack_id": "pack_100"}, r["access_token"])
+    check("achat refusé tant que l'âge est inconnu", s == 400, r)
+
+
 def mfa_checks():
     name = "mfa_" + uuid.uuid4().hex[:8]
     tok, uid = signup(name)
@@ -494,6 +532,7 @@ def main():
     check("supprimer son compte", s == 204, r)
 
     minors_checks()
+    purchase_checks()
     mfa_checks()
 
     failed = 0

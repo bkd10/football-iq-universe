@@ -37,7 +37,10 @@ const _reasonLabels = {
 /// Solde de Ballons + historique des transactions — voir PARTIE 9.2
 /// (écran "Wallet").
 class WalletScreen extends ConsumerWidget {
-  const WalletScreen({super.key});
+  const WalletScreen({super.key, this.justPaid = false});
+
+  /// Retour de la page de paiement Stripe.
+  final bool justPaid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,10 +55,27 @@ class WalletScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(currentProfileProvider);
           ref.invalidate(transactionsProvider);
+          ref.invalidate(myWalletProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
+            if (justPaid) ...[
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: Text(
+                  ('Paiement reçu ! Tes Ballons arrivent dans quelques secondes. '
+                          'Tire vers le bas pour actualiser.')
+                      .tr,
+                  style: context.textTheme.bodyMedium,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
             _BalanceCard(coins: coins, split: ref.watch(myWalletProvider).valueOrNull),
             const SizedBox(height: AppSpacing.md),
             Row(

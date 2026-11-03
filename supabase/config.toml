@@ -52,3 +52,8 @@ allowed_mime_types = ["image/png", "image/jpeg", "image/webp"]
 public = true
 file_size_limit = "5MiB"
 allowed_mime_types = ["image/png", "image/jpeg", "image/webp"]
+
+# Stripe appelle ce webhook sans session Supabase : la signature Stripe est
+# vérifiée dans la fonction elle-même.
+[functions.stripe-webhook]
+verify_jwt = false

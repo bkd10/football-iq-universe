@@ -1,30 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show FunctionException;
+
+import '../../../../core/constants/route_names.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/services/browser/browser.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/providers/supabase_provider.dart';
+import '../../../legal/presentation/screens/legal_screen.dart';
 
-/// Boutique de Ballons — packs affichés à titre indicatif, achat désactivé.
-///
-/// Aucun moyen de paiement réel (App Store/Play Store/Stripe) n'est branché
-/// pour l'instant : plutôt que de ne rien montrer, on affiche déjà les
-/// packs prévus avec un bouton clairement désactivé, pour ne jamais laisser
-/// croire qu'un paiement a été pris alors qu'aucune fonction serveur ne
-/// crédite réellement les Ballons.
-class ShopScreen extends StatelessWidget {
+/// Pack de Ballons tel que fixé côté serveur (`coin_packs`) : l'appli
+/// n'invente jamais un prix.
+class _BallonPack {
+  const _BallonPack({
+    required this.id,
+    required this.ballons,
+    required this.priceCents,
+    required this.currency,
+    this.bonusLabel,
+  });
+
+  factory _BallonPack.fromJson(Map<String, dynamic> j) => _BallonPack(
+        id: j['id'] as String,
+        ballons: (j['coins'] as num).toInt(),
+        priceCents: (j['price_cents'] as num).toInt(),
+        currency: (j['currency'] as String?) ?? 'eur',
+        bonusLabel: j['bonus_label'] as String?,
+      );
+
+  final String id;
+  final int ballons;
+  final int priceCents;
+  final String currency;
+  final String? bonusLabel;
+
+  String get priceLabel {
+    final euros = (priceCents / 100).toStringAsFixed(2);
+    final symbol = currency == 'eur' ? '€' : currency.toUpperCase();
+    return L10n.language == 'en' ? '$symbol$euros' : '${euros.replaceAll('.', ',')} $symbol';
+  }
+}
+
+final _packsProvider = FutureProvider.autoDispose<List<_BallonPack>>((ref) async {
+  final rows = await ref
+      .watch(supabaseClientProvider)
+      .from('coin_packs')
+      .select()
+      .eq('active', true)
+      .order('sort_order', ascending: true);
+  return rows.map(_BallonPack.fromJson).toList();
+});
+
+/// Boutique de Ballons, paiement par Stripe (fonction Edge
+/// `create-checkout`). Les Ballons sont crédités par le webhook Stripe,
+/// jamais par l'appli.
+class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
 
-  static const _packs = [
-    _BallonPack(ballons: 100, priceLabel: '0,99 €'),
-    _BallonPack(ballons: 550, priceLabel: '4,99 €', bonusLabel: '+10%'),
-    _BallonPack(ballons: 1200, priceLabel: '9,99 €', bonusLabel: '+20%'),
-    _BallonPack(ballons: 2500, priceLabel: '19,99 €', bonusLabel: '+25%'),
-  ];
+  @override
+  ConsumerState<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends ConsumerState<ShopScreen> {
+  String? _busyPack;
+
+  Future<void> _buy(_BallonPack pack) async {
+    setState(() => _busyPack = pack.id);
+    String? error;
+    try {
+      final res = await ref.read(supabaseClientProvider).functions.invoke(
+        'create-checkout',
+        body: {'pack_id': pack.id, 'return_origin': Uri.base.origin},
+      );
+      final url = (res.data as Map?)?['url'] as String?;
+      if (url == null || !openExternalLink(url)) {
+        error = 'Le paiement n\'a pas pu s\'ouvrir.'.tr;
+      }
+    } on FunctionException catch (e) {
+      final details = e.details;
+      final message = details is Map ? details['error'] as String? : null;
+      error = message != null ? message.trServer : 'Le paiement n\'est pas encore disponible.'.tr;
+    } catch (_) {
+      error = 'Vérifie ta connexion internet.'.tr;
+    }
+    if (!mounted) return;
+    setState(() => _busyPack = null);
+    if (error != null) context.showSnackBar(error, isError: true);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final packs = ref.watch(_packsProvider);
     return Scaffold(
       appBar: AppBar(title: Text('Boutique'.tr)),
       body: ListView(
@@ -35,17 +106,18 @@ class ShopScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.info_outline, color: AppColors.warning, size: 20),
+                const Icon(Icons.lock_outline, color: AppColors.primary, size: 20),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    ('L\'achat de Ballons n\'est pas encore disponible. Ces packs '
-                            'montrent ce qui arrivera — en attendant, tous les Ballons '
-                            's\'obtiennent en jouant.')
+                    ('Paiement sécurisé par Stripe. Les Ballons achetés servent '
+                            'aux bonus, jamais aux mises, et n\'ont aucune valeur en '
+                            'argent. Moins de 18 ans : achats avec l\'accord de tes '
+                            'parents, 50 € maximum par mois.')
                         .tr,
                     style: context.textTheme.bodySmall,
                   ),
@@ -54,32 +126,42 @@ class ShopScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          for (final pack in _packs) ...[
-            _PackTile(pack: pack),
-            const SizedBox(height: AppSpacing.sm),
-          ],
+          ...packs.when(
+            loading: () => [
+              const Padding(
+                padding: EdgeInsets.all(AppSpacing.lg),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+            error: (_, __) => [Text('Une erreur inattendue est survenue.'.tr)],
+            data: (list) => [
+              for (final pack in list) ...[
+                _PackTile(
+                  pack: pack,
+                  busy: _busyPack == pack.id,
+                  onBuy: _busyPack == null ? () => _buy(pack) : null,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextButton(
+            onPressed: () => context.push(RouteNames.legalPath(LegalDoc.ballons.slug)),
+            child: Text('Règles des Ballons'.tr),
+          ),
         ],
       ),
     );
   }
 }
 
-class _BallonPack {
-  const _BallonPack({
-    required this.ballons,
-    required this.priceLabel,
-    this.bonusLabel,
-  });
-
-  final int ballons;
-  final String priceLabel;
-  final String? bonusLabel;
-}
-
 class _PackTile extends StatelessWidget {
-  const _PackTile({required this.pack});
+  const _PackTile({required this.pack, required this.busy, this.onBuy});
 
   final _BallonPack pack;
+  final bool busy;
+  final VoidCallback? onBuy;
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +215,12 @@ class _PackTile extends StatelessWidget {
             ),
           ),
           OutlinedButton(
-            onPressed: null,
-            child: Text(pack.priceLabel),
+            // Le thème donne aux boutons toute la largeur : ici, taille fixe.
+            style: OutlinedButton.styleFrom(minimumSize: const Size(104, 44)),
+            onPressed: onBuy,
+            child: busy
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : Text(pack.priceLabel),
           ),
         ],
       ),

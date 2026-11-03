@@ -229,7 +229,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RouteNames.wallet,
-        builder: (context, state) => const WalletScreen(),
+        builder: (context, state) => WalletScreen(
+          justPaid: state.uri.queryParameters['achat'] == 'ok',
+        ),
       ),
       GoRoute(
         path: RouteNames.earnBallons,
