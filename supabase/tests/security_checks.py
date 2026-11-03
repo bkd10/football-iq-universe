@@ -51,13 +51,23 @@ def req(method, path, body=None, token=None, headers=None):
             return e.code, text
 
 
-def signup(name, role=None, birth=None):
+def signup_raw(name, role=None, birth="1995-01-01", guardian=None, attest=None, terms=True, email=None):
     data = {"username": name}
     if role:
         data["role"] = role
     if birth:
         data["birth_date"] = birth
-    s, b = req("POST", "/auth/v1/signup", {"email": f"{name}@test.dev", "password": "Passw0rd!123", "data": data})
+    if guardian:
+        data["guardian_email"] = guardian
+    if attest if attest is not None else bool(guardian):
+        data["parental_attestation"] = True
+    if terms:
+        data["terms_accepted"] = True
+    return req("POST", "/auth/v1/signup", {"email": email or f"{name}@test.dev", "password": "Passw0rd!123", "data": data})
+
+
+def signup(name, role=None, birth="1995-01-01", guardian=None):
+    s, b = signup_raw(name, role, birth, guardian)
     assert s == 200, (s, b)
     return b["access_token"], b["user"]["id"]
 
@@ -92,6 +102,48 @@ def totp(secret, offset=0):
     return "%06d" % ((struct.unpack(">I", h[o:o + 4])[0] & 0x7FFFFFFF) % 1000000)
 
 
+def minors_checks():
+    sfx = uuid.uuid4().hex[:6]
+    today = datetime.date.today()
+    years_ago = lambda n: today.replace(year=today.year - n).isoformat()
+    s, r = signup_raw("kid" + sfx, birth=years_ago(10))
+    check("MINEURS moins de 13 ans refusé", s != 200, (s, r))
+    s, r = signup_raw("teen" + sfx, birth=years_ago(15))
+    check("MINEURS 15 ans sans accord parental refusé", s != 200, (s, r))
+    s, r = signup_raw("teen" + sfx, birth=years_ago(15), guardian="parent@test.dev", attest=False)
+    check("MINEURS e-mail parent sans attestation refusé", s != 200, (s, r))
+    s, r = signup_raw("teen" + sfx, birth=years_ago(15), guardian=f"teen{sfx}@test.dev")
+    check("MINEURS e-mail parent = son propre e-mail refusé", s != 200, (s, r))
+    s, r = signup_raw("pro" + sfx, role="scout", birth=years_ago(16))
+    check("MINEURS recruteur mineur refusé", s != 200, (s, r))
+    s, r = signup_raw("noterms" + sfx, terms=False)
+    check("CGU non acceptées : inscription refusée", s != 200, (s, r))
+    s, r = signup_raw("nobirth" + sfx, birth=None)
+    check("date de naissance obligatoire", s != 200, (s, r))
+    t_tok, t = signup("teen" + sfx, birth=years_ago(15), guardian="maman@test.dev")
+    s, r = sel(f"account_consents?select=is_minor,parental_attestation,guardian_email,terms_version", t_tok)
+    check("MINEURS attestation parentale enregistrée", s == 200 and r and r[0]["is_minor"] and r[0]["parental_attestation"]
+          and r[0]["guardian_email"] == "maman@test.dev", r)
+    o_tok, o = signup("adult" + sfx)
+    s, r = sel(f"account_consents?user_id=eq.{t}&select=guardian_email", o_tok)
+    check("CONFIDENTIALITÉ attestation d'un autre illisible", s == 200 and r == [], r)
+    s, r = upd(f"profiles?id=eq.{t}", {"birth_date": "1990-01-01"}, t_tok)
+    check("FRAUDE se vieillir pour contourner l'accord parental refusé", s in (401, 403), r)
+    s, r = rpc("declare_birth_date", {"p_birth_date": "1990-01-01"}, t_tok)
+    check("FRAUDE redéclarer sa date de naissance refusé", s == 400, r)
+    s, r = req("POST", "/auth/v1/signup", {"email": f"legacy{sfx}@test.dev", "password": "Passw0rd!123", "data": {}})
+    l_tok, l = r["access_token"], r["user"]["id"]
+    can = lambda u: sql(f"select private.can_purchase('{u}')").strip()
+    check("achats bloqués tant que l'âge est inconnu", can(l) == "f", can(l))
+    s, r = rpc("declare_birth_date", {"p_birth_date": years_ago(14)}, l_tok)
+    check("déclarer un âge mineur sans parent refusé", s == 400, r)
+    s, r = rpc("declare_birth_date", {"p_birth_date": years_ago(14), "p_guardian_email": "papa@test.dev",
+                                      "p_parental_attestation": True}, l_tok)
+    check("déclarer son âge avec accord parental", s in (200, 204), r)
+    check("achats : mineur avec accord parental autorisé", can(l) == "t", can(l))
+    check("achats : majeur autorisé", can(o) == "t", can(o))
+
+
 def mfa_checks():
     name = "mfa_" + uuid.uuid4().hex[:8]
     tok, uid = signup(name)
@@ -124,6 +176,10 @@ def mfa_checks():
     check("SÉCURITÉ désactiver sans le code refusé", s in (401, 403, 422), (s, r))
 
 
+def sql(q):
+    return subprocess.run(["psql", DB_URL, "-Atqc", q], capture_output=True, text=True).stdout.strip()
+
+
 RESULTS = []
 
 
@@ -133,7 +189,7 @@ def check(name, cond, info=""):
 
 def main():
     sfx = uuid.uuid4().hex[:6]
-    a_tok, a = signup("ana" + sfx, birth="2012-05-01")  # joueuse mineure
+    a_tok, a = signup("ana" + sfx, birth="2012-05-01", guardian="parent@test.dev")  # joueuse mineure
     b_tok, b = signup("ben" + sfx)
     c_tok, c = signup("cid" + sfx)
     check("bonus de bienvenue = 100 Ballons", profile(b)["coins"] == 100, profile(b))
@@ -399,9 +455,45 @@ def main():
     check("FRAUDE mise hors limites refusée", s == 400, r)
     s, r = rpc("find_ledger_drift", {}, c_tok)
     check("grand livre toujours juste après Battles et remboursements", s == 200 and r == [], r)
+    # --- Pas de jeu d'argent : Ballons achetés jamais misés ---
+    g_tok, g = signup("gus" + sfx)
+    s, r = ins("videos", {"user_id": g, "video_url": f"{storage}/videos/{g}/g1.mp4", "category": "dribble",
+                          "duration_seconds": 10}, g_tok)
+    gv = r[0]["id"]
+    earned = profile(g)["coins"]
+    sql(f"update profiles set coins = coins + 500 where id='{g}'")
+    sql(f"insert into transactions (user_id, type, amount, currency, balance_after, reason) "
+        f"values ('{g}', 'purchase', 500, 'coins', {earned + 500}, 'purchase_pack')")
+    s, r = rpc("my_wallet", {}, g_tok)
+    check("achat compté à part (Ballons achetés)", s == 200 and r[0]["purchased_coins"] == 500
+          and r[0]["earned_coins"] == earned, r)
+    s, r = rpc("create_battle", {"p_title": "Mise payée", "p_rules": "x", "p_stake": earned + 50,
+                                 "p_video_id": gv, "p_end_date": end}, g_tok)
+    check("JEU D'ARGENT miser des Ballons achetés refusé", s == 400 and "gagnés" in str(r), r)
+    check("JEU D'ARGENT refus = aucun Ballon débité", profile(g)["coins"] == earned + 500, profile(g))
+    s, r = rpc("create_battle", {"p_title": "Mise gagnée", "p_rules": "x", "p_stake": 20,
+                                 "p_video_id": gv, "p_end_date": end}, g_tok)
+    check("miser des Ballons gagnés autorisé", s == 200, r)
+    s, r = rpc("my_wallet", {}, g_tok)
+    check("la mise ne touche pas aux Ballons achetés", s == 200 and r[0]["purchased_coins"] == 500
+          and r[0]["earned_coins"] == earned - 20, r)
+    bal = profile(g)["coins"]
+    sql(f"update profiles set coins = coins - 30 where id='{g}'")
+    sql(f"insert into transactions (user_id, type, amount, currency, balance_after, reason) "
+        f"values ('{g}', 'spend', -30, 'coins', {bal - 30}, 'boost_video')")
+    s, r = rpc("my_wallet", {}, g_tok)
+    check("bonus payé d'abord avec les Ballons achetés", s == 200 and r[0]["purchased_coins"] == 470, r)
+    out = subprocess.run(["psql", DB_URL, "-Atqc", f"insert into challenges (creator_id, title, type, entry_cost, "
+                          f"prize_currency, end_date) values ('{g}', 'Lot payant', 'sponsored', 10, 'real', now() + interval '1 day')"],
+                         capture_output=True, text=True)
+    check("JEU D'ARGENT défi avec vrai lot payant impossible", "challenges_real_prize_free_entry" in out.stderr, out.stderr)
+    s, r = upd(f"profiles?id=eq.{g}", {"purchased_coins": 0}, g_tok)
+    check("FRAUDE effacer ses Ballons achetés refusé", s in (401, 403), r)
+
     s, r = rpc("delete_my_account", {}, b_tok)
     check("supprimer son compte", s == 204, r)
 
+    minors_checks()
     mfa_checks()
 
     failed = 0

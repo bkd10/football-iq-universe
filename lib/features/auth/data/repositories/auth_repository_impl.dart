@@ -70,6 +70,9 @@ class AuthRepositoryImpl implements AuthRepository {
     DateTime? birthDate,
     bool asScout = false,
     bool asBrand = false,
+    String? guardianEmail,
+    bool parentalAttestation = false,
+    bool termsAccepted = false,
   }) async {
     try {
       final model = await _remoteDataSource.signUp(
@@ -82,6 +85,9 @@ class AuthRepositoryImpl implements AuthRepository {
         birthDate: birthDate,
         asScout: asScout,
         asBrand: asBrand,
+        guardianEmail: guardianEmail,
+        parentalAttestation: parentalAttestation,
+        termsAccepted: termsAccepted,
       );
       return Right(model.toEntity());
     } on AuthException catch (e) {

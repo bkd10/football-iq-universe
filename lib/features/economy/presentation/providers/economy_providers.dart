@@ -79,3 +79,19 @@ class EconomyController extends AsyncNotifier<void> {
 final economyControllerProvider = AsyncNotifierProvider<EconomyController, void>(
   EconomyController.new,
 );
+
+/// Solde séparé en Ballons gagnés (misables en Battle/Challenge) et
+/// achetés (bonus seulement) — voir `20260101000030_no_gambling.sql`.
+typedef WalletSplit = ({int coins, int purchased, int earned});
+
+final myWalletProvider = FutureProvider.autoDispose<WalletSplit?>((ref) async {
+  ref.watch(currentProfileProvider);
+  final rows = await ref.watch(supabaseClientProvider).rpc<List<dynamic>>('my_wallet');
+  if (rows.isEmpty) return null;
+  final row = rows.first as Map<String, dynamic>;
+  return (
+    coins: (row['coins'] as num?)?.toInt() ?? 0,
+    purchased: (row['purchased_coins'] as num?)?.toInt() ?? 0,
+    earned: (row['earned_coins'] as num?)?.toInt() ?? 0,
+  );
+});

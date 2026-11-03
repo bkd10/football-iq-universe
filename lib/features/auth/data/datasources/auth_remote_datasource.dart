@@ -72,6 +72,9 @@ class AuthRemoteDataSource {
     DateTime? birthDate,
     bool asScout = false,
     bool asBrand = false,
+    String? guardianEmail,
+    bool parentalAttestation = false,
+    bool termsAccepted = false,
   }) async {
     try {
       final response = await _client.auth.signUp(
@@ -93,6 +96,11 @@ class AuthRemoteDataSource {
           if (preferredFoot != null) 'preferred_foot': preferredFoot,
           if (birthDate != null)
             'birth_date': birthDate.toIso8601String().split('T').first,
+          // Vérifiés aussi par le serveur (`handle_new_user`) : mineur sans
+          // accord parental ou CGU non acceptées = inscription refusée.
+          if (guardianEmail != null) 'guardian_email': guardianEmail,
+          if (parentalAttestation) 'parental_attestation': true,
+          'terms_accepted': termsAccepted,
         },
       );
       final user = response.user;
@@ -304,6 +312,9 @@ class AuthRemoteDataSource {
     }
     if (message.contains('invalid format') || message.contains('email address') && message.contains('invalid')) {
       return 'Adresse e-mail invalide.';
+    }
+    if (message.contains('database error saving new user')) {
+      return 'Inscription refusée : vérifie ta date de naissance, l\'accord parental et les conditions.';
     }
     if (message.contains('rate limit') || message.contains('security purposes') || e.statusCode == '429') {
       return 'Trop de tentatives. Réessaie dans quelques minutes.';

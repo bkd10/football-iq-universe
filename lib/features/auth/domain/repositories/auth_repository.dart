@@ -27,6 +27,9 @@ abstract class AuthRepository {
     DateTime? birthDate,
     bool asScout = false,
     bool asBrand = false,
+    String? guardianEmail,
+    bool parentalAttestation = false,
+    bool termsAccepted = false,
   });
 
   Future<Either<Failure, void>> signOut();

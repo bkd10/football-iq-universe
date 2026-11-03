@@ -54,6 +54,10 @@ class RouteNames {
   static const String earnBallons = '/wallet/earn';
   static const String shop = '/wallet/shop';
   static const String settings = '/settings';
+  // Documents légaux (CGU, confidentialité, règles des Ballons) : lisibles
+  // connecté ou non, depuis l'inscription.
+  static const String legal = '/legal/:doc';
+  static String legalPath(String doc) => '/legal/$doc';
   static const String securitySettings = '/settings/security';
   static const String search = '/search';
   static const String pepiteOfTheDay = '/pepite';

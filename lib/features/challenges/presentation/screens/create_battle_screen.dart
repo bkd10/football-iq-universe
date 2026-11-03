@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../economy/presentation/providers/economy_providers.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/economy_constants.dart';
@@ -108,7 +110,9 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final coins = ref.watch(currentProfileProvider).valueOrNull?.coins;
+    // Seuls les Ballons gagnés en jouant se misent (jamais les achetés).
+    final coins = ref.watch(myWalletProvider).valueOrNull?.earned ??
+        ref.watch(currentProfileProvider).valueOrNull?.coins;
 
     return Scaffold(
       appBar: AppBar(title: Text('Lancer une Battle'.tr)),
@@ -162,7 +166,7 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Mise (Ballons)'.tr,
-                    helperText: coins != null ? 'Tu as {coins} Ballons'.trArgs({'coins': coins}) : null,
+                    helperText: coins != null ? 'Tu peux miser {coins} Ballons gagnés en jouant'.trArgs({'coins': coins}) : null,
                   ),
                   validator: (v) {
                     final stake = int.tryParse(v?.trim() ?? '');
@@ -174,7 +178,7 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                         'max': EconomyConstants.battleMaxStake,
                       });
                     }
-                    if (coins != null && stake > coins) return 'Tu n\'as que {coins} Ballons.'.trArgs({'coins': coins});
+                    if (coins != null && stake > coins) return 'Tu n\'as que {coins} Ballons gagnés à miser.'.trArgs({'coins': coins});
                     return null;
                   },
                 ),

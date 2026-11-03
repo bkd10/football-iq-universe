@@ -147,6 +147,9 @@ class AuthController extends AsyncNotifier<void> {
     DateTime? birthDate,
     bool asScout = false,
     bool asBrand = false,
+    String? guardianEmail,
+    bool parentalAttestation = false,
+    bool termsAccepted = false,
   }) async {
     state = const AsyncLoading();
     final result = await ref.read(signUpUseCaseProvider)(
@@ -159,6 +162,9 @@ class AuthController extends AsyncNotifier<void> {
       birthDate: birthDate,
       asScout: asScout,
       asBrand: asBrand,
+      guardianEmail: guardianEmail,
+      parentalAttestation: parentalAttestation,
+      termsAccepted: termsAccepted,
     );
     return result.fold(
       (failure) {

@@ -5,6 +5,10 @@ class AppConstants {
 
   static const String appName = 'Football IQ Universe';
 
+  // Âge (mêmes règles que le serveur, voir `20260101000029_minors_consent.sql`)
+  static const int minimumAge = 13;
+  static const int parentalConsentUnderAge = 18;
+
   // Vidéo
   static const int minVideoDurationSeconds = 5;
   static const int maxVideoDurationSeconds = 60;

@@ -23,6 +23,9 @@ class SignUp {
     DateTime? birthDate,
     bool asScout = false,
     bool asBrand = false,
+    String? guardianEmail,
+    bool parentalAttestation = false,
+    bool termsAccepted = false,
   }) {
     return _repository.signUp(
       email: email,
@@ -34,6 +37,9 @@ class SignUp {
       birthDate: birthDate,
       asScout: asScout,
       asBrand: asBrand,
+      guardianEmail: guardianEmail,
+      parentalAttestation: parentalAttestation,
+      termsAccepted: termsAccepted,
     );
   }
 }

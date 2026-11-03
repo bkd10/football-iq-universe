@@ -7,12 +7,11 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../legal/presentation/screens/legal_screen.dart';
 import '../../../../shared/providers/supabase_provider.dart';
 
-/// Écran "Settings" (PARTIE 9.2, écran 33). Volontairement minimal pour le
-/// MVP — pas de liens vers des CGU/politique de confidentialité qui
-/// n'existent pas encore, pour ne rien afficher qui ne fonctionne pas
-/// réellement.
+/// Écran "Settings" (PARTIE 9.2, écran 33) : compte, sécurité, protection
+/// des mineurs, documents légaux.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -83,6 +82,27 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(RouteNames.guardianApprovalEntry),
           ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs),
+            child: Text(
+              'INFORMATIONS LÉGALES'.tr,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(letterSpacing: 1),
+            ),
+          ),
+          for (final doc in LegalDoc.values)
+            ListTile(
+              leading: Icon(
+                switch (doc) {
+                  LegalDoc.terms => Icons.description_outlined,
+                  LegalDoc.privacy => Icons.lock_outline,
+                  LegalDoc.ballons => Icons.sports_soccer,
+                },
+              ),
+              title: Text(doc.title),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(RouteNames.legalPath(doc.slug)),
+            ),
           if (profileAsync.valueOrNull?.role == 'admin') ...[
             const Divider(),
             ListTile(

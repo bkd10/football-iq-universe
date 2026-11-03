@@ -56,7 +56,7 @@ class WalletScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            _BalanceCard(coins: coins),
+            _BalanceCard(coins: coins, split: ref.watch(myWalletProvider).valueOrNull),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -117,9 +117,10 @@ class WalletScreen extends ConsumerWidget {
 }
 
 class _BalanceCard extends StatelessWidget {
-  const _BalanceCard({required this.coins});
+  const _BalanceCard({required this.coins, this.split});
 
   final int? coins;
+  final WalletSplit? split;
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +153,17 @@ class _BalanceCard extends StatelessWidget {
                 coins != null ? Formatters.compactCount(coins!) : '—',
                 style: AppTypography.stat(fontSize: 26, color: AppColors.gold),
               ),
+              if (split != null && split!.purchased > 0)
+                Text(
+                  '{earned} gagnés (misables) · {bought} achetés (bonus)'.trArgs({
+                    'earned': split!.earned,
+                    'bought': split!.purchased,
+                  }),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: AppColors.textSecondary),
+                ),
             ],
           ),
         ],

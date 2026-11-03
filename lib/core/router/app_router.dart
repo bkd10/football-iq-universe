@@ -23,6 +23,7 @@ import '../../features/economy/presentation/screens/earn_ballons_screen.dart';
 import '../../features/economy/presentation/screens/shop_screen.dart';
 import '../../features/economy/presentation/screens/wallet_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
+import '../../features/legal/presentation/screens/legal_screen.dart';
 import '../../features/messaging/presentation/screens/conversation_screen.dart';
 import '../../features/messaging/presentation/screens/guardian_approval_screen.dart';
 import '../../features/messaging/presentation/screens/inbox_screen.dart';
@@ -93,6 +94,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (location.startsWith(RouteNames.guardianApprovalEntry)) {
         return null;
       }
+
+      // Documents légaux : toujours lisibles, connecté ou non.
+      if (location.startsWith('/legal/')) return null;
 
       // Écrans imposés avant tout le reste : nouveau mot de passe après le
       // lien « mot de passe oublié », code de double authentification.
@@ -199,6 +203,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ConfirmEmailScreen(
           email: (state.extra as String?) ?? '',
         ),
+      ),
+      GoRoute(
+        path: RouteNames.legal,
+        builder: (context, state) =>
+            LegalScreen(doc: LegalDoc.fromSlug(state.pathParameters['doc'])),
       ),
       GoRoute(
         path: RouteNames.resetPassword,
