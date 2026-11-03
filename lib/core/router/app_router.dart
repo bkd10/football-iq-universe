@@ -2,7 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/providers/auth_gate_provider.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/auth/presentation/screens/mfa_verify_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/auth/presentation/screens/security_settings_screen.dart';
 import '../../features/auth/presentation/screens/auth_callback_screen.dart';
 import '../../features/auth/presentation/screens/confirm_email_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
@@ -57,6 +61,7 @@ import '../constants/route_names.dart';
 class GoRouterRefreshNotifier extends ChangeNotifier {
   GoRouterRefreshNotifier(Ref ref) {
     ref.listen(authStateProvider, (_, __) => notifyListeners());
+    ref.listen(authGateProvider, (_, __) => notifyListeners());
   }
 }
 
@@ -79,12 +84,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: refreshNotifier,
     redirect: (context, state) async {
       final location = state.matchedLocation;
+      final gatedScreen = location == RouteNames.resetPassword ||
+          location == RouteNames.mfaVerify;
 
       // Approbation tuteur : toujours accessible, connecté ou non — le
       // tuteur n'a pas nécessairement de compte dans l'app (voir
       // `GuardianApprovalScreen`).
       if (location.startsWith(RouteNames.guardianApprovalEntry)) {
         return null;
+      }
+
+      // Écrans imposés avant tout le reste : nouveau mot de passe après le
+      // lien « mot de passe oublié », code de double authentification.
+      switch (ref.read(authGateProvider)) {
+        case AuthGate.newPassword:
+        case AuthGate.resetLinkInvalid:
+          return location == RouteNames.resetPassword
+              ? null
+              : RouteNames.resetPassword;
+        case AuthGate.mfaCode:
+          return location == RouteNames.mfaVerify ? null : RouteNames.mfaVerify;
+        case AuthGate.open:
+          break;
       }
 
       // Retour du lien de confirmation d'e-mail : géré entièrement à part,
@@ -125,7 +146,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isScout = role == 'scout';
       final isBrand = role == 'brand';
 
-      final onAuthOnlyScreen = location == RouteNames.splash ||
+      final onAuthOnlyScreen = gatedScreen ||
+          location == RouteNames.splash ||
           location == RouteNames.onboarding ||
           _authOnlyRoutes.contains(location);
       // PARTIE 8.9 : la Pépite du Jour s'affiche à chaque entrée dans l'app
@@ -177,6 +199,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ConfirmEmailScreen(
           email: (state.extra as String?) ?? '',
         ),
+      ),
+      GoRoute(
+        path: RouteNames.resetPassword,
+        builder: (context, state) => const ResetPasswordScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.mfaVerify,
+        builder: (context, state) => const MfaVerifyScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.securitySettings,
+        builder: (context, state) => const SecuritySettingsScreen(),
       ),
       GoRoute(
         path: RouteNames.authCallback,

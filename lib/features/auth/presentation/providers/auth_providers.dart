@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/errors/failures.dart';
 import '../../../../shared/providers/supabase_provider.dart';
+import 'auth_gate_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/profile.dart';
@@ -118,6 +120,13 @@ class AuthController extends AsyncNotifier<void> {
     );
     return result.fold(
       (failure) {
+        // Double authentification : pas une erreur, le routeur ouvre
+        // l'écran du code (voir `AuthGate`).
+        if (failure is MfaRequiredFailure) {
+          state = const AsyncData(null);
+          ref.read(authGateProvider.notifier).refresh();
+          return true;
+        }
         state = AsyncError(failure, StackTrace.current);
         return false;
       },

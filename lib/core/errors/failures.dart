@@ -58,6 +58,14 @@ class EmailNotConfirmedFailure extends Failure {
   ]);
 }
 
+/// Mot de passe accepté, code de double authentification encore attendu —
+/// pas une erreur : le routeur envoie vers l'écran du code.
+class MfaRequiredFailure extends Failure {
+  const MfaRequiredFailure([
+    super.rawMessage = 'Entre le code de ton appli d\'authentification.',
+  ]);
+}
+
 class UnknownFailure extends Failure {
   const UnknownFailure([super.rawMessage = 'Une erreur inattendue est survenue.']);
 }

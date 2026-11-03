@@ -16,6 +16,10 @@ class RouteNames {
   // `AuthCallbackScreen`. Supabase redirige ici avec `?code=...` (PKCE) ou
   // `?error=...` (lien expiré/invalide).
   static const String authCallback = '/auth/callback';
+  // Nouveau mot de passe (retour du lien « mot de passe oublié ») et code
+  // de double authentification — imposés par `AuthGate`.
+  static const String resetPassword = '/reset-password';
+  static const String mfaVerify = '/mfa';
 
   // Shell principal (bottom navigation)
   static const String feed = '/feed';
@@ -50,6 +54,7 @@ class RouteNames {
   static const String earnBallons = '/wallet/earn';
   static const String shop = '/wallet/shop';
   static const String settings = '/settings';
+  static const String securitySettings = '/settings/security';
   static const String search = '/search';
   static const String pepiteOfTheDay = '/pepite';
 

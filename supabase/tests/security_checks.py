@@ -82,6 +82,48 @@ def profile(uid):
     return sel(f"profiles?id=eq.{uid}&select=coins,stars,followers_count")[1][0]
 
 
+def totp(secret, offset=0):
+    """Code à 6 chiffres d'une appli d'authentification (RFC 6238)."""
+    import base64, hashlib, hmac, struct, time
+    key = base64.b32decode(secret + "=" * (-len(secret) % 8))
+    msg = struct.pack(">Q", int(time.time()) // 30 + offset)
+    h = hmac.new(key, msg, hashlib.sha1).digest()
+    o = h[-1] & 0x0F
+    return "%06d" % ((struct.unpack(">I", h[o:o + 4])[0] & 0x7FFFFFFF) % 1000000)
+
+
+def mfa_checks():
+    name = "mfa_" + uuid.uuid4().hex[:8]
+    tok, uid = signup(name)
+    s, f = req("POST", "/auth/v1/factors", {"factor_type": "totp", "friendly_name": "app"}, tok)
+    check("activer une appli de codes", s == 200 and f.get("totp", {}).get("secret"), (s, f))
+    fid, secret = f["id"], f["totp"]["secret"]
+    s, ch = req("POST", f"/auth/v1/factors/{fid}/challenge", {}, tok)
+    s, r = req("POST", f"/auth/v1/factors/{fid}/verify", {"challenge_id": ch["id"], "code": "000000"}, tok)
+    check("SÉCURITÉ mauvais code refusé", s in (400, 422), (s, r))
+    s, ch = req("POST", f"/auth/v1/factors/{fid}/challenge", {}, tok)
+    s, r = req("POST", f"/auth/v1/factors/{fid}/verify", {"challenge_id": ch["id"], "code": totp(secret)}, tok)
+    check("valider le premier code", s == 200 and r.get("access_token"), (s, r))
+    aal2 = r["access_token"]
+    s, r = req("POST", "/auth/v1/token?grant_type=password", {"email": f"{name}@test.dev", "password": "Passw0rd!123"})
+    aal1 = r["access_token"]
+    s, r = sel(f"profiles?id=eq.{uid}&select=username", aal1)
+    check("SÉCURITÉ mot de passe seul : données bloquées sans le code", s in (401, 403), (s, r))
+    s, r = rpc("get_my_profile", {}, aal1)
+    check("SÉCURITÉ mot de passe seul : RPC bloquées sans le code", s in (401, 403), (s, r))
+    s, r = sel(f"profiles?id=eq.{uid}&select=username", aal2)
+    check("avec le code : accès normal", s == 200 and r == [{"username": name}], (s, r))
+    s, ch = req("POST", f"/auth/v1/factors/{fid}/challenge", {}, aal1)
+    s, r = req("POST", f"/auth/v1/factors/{fid}/verify", {"challenge_id": ch["id"], "code": totp(secret)}, aal1)
+    if s != 200:
+        s, ch = req("POST", f"/auth/v1/factors/{fid}/challenge", {}, aal1)
+        s, r = req("POST", f"/auth/v1/factors/{fid}/verify", {"challenge_id": ch["id"], "code": totp(secret, 1)}, aal1)
+    check("connexion avec le code", s == 200, (s, r))
+    s, r = req("POST", "/auth/v1/token?grant_type=password", {"email": f"{name}@test.dev", "password": "Passw0rd!123"})
+    s, r = req("DELETE", f"/auth/v1/factors/{fid}", None, r["access_token"])
+    check("SÉCURITÉ désactiver sans le code refusé", s in (401, 403, 422), (s, r))
+
+
 RESULTS = []
 
 
@@ -359,6 +401,8 @@ def main():
     check("grand livre toujours juste après Battles et remboursements", s == 200 and r == [], r)
     s, r = rpc("delete_my_account", {}, b_tok)
     check("supprimer son compte", s == 204, r)
+
+    mfa_checks()
 
     failed = 0
     for ok, name, info in RESULTS:

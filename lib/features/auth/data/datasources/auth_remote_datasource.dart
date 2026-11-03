@@ -3,6 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/exceptions.dart' as core_errors;
+import '../../../../core/services/auth_link_flags.dart';
+import '../services/account_security_service.dart';
 import '../models/profile_model.dart';
 
 /// Accès direct à Supabase Auth + table `profiles`. Toute erreur réseau ou
@@ -20,6 +22,9 @@ class AuthRemoteDataSource {
     return _client.auth.onAuthStateChange.asyncMap((state) async {
       final user = state.session?.user;
       if (user == null) return null;
+      // Code de double authentification pas encore saisi : le serveur
+      // refuse toute lecture, le routeur affiche l'écran du code.
+      if (needsMfaCode(_client)) return null;
       return _fetchProfile(user.id);
     });
   }
@@ -37,8 +42,11 @@ class AuthRemoteDataSource {
       if (user == null) {
         throw const core_errors.AuthException('Connexion impossible.');
       }
+      if (needsMfaCode(_client)) throw const core_errors.MfaRequiredException();
       return _fetchProfile(user.id);
     } on core_errors.AuthException {
+      rethrow;
+    } on core_errors.MfaRequiredException {
       rethrow;
     } on supa.AuthException catch (e) {
       if (e.code == 'email_not_confirmed' ||
@@ -157,7 +165,15 @@ class AuthRemoteDataSource {
 
   Future<void> sendPasswordResetEmail(String email) async {
     try {
-      await _client.auth.resetPasswordForEmail(email);
+      // Le lien ramène sur l'appli avec `?reset=1` : au retour, l'appli
+      // ouvre l'écran « Nouveau mot de passe » (voir `AuthGate`). L'adresse
+      // doit figurer dans les Redirect URLs du projet Supabase.
+      await _client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: kIsWeb
+            ? '${Uri.base.origin}/?${AuthLinkFlags.resetParam}=1'
+            : null,
+      );
     } on supa.AuthException catch (e) {
       throw core_errors.AuthException(_authMessage(e));
     } catch (e) {

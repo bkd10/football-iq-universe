@@ -48,6 +48,12 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.push(RouteNames.editProfile),
           ),
           ListTile(
+            leading: const Icon(Icons.shield_outlined),
+            title: Text('Mot de passe et double authentification'.tr),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(RouteNames.securitySettings),
+          ),
+          ListTile(
             leading: const Icon(Icons.mail_outline),
             title: Text('Messages'.tr),
             trailing: const Icon(Icons.chevron_right),

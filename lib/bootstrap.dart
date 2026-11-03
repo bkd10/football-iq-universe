@@ -5,6 +5,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/config/supabase_config.dart';
+import 'core/services/auth_link_flags.dart';
 import 'core/l10n/l10n.dart';
 
 /// Point d'entrée commun aux trois flavors (dev/staging/prod) — voir
@@ -13,8 +14,10 @@ import 'core/l10n/l10n.dart';
 Future<void> bootstrap(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
   L10n.init();
+  AuthLinkFlags.capture();
 
   await SupabaseConfig.initialize(config);
+  AuthLinkFlags.clearUrl();
 
   final app = ProviderScope(child: FootballIqUniverseApp(config: config));
 

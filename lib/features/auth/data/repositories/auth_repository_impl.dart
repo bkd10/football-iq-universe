@@ -32,6 +32,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(model.toEntity());
     } on EmailNotConfirmedException catch (e) {
       return Left(EmailNotConfirmedFailure(e.message));
+    } on MfaRequiredException {
+      return const Left(MfaRequiredFailure());
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } on NetworkException catch (e) {

@@ -18,7 +18,7 @@ port = 54323
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = []
+additional_redirect_urls = ["http://127.0.0.1:8080/**", "http://localhost:8080/**"]
 jwt_expiry = 3600
 enable_signup = true
 
@@ -26,6 +26,13 @@ enable_signup = true
 enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
+
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
 
 [storage]
 enabled = true

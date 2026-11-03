@@ -47,3 +47,9 @@ class EmailNotConfirmedException implements Exception {
   const EmailNotConfirmedException(this.message);
   final String message;
 }
+
+/// Levée par `signIn` quand le mot de passe est bon mais que le compte a la
+/// double authentification : il reste à saisir le code de l'appli.
+class MfaRequiredException implements Exception {
+  const MfaRequiredException();
+}
