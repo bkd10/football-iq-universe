@@ -27,7 +27,7 @@ Tu restes propriétaire de tes vidéos. Tu nous autorises à les afficher dans l
 Les Ballons sont une monnaie virtuelle du jeu et les Stars mesurent ta réputation. Ni les uns ni les autres n'ont de valeur en argent. Leur fonctionnement est décrit dans les Règles des Ballons, qui font partie de ces conditions.
 
 ## 7. Défis, Challenges et Battles
-Ce sont des concours de talent : le gagnant est désigné par les votes de la communauté ou par un jury, jamais par le hasard. On ne gagne jamais d'argent. Seuls les Ballons gagnés en jouant peuvent servir de mise. Les défis sponsorisés par une marque, avec un vrai lot, sont gratuits et sans obligation d'achat ; le lot est remis par la marque, selon le règlement affiché sur le défi.
+Ce sont des concours de talent : le gagnant est désigné par les votes de la communauté ou par un jury, jamais par le hasard. On ne gagne jamais d'argent. Pour entrer dans une Battle ou un Challenge, on dépense des Ballons, quoi qu'il arrive, et le gagnant ne remporte jamais les Ballons des autres : il n'y a ni mise ni cagnotte. Les défis sponsorisés par une marque, avec un vrai lot, sont gratuits et sans obligation d'achat ; le lot est remis par la marque, selon le règlement affiché sur le défi.
 
 ## 8. Recruteurs
 Un recruteur ne peut contacter un joueur mineur qu'après l'accord de son parent ou tuteur.
@@ -67,7 +67,7 @@ You keep ownership of your videos. You allow us to show them in the app while th
 Balls are the game's virtual currency and Stars measure your reputation. Neither has any money value. How they work is described in the Balls rules, which are part of these terms.
 
 ## 7. Challenges and Battles
-These are talent contests: the winner is chosen by community votes or by a jury, never by chance. You never win money. Only Balls earned by playing can be staked. Brand-sponsored challenges with a real prize are free with no purchase required; the prize is given by the brand under the rules shown on the challenge.
+These are talent contests: the winner is chosen by community votes or by a jury, never by chance. You never win money. Entering a Battle or Challenge costs Balls whatever happens, and the winner never takes the other players' Balls: there is no stake and no prize pool. Brand-sponsored challenges with a real prize are free with no purchase required; the prize is given by the brand under the rules shown on the challenge.
 
 ## 8. Scouts
 A scout can only contact an underage player after their parent or guardian agrees.
@@ -155,14 +155,14 @@ Version {version}. Ces règles font de Football IQ un jeu de talent, pas un jeu 
 ## 1. Les Ballons n'ont pas de valeur en argent
 Les Ballons sont une monnaie virtuelle, utilisable seulement dans le jeu. Ils ne s'échangent jamais contre de l'argent, des biens ou des cadeaux, ne se revendent pas et ne se transfèrent pas à un autre joueur.
 
-## 2. Ballons gagnés et Ballons achetés
-Tu gagnes des Ballons en jouant : bonus de bienvenue, vidéos, missions, victoires. Tu peux aussi en acheter. L'appli compte les deux à part, dans ton portefeuille.
+## 2. Gagner ou acheter des Ballons
+Tu gagnes des Ballons en jouant : bonus de bienvenue, vidéos, missions, défis officiels gratuits. Tu peux aussi en acheter.
 
-## 3. Les Ballons achetés ne se misent jamais
-Les Ballons achetés servent uniquement aux bonus (par exemple mettre une vidéo en avant). Ils ne peuvent jamais servir de mise dans une Battle, ni pour entrer dans un Challenge qui a une cagnotte. Quand tu paies un bonus, les Ballons achetés sont utilisés en premier.
+## 3. À quoi servent les Ballons
+Les Ballons servent à entrer dans les Battles et les Challenges, et aux bonus (par exemple mettre une vidéo en avant). Une fois dépensés, ils ne reviennent pas, sauf si le défi est annulé ou n'a pas de vainqueur : l'entrée est alors remboursée.
 
-## 4. Battles et Challenges
-On ne mise que des Ballons gagnés en jouant, et la cagnotte se gagne seulement en Ballons. Le gagnant est désigné par les votes ou par un jury, selon le talent montré dans la vidéo, jamais par le hasard.
+## 4. Battles et Challenges : pas de mise, pas de cagnotte
+L'entrée d'un défi est dépensée quoi qu'il arrive, comme une vie dans un jeu. Le gagnant ne remporte jamais les Ballons des autres joueurs : il gagne des Stars, des points de forme sur sa carte et une victoire au compteur. Le gagnant est désigné par les votes ou par un jury, selon le talent montré dans la vidéo, jamais par le hasard. Seuls les défis officiels gratuits peuvent offrir une récompense en Ballons, payée par l'appli.
 
 ## 5. Défis sponsorisés
 Les défis d'une marque avec un vrai lot sont toujours gratuits, sans aucun achat nécessaire.
@@ -183,14 +183,14 @@ Version {version}. These rules make Football IQ a game of skill, not gambling.
 ## 1. Balls have no money value
 Balls are a virtual currency, usable only in the game. They can never be exchanged for money, goods or gifts, cannot be resold and cannot be transferred to another player.
 
-## 2. Earned Balls and bought Balls
-You earn Balls by playing: welcome bonus, videos, missions, wins. You can also buy them. The app counts both separately in your wallet.
+## 2. Earning or buying Balls
+You earn Balls by playing: welcome bonus, videos, missions, free official challenges. You can also buy them.
 
-## 3. Bought Balls are never staked
-Bought Balls are only for bonuses (for example boosting a video). They can never be used as a stake in a Battle, nor to enter a Challenge with a prize pool. When you pay for a bonus, bought Balls are used first.
+## 3. What Balls are for
+Balls are used to enter Battles and Challenges, and for bonuses (for example boosting a video). Once spent, they don't come back, unless the challenge is cancelled or has no winner: the entry is then refunded.
 
-## 4. Battles and Challenges
-Only Balls earned by playing can be staked, and the prize pool is only ever won in Balls. The winner is chosen by votes or by a jury, based on the skill shown in the video, never by chance.
+## 4. Battles and Challenges: no stake, no prize pool
+A challenge entry is spent whatever happens, like a life in a game. The winner never takes the other players' Balls: they win Stars, form points on their card and a win on their record. The winner is chosen by votes or by a jury, based on the skill shown in the video, never by chance. Only free official challenges can offer a reward in Balls, paid by the app.
 
 ## 5. Sponsored challenges
 Brand challenges with a real prize are always free, with no purchase required.

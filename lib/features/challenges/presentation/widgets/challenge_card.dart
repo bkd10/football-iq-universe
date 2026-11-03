@@ -79,7 +79,7 @@ class ChallengeCard extends StatelessWidget {
           ],
           if (challenge.isBattle)
             Text(
-              '@{creator} VS {opponent} · mise {stake} Ballons'.trArgs({
+              '@{creator} VS {opponent} · entrée {stake} Ballons'.trArgs({
                 'creator': challenge.creator?.username ?? '?',
                 'opponent': challenge.opponent != null
                     ? '@${challenge.opponent!.username}'
@@ -149,7 +149,7 @@ class ChallengeCard extends StatelessWidget {
                   const Icon(Icons.paid_outlined, size: 14, color: AppColors.gold),
                   const SizedBox(width: 4),
                   Text(
-                    'Cagnotte : {n} Ballons'.trArgs({'n': challenge.prizePool}),
+                    'Récompense : {n} Ballons'.trArgs({'n': challenge.prizePool}),
                     style: const TextStyle(color: AppColors.gold, fontSize: 12),
                   ),
                 ],

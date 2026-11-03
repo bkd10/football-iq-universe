@@ -470,8 +470,10 @@ def main():
     form_before = {r["id"]: r["form_score"] for r in sel(f"profiles?id=in.({a},{b})&select=id,form_score")[1]}
     sql(f"update challenges set end_date = now() - interval '1 minute' where id='{bid}'")
     sql("select resolve_expired_challenges()")
-    check("le gagnant de la Battle prend les 2 mises + 100 Stars",
-          profile(b)["coins"] == b_coins + 60 and profile(b)["stars"] == b_stars + 100, profile(b))
+    check("PAS DE PARI le gagnant de la Battle ne prend aucun Ballon des autres, +100 Stars",
+          profile(b)["coins"] == b_coins and profile(b)["stars"] == b_stars + 100, profile(b))
+    pool = sel(f"challenges?id=eq.{bid}&select=prize_pool")[1]
+    check("PAS DE PARI aucune cagnotte formée par les entrées", pool == [{"prize_pool": 0}], pool)
     sql("select refresh_form_scores()")
     after = {r["id"]: r["form_score"] for r in sel(f"profiles?id=in.({a},{b})&select=id,form_score")[1]}
     check("forme : la Battle gagnée fait monter, la perdue fait baisser",
@@ -505,22 +507,11 @@ def main():
     s, r = rpc("my_wallet", {}, g_tok)
     check("achat compté à part (Ballons achetés)", s == 200 and r[0]["purchased_coins"] == 500
           and r[0]["earned_coins"] == earned, r)
-    s, r = rpc("create_battle", {"p_title": "Mise payée", "p_rules": "x", "p_stake": earned + 50,
+    s, r = rpc("create_battle", {"p_title": "Entrée payée", "p_rules": "x", "p_stake": earned + 50,
                                  "p_video_id": gv, "p_end_date": end}, g_tok)
-    check("JEU D'ARGENT miser des Ballons achetés refusé", s == 400 and "gagnés" in str(r), r)
-    check("JEU D'ARGENT refus = aucun Ballon débité", profile(g)["coins"] == earned + 500, profile(g))
-    s, r = rpc("create_battle", {"p_title": "Mise gagnée", "p_rules": "x", "p_stake": 20,
-                                 "p_video_id": gv, "p_end_date": end}, g_tok)
-    check("miser des Ballons gagnés autorisé", s == 200, r)
+    check("entrée de Battle payable avec des Ballons achetés", s == 200, r)
     s, r = rpc("my_wallet", {}, g_tok)
-    check("la mise ne touche pas aux Ballons achetés", s == 200 and r[0]["purchased_coins"] == 500
-          and r[0]["earned_coins"] == earned - 20, r)
-    bal = profile(g)["coins"]
-    sql(f"update profiles set coins = coins - 30 where id='{g}'")
-    sql(f"insert into transactions (user_id, type, amount, currency, balance_after, reason) "
-        f"values ('{g}', 'spend', -30, 'coins', {bal - 30}, 'boost_video')")
-    s, r = rpc("my_wallet", {}, g_tok)
-    check("bonus payé d'abord avec les Ballons achetés", s == 200 and r[0]["purchased_coins"] == 470, r)
+    check("entrée payée d'abord avec les Ballons achetés", s == 200 and r[0]["purchased_coins"] == 500 - earned - 50, r)
     out = subprocess.run(["psql", DB_URL, "-Atqc", f"insert into challenges (creator_id, title, type, entry_cost, "
                           f"prize_currency, end_date) values ('{g}', 'Lot payant', 'sponsored', 10, 'real', now() + interval '1 day')"],
                          capture_output=True, text=True)

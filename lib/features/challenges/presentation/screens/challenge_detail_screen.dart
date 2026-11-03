@@ -126,12 +126,12 @@ class _ChallengeBody extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _InfoStat(
-                label: 'Mise'.tr,
+                label: 'Entrée'.tr,
                 value: '{n} Ballons'.trArgs({'n': challenge.entryCost}),
               ),
               _InfoStat(
                 label: 'À gagner'.tr,
-                value: '{n} Ballons'.trArgs({'n': challenge.entryCost * 2}),
+                value: '+100 Stars'.tr,
               ),
               _InfoStat(label: 'Joueurs'.tr, value: '${challenge.participantsCount}/2'),
             ],
@@ -144,10 +144,16 @@ class _ChallengeBody extends ConsumerWidget {
                 label: 'Entrée'.tr,
                 value: '{n} Ballons'.trArgs({'n': challenge.entryCost}),
               ),
-              _InfoStat(
-                label: 'Cagnotte'.tr,
-                value: '{n} Ballons'.trArgs({'n': challenge.prizePool}),
-              ),
+              if (challenge.prizePool > 0)
+                _InfoStat(
+                  label: 'Récompense'.tr,
+                  value: '{n} Ballons'.trArgs({'n': challenge.prizePool}),
+                )
+              else
+                _InfoStat(
+                  label: 'À gagner'.tr,
+                  value: '+100 Stars'.tr,
+                ),
               _InfoStat(
                 label: 'Participants'.tr,
                 value: '${challenge.participantsCount}'
@@ -303,11 +309,10 @@ class _KingRecordBanner extends StatelessWidget {
   }
 }
 
-/// Explique en clair, dans l'écran lui-même, ce que les chiffres "Entrée"/
-/// "Cagnotte" veulent dire — sans ça, les joueurs n'ont aucun moyen de
-/// savoir comment la cagnotte se constitue ni comment le vainqueur est
-/// désigné (ces règles n'existaient auparavant que dans les commentaires
-/// du code SQL, invisibles côté app).
+/// Explique en clair, dans l'écran lui-même, ce que coûte l'entrée et ce
+/// que gagne le vainqueur. Modèle sans cagnotte : l'entrée est dépensée, le
+/// gagnant ne prend jamais les Ballons des autres (voir
+/// `20260101000032_entry_fee_no_pot.sql`).
 class _RulesBanner extends StatelessWidget {
   const _RulesBanner({required this.challenge});
 
@@ -323,23 +328,22 @@ class _RulesBanner extends StatelessWidget {
               'décrit ci-dessus, remis directement par la marque.')
           .tr;
     } else if (challenge.isBattle) {
-      text = ('Battle 1 contre 1 : chaque joueur mise {stake} Ballons. '
-              'Les autres utilisateurs regardent les deux vidéos et votent (un vote '
-              'par personne, les deux joueurs ne votent pas). Le gagnant remporte les '
-              '{prize} Ballons et +100 Stars. Égalité, aucun vote ou '
-              'personne en face : chacun récupère sa mise.')
-          .trArgs({'stake': challenge.entryCost, 'prize': challenge.entryCost * 2});
+      text = ('Battle 1 contre 1 : l\'entrée coûte {stake} Ballons à chaque '
+              'joueur, quoi qu\'il arrive. Les autres utilisateurs regardent les '
+              'deux vidéos et votent (un vote par personne, les deux joueurs ne '
+              'votent pas). Le gagnant remporte +100 Stars et des points de '
+              'forme sur sa carte, jamais les Ballons de l\'autre. Égalité, aucun '
+              'vote ou personne en face : chacun est remboursé.')
+          .trArgs({'stake': challenge.entryCost});
     } else if (challenge.type == 'king') {
-      text = ('Le Roi en titre remporte la cagnotte s\'il n\'est pas '
+      text = ('Le Roi en titre remporte +100 Stars s\'il n\'est pas '
               'détrôné avant la fin du défi. Chaque tentative pour le '
-              'détrôner coûte {cost} Ballons, qui rejoignent '
-              'la cagnotte.')
+              'détrôner coûte {cost} Ballons.')
           .trArgs({'cost': challenge.entryCost});
     } else {
       text = ('Ouvert à tous du {start} '
-              'au {end}. Chaque droit '
-              'd\'entrée ({cost} Ballons) rejoint la cagnotte. Le '
-              'participant avec le plus de votes la remporte en entier (égalité : '
+              'au {end}. L\'entrée coûte {cost} Ballons. Le '
+              'participant avec le plus de votes remporte +100 Stars (égalité : '
               'le premier inscrit). Aucun vote : chacun est remboursé.')
           .trArgs({
         'start': DateTimeField.format(challenge.startDate.toLocal()),

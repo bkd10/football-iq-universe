@@ -150,9 +150,8 @@ class _CreateChallengeScreenState extends ConsumerState<CreateChallengeScreen> {
                       ('🎯 Un Challenge est ouvert à tous les joueurs entre la date de '
                               'début et la date de fin. Créer coûte '
                               '{createCost} Ballons ; chaque '
-                              'participant paie {joinCost} Ballons, '
-                              'qui forment la cagnotte. Le joueur avec le plus de votes la '
-                              'remporte.')
+                              'participant paie {joinCost} Ballons pour entrer. Le joueur '
+                              'avec le plus de votes remporte +100 Stars.')
                           .trArgs({
                         'createCost': EconomyConstants.createChallengeCost,
                         'joinCost': EconomyConstants.joinChallengeCost,

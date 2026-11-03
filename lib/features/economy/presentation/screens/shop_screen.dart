@@ -114,8 +114,8 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    ('Paiement sécurisé par Stripe. Les Ballons achetés servent '
-                            'aux bonus, jamais aux mises, et n\'ont aucune valeur en '
+                    ('Paiement sécurisé par Stripe. Les Ballons servent à entrer '
+                            'dans les défis et aux bonus, et n\'ont aucune valeur en '
                             'argent. Moins de 18 ans : achats avec l\'accord de tes '
                             'parents, 50 € maximum par mois.')
                         .tr,

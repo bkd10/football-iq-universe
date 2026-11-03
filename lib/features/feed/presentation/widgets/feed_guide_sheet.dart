@@ -134,14 +134,14 @@ class FeedGuideSheet extends StatelessWidget {
             icon: '⚔️',
             title: 'Battle',
             text: 'Toi contre un autre joueur. Tu fixes les règles (le plus beau but, '
-                'qui réussit ce geste…) et la mise. Ton adversaire mise autant, les '
-                'utilisateurs votent, le gagnant prend les deux mises.',
+                'qui réussit ce geste…) et le prix d\'entrée. Ton adversaire paie la '
+                'même entrée, les utilisateurs votent, le gagnant remporte +100 Stars.',
           ),
           const _Line(
             icon: '🎯',
             title: 'Challenge',
             text: 'Ouvert à tous entre une date de début et une date de fin. '
-                '20 Ballons pour entrer, le plus de votes remporte la cagnotte.',
+                '20 Ballons pour entrer, le plus de votes remporte +100 Stars.',
           ),
           const _Line(
             icon: '🌍',
@@ -157,7 +157,7 @@ class FeedGuideSheet extends StatelessWidget {
             icon: '🗳️',
             title: 'Votes',
             text: 'Un vote par personne. On ne vote pas pour soi, ni dans sa propre '
-                'Battle. Égalité ou aucun vote : chacun récupère sa mise.',
+                'Battle. Égalité ou aucun vote : chacun est remboursé.',
           ),
           const _Section('Gagner des Ballons'),
           const _Line(icon: '🎁', title: 'Bienvenue', text: '100 Ballons à l’inscription.'),
@@ -174,7 +174,7 @@ class FeedGuideSheet extends StatelessWidget {
           const _Line(
             icon: '🏆',
             title: 'Gagner',
-            text: 'Remporte une Battle ou un Challenge et la cagnotte est pour toi.',
+            text: 'Remporte un défi officiel gratuit et sa récompense en Ballons est pour toi.',
           ),
           const _Section('La note sur 99'),
           Text(
