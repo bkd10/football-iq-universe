@@ -70,8 +70,13 @@ class _ChallengeBody extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // Type du défi et compte à rebours : passent à la ligne sur petit
+        // écran au lieu de se coller et de déborder.
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.xs,
           children: [
             Text(
               challengeTypeLabels[challenge.type]?.tr ?? challenge.type,
@@ -88,7 +93,7 @@ class _ChallengeBody extends ConsumerWidget {
                     ? Formatters.countdown(challenge.timeRemaining)
                     : 'Commence dans {time}'.trArgs({'time': Formatters.countdown(challenge.timeUntilStart)}),
               },
-              style: AppTypography.stat(color: AppColors.gold),
+              style: AppTypography.stat(fontSize: 15, color: AppColors.gold),
             ),
           ],
         ),
@@ -384,12 +389,24 @@ class _InfoStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value, style: AppTypography.stat(fontSize: 15)),
-        const SizedBox(height: 2),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-      ],
+    // Trois colonnes de même largeur, texte centré : les chiffres restent
+    // alignés quelle que soit leur longueur.
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: AppTypography.stat(fontSize: 15),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
     );
   }
 }
