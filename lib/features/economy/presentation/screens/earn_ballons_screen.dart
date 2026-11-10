@@ -54,11 +54,10 @@ class EarnBallonsScreen extends StatelessWidget {
           _EarnTile(
             icon: Icons.emoji_events_outlined,
             title: 'Gagner un Défi ou une Battle'.tr,
-            detail: ('Le joueur avec le plus de votes remporte toute la '
-                    'cagnotte (droits d\'entrée ou mises de la Battle), plus '
-                    '100 Stars.')
+            detail: ('Défis officiels gratuits : le gagnant reçoit la récompense '
+                    'annoncée en Ballons. Battles et Challenges : +100 Stars.')
                 .tr,
-            amountLabel: 'Cagnotte + 100 ★'.tr,
+            amountLabel: 'Récompense + 100 ★'.tr,
           ),
           const SizedBox(height: AppSpacing.xl),
           Text('Bientôt disponible'.tr, style: context.textTheme.titleMedium),

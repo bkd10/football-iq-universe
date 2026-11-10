@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/economy_constants.dart';
@@ -18,9 +19,11 @@ import '../widgets/date_time_field.dart';
 import '../widgets/my_video_picker_sheet.dart';
 
 /// Battle 1 contre 1 : le joueur fixe les règles (« le plus beau but »,
-/// « qui réussit ce geste »...), la mise en Ballons et, s'il veut, son
-/// adversaire. L'adversaire mise la même somme pour relever la Battle, les
-/// autres utilisateurs votent, le gagnant remporte les deux mises.
+/// « qui réussit ce geste »...), le prix d'entrée en Ballons et, s'il veut,
+/// son adversaire. L'adversaire paie la même entrée pour relever la Battle,
+/// les autres utilisateurs votent, le gagnant remporte +100 Stars (jamais
+/// les Ballons de l'autre : pas de cagnotte, voir
+/// `20260101000032_entry_fee_no_pot.sql`).
 ///
 /// Adversaire : le premier qui relève, un joueur choisi parmi ses abonnés
 /// et abonnements (ou tapé à la main), ou un joueur tiré au hasard.
@@ -127,10 +130,11 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                   child: Text(
-                    ('⚔️ Toi contre un autre joueur. Tu fixes les règles et la mise. '
-                            'Ton adversaire mise la même somme pour relever le défi, puis '
-                            'les utilisateurs votent. Le gagnant remporte les deux mises. '
-                            'Égalité ou personne en face : chacun récupère sa mise.')
+                    ('⚔️ Toi contre un autre joueur. Tu fixes les règles et le prix '
+                            'd\'entrée. Ton adversaire paie la même entrée pour relever le '
+                            'défi, puis les utilisateurs votent. Le gagnant remporte +100 '
+                            'Stars et des points de forme. Égalité ou personne en face : '
+                            'chacun est remboursé.')
                         .tr,
                     style: context.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                   ),
@@ -161,7 +165,7 @@ class _CreateBattleScreenState extends ConsumerState<CreateBattleScreen> {
                   controller: _stakeController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Mise (Ballons)'.tr,
+                    labelText: 'Entrée (Ballons)'.tr,
                     helperText: coins != null ? 'Tu as {coins} Ballons'.trArgs({'coins': coins}) : null,
                   ),
                   validator: (v) {
