@@ -23,6 +23,16 @@ void main() {
     expect(text, isNot(contains('aimé')));
   });
 
+  test('notification « Nouveau challenge » traduite dans chaque langue', () {
+    for (final lang in L10n.supportedLanguages.where((l) => l != 'fr')) {
+      L10n.setLanguage(lang);
+      expect('Nouveau challenge ! 🏆'.trServer, isNot('Nouveau challenge ! 🏆'), reason: lang);
+      final body = '« Défi du 10 novembre » est lancé : à toi de jouer !'.trServer;
+      expect(body, contains('Défi du 10 novembre'), reason: lang);
+      expect(body, isNot(contains('à toi de jouer')), reason: lang);
+    }
+  });
+
   test('chaque langue traduit les textes', () {
     for (final lang in L10n.supportedLanguages.where((l) => l != 'fr')) {
       L10n.setLanguage(lang);

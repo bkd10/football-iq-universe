@@ -96,6 +96,11 @@ class _NotificationTile extends ConsumerWidget {
         return Icons.mark_email_read_outlined;
       case 'moderation':
         return Icons.shield_outlined;
+      case 'challenge_launched':
+        return Icons.campaign;
+      case 'battle_invite':
+      case 'battle_result':
+        return Icons.sports_mma;
       default:
         return Icons.notifications;
     }
