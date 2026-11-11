@@ -33,6 +33,23 @@ void main() {
     }
   });
 
+  test('participation sans vidéo : textes traduits dans chaque langue', () {
+    for (final lang in L10n.supportedLanguages.where((l) => l != 'fr')) {
+      L10n.setLanguage(lang);
+      expect('Envoyer ma vidéo'.tr, isNot('Envoyer ma vidéo'), reason: lang);
+      expect('Participation validée ✅'.trServer, isNot('Participation validée ✅'), reason: lang);
+      final body =
+          'Envoie ta vidéo pour « But contre Metz » avant la date limite (48 h maximum).'.trServer;
+      expect(body, contains('But contre Metz'), reason: lang);
+      expect(body, isNot(contains('Envoie ta vidéo')), reason: lang);
+      expect(
+        "Ce joueur n'a pas encore envoyé sa vidéo.".trServer,
+        isNot("Ce joueur n'a pas encore envoyé sa vidéo."),
+        reason: lang,
+      );
+    }
+  });
+
   test('chaque langue traduit les textes', () {
     for (final lang in L10n.supportedLanguages.where((l) => l != 'fr')) {
       L10n.setLanguage(lang);

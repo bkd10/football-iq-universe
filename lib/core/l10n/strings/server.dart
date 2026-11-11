@@ -56,6 +56,10 @@ const serverTranslations = <String, Map<String, String>>{
         'This Challenge is no longer accepting entries.',
     "Ce défi n'a pas encore commencé.": "This Challenge hasn't started yet.",
     'Ce défi est complet.': 'This Challenge is full.',
+    'Tu ne participes pas à ce défi.': "You're not in this Challenge.",
+    'Ta vidéo est déjà envoyée.': 'Your video has already been sent.',
+    'Le délai pour envoyer ta vidéo est dépassé.': 'The deadline to send your video has passed.',
+    "Ce joueur n'a pas encore envoyé sa vidéo.": "This Player hasn't sent their video yet.",
     'Cette Battle est réservée au joueur défié.':
         'This Battle is only for the challenged Player.',
     "Tu ne peux participer qu'avec l'une de tes propres vidéos.":
@@ -118,6 +122,7 @@ const serverTranslations = <String, Map<String, String>>{
     'Un recruteur veut te contacter': 'A Scout wants to contact you',
     'On te défie ! ⚔️': "You've been challenged! ⚔️",
     'Nouveau challenge ! 🏆': 'New Challenge! 🏆',
+    'Participation validée ✅': 'Entry confirmed ✅',
     'Mise remboursée': 'Stake refunded',
     'Battle gagnée ! ⚔️': 'Battle won! ⚔️',
     'Défi remporté !': 'Challenge won!',
@@ -196,6 +201,7 @@ const serverTranslationPatterns = <String, List<List<String>>>{
     [r'(.+?) rejoint ton Football Passport 🏅', r'$1 joins your Football Passport 🏅'],
     [r'(.+?) te lance une Battle : « (.+) » \(mise : (\d+) Ballons\)\.', r'$1 challenges you to a Battle: "$2" (stake: $3 Balls).'],
     [r'« (.+) » est lancé : à toi de jouer !', r'"$1" is live: your turn to play!'],
+    [r'Envoie ta vidéo pour « (.+) » avant la date limite \(48 h maximum\)\.', 'Send your video for "\$1" before the deadline (48 h max).'],
     [r'« (.+) » se termine sans vainqueur : tes (\d+) Ballons te sont rendus\.', r'"$1" ended with no winner: your $2 Balls have been refunded.'],
     [r'Tu as remporté « (.+) » 🏆', r'You won "$1" 🏆'],
     [r'Tu as remporté "(.+)" 🏆', r'You won "$1" 🏆'],

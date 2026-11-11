@@ -11,7 +11,8 @@ class ChallengeParticipationModel {
     required this.id,
     required this.challengeId,
     required this.userId,
-    required this.videoId,
+    this.videoId,
+    this.videoDeadline,
     required this.createdAt,
     this.votesCount = 0,
     this.score,
@@ -28,7 +29,8 @@ class ChallengeParticipationModel {
   final String id;
   final String challengeId;
   final String userId;
-  final String videoId;
+  final String? videoId;
+  final DateTime? videoDeadline;
   final DateTime createdAt;
   final int votesCount;
   final double? score;
@@ -43,6 +45,7 @@ class ChallengeParticipationModel {
       challengeId: challengeId,
       userId: userId,
       videoId: videoId,
+      videoDeadline: videoDeadline,
       createdAt: createdAt,
       votesCount: votesCount,
       score: score,

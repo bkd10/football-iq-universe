@@ -57,9 +57,29 @@ class ChallengeRepositoryImpl implements ChallengeRepository {
   }
 
   @override
-  Future<Either<Failure, void>> joinChallenge({
+  Future<Either<Failure, void>> submitChallengeVideo({
     required String challengeId,
     required String videoId,
+  }) async {
+    try {
+      await _remoteDataSource.submitChallengeVideo(
+        challengeId: challengeId,
+        videoId: videoId,
+      );
+      return const Right(null);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(UnknownFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> joinChallenge({
+    required String challengeId,
+    String? videoId,
   }) async {
     try {
       await _remoteDataSource.joinChallenge(

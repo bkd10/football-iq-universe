@@ -76,7 +76,24 @@ class ChallengeActionsController extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<bool> join({required String challengeId, required String videoId}) async {
+  Future<bool> submitVideo({required String challengeId, required String videoId}) async {
+    final result = await ref
+        .read(challengeRepositoryProvider)
+        .submitChallengeVideo(challengeId: challengeId, videoId: videoId);
+    return result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        return false;
+      },
+      (_) {
+        ref.invalidate(participationsProvider(challengeId));
+        state = const AsyncData(null);
+        return true;
+      },
+    );
+  }
+
+  Future<bool> join({required String challengeId, String? videoId}) async {
     final result = await ref.read(joinChallengeUseCaseProvider)(
       challengeId: challengeId,
       videoId: videoId,

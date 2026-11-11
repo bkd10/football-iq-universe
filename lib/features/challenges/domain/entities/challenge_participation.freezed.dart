@@ -19,7 +19,8 @@ mixin _$ChallengeParticipation {
   String get id => throw _privateConstructorUsedError;
   String get challengeId => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
-  String get videoId => throw _privateConstructorUsedError;
+  String? get videoId => throw _privateConstructorUsedError;
+  DateTime? get videoDeadline => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   int get votesCount => throw _privateConstructorUsedError;
   double? get score => throw _privateConstructorUsedError;
@@ -46,7 +47,8 @@ abstract class $ChallengeParticipationCopyWith<$Res> {
       {String id,
       String challengeId,
       String userId,
-      String videoId,
+      String? videoId,
+      DateTime? videoDeadline,
       DateTime createdAt,
       int votesCount,
       double? score,
@@ -78,7 +80,8 @@ class _$ChallengeParticipationCopyWithImpl<$Res,
     Object? id = null,
     Object? challengeId = null,
     Object? userId = null,
-    Object? videoId = null,
+    Object? videoId = freezed,
+    Object? videoDeadline = freezed,
     Object? createdAt = null,
     Object? votesCount = null,
     Object? score = freezed,
@@ -101,10 +104,14 @@ class _$ChallengeParticipationCopyWithImpl<$Res,
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      videoId: null == videoId
+      videoId: freezed == videoId
           ? _value.videoId
           : videoId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      videoDeadline: freezed == videoDeadline
+          ? _value.videoDeadline
+          : videoDeadline // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -168,7 +175,8 @@ abstract class _$$ChallengeParticipationImplCopyWith<$Res>
       {String id,
       String challengeId,
       String userId,
-      String videoId,
+      String? videoId,
+      DateTime? videoDeadline,
       DateTime createdAt,
       int votesCount,
       double? score,
@@ -200,7 +208,8 @@ class __$$ChallengeParticipationImplCopyWithImpl<$Res>
     Object? id = null,
     Object? challengeId = null,
     Object? userId = null,
-    Object? videoId = null,
+    Object? videoId = freezed,
+    Object? videoDeadline = freezed,
     Object? createdAt = null,
     Object? votesCount = null,
     Object? score = freezed,
@@ -223,10 +232,14 @@ class __$$ChallengeParticipationImplCopyWithImpl<$Res>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      videoId: null == videoId
+      videoId: freezed == videoId
           ? _value.videoId
           : videoId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      videoDeadline: freezed == videoDeadline
+          ? _value.videoDeadline
+          : videoDeadline // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -270,7 +283,8 @@ class _$ChallengeParticipationImpl implements _ChallengeParticipation {
       {required this.id,
       required this.challengeId,
       required this.userId,
-      required this.videoId,
+      this.videoId,
+      this.videoDeadline,
       required this.createdAt,
       this.votesCount = 0,
       this.score,
@@ -287,7 +301,9 @@ class _$ChallengeParticipationImpl implements _ChallengeParticipation {
   @override
   final String userId;
   @override
-  final String videoId;
+  final String? videoId;
+  @override
+  final DateTime? videoDeadline;
   @override
   final DateTime createdAt;
   @override
@@ -309,7 +325,7 @@ class _$ChallengeParticipationImpl implements _ChallengeParticipation {
 
   @override
   String toString() {
-    return 'ChallengeParticipation(id: $id, challengeId: $challengeId, userId: $userId, videoId: $videoId, createdAt: $createdAt, votesCount: $votesCount, score: $score, rank: $rank, hasVoted: $hasVoted, participant: $participant, videoUrl: $videoUrl, videoThumbnailUrl: $videoThumbnailUrl)';
+    return 'ChallengeParticipation(id: $id, challengeId: $challengeId, userId: $userId, videoId: $videoId, videoDeadline: $videoDeadline, createdAt: $createdAt, votesCount: $votesCount, score: $score, rank: $rank, hasVoted: $hasVoted, participant: $participant, videoUrl: $videoUrl, videoThumbnailUrl: $videoThumbnailUrl)';
   }
 
   @override
@@ -322,6 +338,8 @@ class _$ChallengeParticipationImpl implements _ChallengeParticipation {
                 other.challengeId == challengeId) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.videoId, videoId) || other.videoId == videoId) &&
+            (identical(other.videoDeadline, videoDeadline) ||
+                other.videoDeadline == videoDeadline) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.votesCount, votesCount) ||
@@ -345,6 +363,7 @@ class _$ChallengeParticipationImpl implements _ChallengeParticipation {
       challengeId,
       userId,
       videoId,
+      videoDeadline,
       createdAt,
       votesCount,
       score,
@@ -369,7 +388,8 @@ abstract class _ChallengeParticipation implements ChallengeParticipation {
       {required final String id,
       required final String challengeId,
       required final String userId,
-      required final String videoId,
+      final String? videoId,
+      final DateTime? videoDeadline,
       required final DateTime createdAt,
       final int votesCount,
       final double? score,
@@ -386,7 +406,9 @@ abstract class _ChallengeParticipation implements ChallengeParticipation {
   @override
   String get userId;
   @override
-  String get videoId;
+  String? get videoId;
+  @override
+  DateTime? get videoDeadline;
   @override
   DateTime get createdAt;
   @override

@@ -97,11 +97,31 @@ class ChallengeRemoteDataSource {
 
   Future<void> joinChallenge({
     required String challengeId,
-    required String videoId,
+    String? videoId,
   }) async {
     try {
       await _client.rpc<void>(
         'join_challenge',
+        params: {
+          'p_challenge_id': challengeId,
+          if (videoId != null) 'p_video_id': videoId,
+        },
+      );
+    } on supa.PostgrestException catch (e) {
+      throw _mapRpcError(e);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  /// Envoie la vidéo d'une participation validée sans vidéo (48 h max).
+  Future<void> submitChallengeVideo({
+    required String challengeId,
+    required String videoId,
+  }) async {
+    try {
+      await _client.rpc<void>(
+        'submit_challenge_video',
         params: {'p_challenge_id': challengeId, 'p_video_id': videoId},
       );
     } on supa.PostgrestException catch (e) {

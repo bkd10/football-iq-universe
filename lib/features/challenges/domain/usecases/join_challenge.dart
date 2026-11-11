@@ -10,7 +10,7 @@ class JoinChallenge {
 
   Future<Either<Failure, void>> call({
     required String challengeId,
-    required String videoId,
+    String? videoId,
   }) {
     return _repository.joinChallenge(challengeId: challengeId, videoId: videoId);
   }

@@ -66,6 +66,12 @@ class _ChallengeBody extends ConsumerWidget {
         ?.where((p) => p.userId == myProfile?.id)
         .toList();
     final hasJoined = myParticipation != null && myParticipation.isNotEmpty;
+    final mine = hasJoined ? myParticipation.first : null;
+    final videoMissing = mine != null && mine.videoId == null;
+    final deadline = mine?.videoDeadline?.toLocal();
+    final canStillSend = videoMissing &&
+        challenge.status == 'active' &&
+        (deadline == null || DateTime.now().isBefore(deadline));
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -187,11 +193,31 @@ class _ChallengeBody extends ConsumerWidget {
               label: challenge.type == 'sponsored' || challenge.entryCost == 0
                   ? 'Participer gratuitement'.tr
                   : 'Participer ({n} Ballons)'.trArgs({'n': challenge.entryCost}),
-              icon: Icons.videocam,
+              icon: Icons.how_to_reg,
               onPressed: challenge.isFull
                   ? null
                   : () => _openParticipateSheet(context, ref, challenge),
             )
+        else if (canStillSend)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                deadline != null
+                    ? 'Participation validée ✅ Envoie ta vidéo avant le {date}.'.trArgs({
+                        'date': DateTimeField.format(deadline),
+                      })
+                    : 'Participation validée ✅ Envoie ta vidéo.'.tr,
+                style: context.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppPrimaryButton(
+                label: 'Envoyer ma vidéo'.tr,
+                icon: Icons.upload,
+                onPressed: () => _sendVideo(context, ref, challenge),
+              ),
+            ],
+          )
         else if (hasJoined)
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -259,6 +285,27 @@ class _ChallengeBody extends ConsumerWidget {
     );
   }
 
+  Future<void> _sendVideo(BuildContext context, WidgetRef ref, Challenge challenge) async {
+    final myProfile = ref.read(currentProfileProvider).valueOrNull;
+    if (myProfile == null) return;
+    final video = await MyVideoPickerSheet.show(context, myProfile.id);
+    if (video == null || !context.mounted) return;
+
+    final success = await ref
+        .read(challengeActionsControllerProvider.notifier)
+        .submitVideo(challengeId: challenge.id, videoId: video.id);
+    if (!context.mounted) return;
+    if (success) {
+      context.showSnackBar('Vidéo envoyée ! Que les votes commencent 🔥'.tr);
+    } else {
+      final failure = ref.read(challengeActionsControllerProvider).error;
+      context.showSnackBar(
+        failure is Failure ? failure.message : "Échec de l'envoi.".tr,
+        isError: true,
+      );
+    }
+  }
+
   Future<void> _openParticipateSheet(
     BuildContext context,
     WidgetRef ref,
@@ -267,9 +314,14 @@ class _ChallengeBody extends ConsumerWidget {
     final myProfile = ref.read(currentProfileProvider).valueOrNull;
     if (myProfile == null) return;
 
-    final video = await MyVideoPickerSheet.show(context, myProfile.id);
-    if (video == null || !context.mounted) return;
-    final videoId = video.id;
+    // Challenge : on valide d'abord la participation, la vidéo suit (48 h).
+    // Battle : la vidéo reste obligatoire pour relever le défi.
+    String? videoId;
+    if (challenge.isBattle) {
+      final video = await MyVideoPickerSheet.show(context, myProfile.id);
+      if (video == null || !context.mounted) return;
+      videoId = video.id;
+    }
 
     final success = await ref
         .read(challengeActionsControllerProvider.notifier)
@@ -278,7 +330,9 @@ class _ChallengeBody extends ConsumerWidget {
     if (!context.mounted) return;
     if (success) {
       context.showSnackBar(
-        challenge.isBattle ? 'Battle relevée ! ⚔️'.tr : 'Tu participes au défi !'.tr,
+        challenge.isBattle
+            ? 'Battle relevée ! ⚔️'.tr
+            : 'Participation validée ! Tu as 48 h pour envoyer ta vidéo.'.tr,
       );
     } else {
       final failure = ref.read(challengeActionsControllerProvider).error;
@@ -437,7 +491,9 @@ class _ParticipationTile extends ConsumerWidget {
         children: [
           // Toucher la miniature ouvre la vidéo : on vote après l'avoir vue.
           GestureDetector(
-            onTap: () => context.push(RouteNames.videoDetailPath(participation.videoId)),
+            onTap: participation.videoId == null
+                ? null
+                : () => context.push(RouteNames.videoDetailPath(participation.videoId!)),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
               child: SizedBox(
@@ -450,8 +506,14 @@ class _ParticipationTile extends ConsumerWidget {
                       Image.network(participation.videoThumbnailUrl!, fit: BoxFit.cover)
                     else
                       const ColoredBox(color: AppColors.surface),
-                    const Center(
-                      child: Icon(Icons.play_circle_fill, color: Colors.white, size: 26),
+                    Center(
+                      child: Icon(
+                        participation.videoId == null
+                            ? Icons.hourglass_top
+                            : Icons.play_circle_fill,
+                        color: Colors.white,
+                        size: 26,
+                      ),
                     ),
                   ],
                 ),
@@ -475,7 +537,9 @@ class _ParticipationTile extends ConsumerWidget {
               ],
             ),
           ),
-          if (challenge.status == 'active' &&
+          if (participation.videoId == null)
+            Text('Vidéo à venir'.tr, style: Theme.of(context).textTheme.bodySmall)
+          else if (challenge.status == 'active' &&
               challenge.hasStarted &&
               !(challenge.isBattle && challenge.participantsCount < 2))
             OutlinedButton.icon(

@@ -12,7 +12,10 @@ ChallengeParticipationModel _$ChallengeParticipationModelFromJson(
       id: json['id'] as String,
       challengeId: json['challenge_id'] as String,
       userId: json['user_id'] as String,
-      videoId: json['video_id'] as String,
+      videoId: json['video_id'] as String?,
+      videoDeadline: json['video_deadline'] == null
+          ? null
+          : DateTime.parse(json['video_deadline'] as String),
       createdAt: DateTime.parse(json['created_at'] as String),
       votesCount: (json['votes_count'] as num?)?.toInt() ?? 0,
       score: (json['score'] as num?)?.toDouble(),
@@ -33,6 +36,7 @@ Map<String, dynamic> _$ChallengeParticipationModelToJson(
       'challenge_id': instance.challengeId,
       'user_id': instance.userId,
       'video_id': instance.videoId,
+      'video_deadline': instance.videoDeadline?.toIso8601String(),
       'created_at': instance.createdAt.toIso8601String(),
       'votes_count': instance.votesCount,
       'score': instance.score,

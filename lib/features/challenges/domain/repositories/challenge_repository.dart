@@ -20,6 +20,12 @@ abstract class ChallengeRepository {
   /// participation, atomiquement.
   Future<Either<Failure, void>> joinChallenge({
     required String challengeId,
+    String? videoId,
+  });
+
+  /// Envoie la vidéo d'une participation validée sans vidéo.
+  Future<Either<Failure, void>> submitChallengeVideo({
+    required String challengeId,
     required String videoId,
   });
 

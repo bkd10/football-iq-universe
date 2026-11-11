@@ -136,6 +136,12 @@ const challengesTranslations = <String, Map<String, String>>{
     'Joueurs': 'Players',
     'Cagnotte': 'Prize pool',
     'Ouvre le {date}': 'Opens on {date}',
+    'Participation validée ✅ Envoie ta vidéo avant le {date}.': 'Entry confirmed ✅ Send your video before {date}.',
+    'Participation validée ✅ Envoie ta vidéo.': 'Entry confirmed ✅ Send your video.',
+    'Envoyer ma vidéo': 'Send my video',
+    'Participation validée ! Tu as 48 h pour envoyer ta vidéo.': 'Entry confirmed! You have 48 h to send your video.',
+    'Vidéo envoyée ! Que les votes commencent 🔥': 'Video sent! Let the voting begin 🔥',
+    'Vidéo à venir': 'Video coming soon',
     'Les votes commencent le {date}. Inscris-toi dès maintenant !':
         'Voting starts on {date}. Sign up now!',
     'Relever la Battle ({n} Ballons)': 'Take on the Battle ({n} Balls)',
