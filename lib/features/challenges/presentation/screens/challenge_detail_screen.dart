@@ -161,13 +161,7 @@ class _ChallengeBody extends ConsumerWidget {
         if (challenge.type == 'king')
           _KingRecordBanner(challenge: challenge)
         else if (challenge.status == 'active' && !hasJoined && !challenge.hasEnded)
-          if (!challenge.hasStarted)
-            AppPrimaryButton(
-              label: 'Ouvre le {date}'.trArgs({'date': DateTimeField.format(challenge.startDate.toLocal())}),
-              icon: Icons.schedule,
-              onPressed: null,
-            )
-          else if (challenge.isBattle)
+          if (challenge.isBattle)
             if (challenge.isFull ||
                 (challenge.opponentId != null && challenge.opponentId != myProfile?.id))
               const SizedBox.shrink()
@@ -202,6 +196,24 @@ class _ChallengeBody extends ConsumerWidget {
               ],
             ),
           ),
+        // Inscriptions ouvertes dès la création ; les votes attendent le début.
+        if (challenge.status == 'active' && !challenge.hasStarted && !challenge.hasEnded) ...[
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              const Icon(Icons.schedule, size: 18, color: AppColors.gold),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Les votes commencent le {date}. Inscris-toi dès maintenant !'.trArgs({
+                    'date': DateTimeField.format(challenge.startDate.toLocal()),
+                  }),
+                  style: context.textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: AppSpacing.xl),
         Text(
           challenge.isBattle ? 'Les vidéos — vote pour la meilleure'.tr : 'Participants'.tr,
@@ -443,6 +455,7 @@ class _ParticipationTile extends ConsumerWidget {
             ),
           ),
           if (challenge.status == 'active' &&
+              challenge.hasStarted &&
               !(challenge.isBattle && challenge.participantsCount < 2))
             OutlinedButton.icon(
               // Le thème impose une largeur infinie aux boutons (pleine

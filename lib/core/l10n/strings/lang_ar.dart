@@ -299,6 +299,8 @@ const arTranslations = <String, Map<String, String>>{
     'À gagner': 'للفوز',
     'Cagnotte': 'مجموع الجوائز',
     'Ouvre le {date}': 'يفتح في {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'يبدأ التصويت في {date}. سجّل الآن!',
     'Relever la Battle ({n} Ballons)': 'اقبل الـBattle ({n} كرة)',
     'Participer gratuitement': 'شارك مجانًا',
     'Participer ({n} Ballons)': 'شارك ({n} كرة)',

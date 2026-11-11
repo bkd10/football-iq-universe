@@ -299,6 +299,8 @@ const itTranslations = <String, Map<String, String>>{
     'À gagner': 'In palio',
     'Cagnotte': 'Montepremi',
     'Ouvre le {date}': 'Apre il {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'Le votazioni iniziano il {date}. Iscriviti subito!',
     'Relever la Battle ({n} Ballons)': 'Accetta la Battle ({n} Palloni)',
     'Participer gratuitement': 'Partecipa gratis',
     'Participer ({n} Ballons)': 'Partecipa ({n} Palloni)',

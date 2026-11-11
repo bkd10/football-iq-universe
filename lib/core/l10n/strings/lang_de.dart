@@ -299,6 +299,8 @@ const deTranslations = <String, Map<String, String>>{
     'À gagner': 'Zu gewinnen',
     'Cagnotte': 'Pot',
     'Ouvre le {date}': 'Öffnet am {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'Die Abstimmung beginnt am {date}. Melde dich jetzt an!',
     'Relever la Battle ({n} Ballons)': 'Battle annehmen ({n} Bälle)',
     'Participer gratuitement': 'Kostenlos mitmachen',
     'Participer ({n} Ballons)': 'Mitmachen ({n} Bälle)',

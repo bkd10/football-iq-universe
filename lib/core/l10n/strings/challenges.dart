@@ -136,6 +136,8 @@ const challengesTranslations = <String, Map<String, String>>{
     'Joueurs': 'Players',
     'Cagnotte': 'Prize pool',
     'Ouvre le {date}': 'Opens on {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'Voting starts on {date}. Sign up now!',
     'Relever la Battle ({n} Ballons)': 'Take on the Battle ({n} Balls)',
     'Participer gratuitement': 'Join for free',
     'Participer ({n} Ballons)': 'Join ({n} Balls)',

@@ -299,6 +299,8 @@ const ptTranslations = <String, Map<String, String>>{
     'À gagner': 'Em jogo',
     'Cagnotte': 'Prêmio acumulado',
     'Ouvre le {date}': 'Abre em {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'A votação começa em {date}. Inscreva-se já!',
     'Relever la Battle ({n} Ballons)': 'Aceitar a Battle ({n} Bolas)',
     'Participer gratuitement': 'Participar grátis',
     'Participer ({n} Ballons)': 'Participar ({n} Bolas)',

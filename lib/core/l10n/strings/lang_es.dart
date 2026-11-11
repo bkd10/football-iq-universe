@@ -299,6 +299,8 @@ const esTranslations = <String, Map<String, String>>{
     'À gagner': 'Para ganar',
     'Cagnotte': 'Bote',
     'Ouvre le {date}': 'Abre el {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'Las votaciones empiezan el {date}. ¡Apúntate ya!',
     'Relever la Battle ({n} Ballons)': 'Aceptar la Battle ({n} Balones)',
     'Participer gratuitement': 'Unirse gratis',
     'Participer ({n} Ballons)': 'Unirse ({n} Balones)',

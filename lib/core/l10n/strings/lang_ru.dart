@@ -299,6 +299,8 @@ const ruTranslations = <String, Map<String, String>>{
     'À gagner': 'Выигрыш',
     'Cagnotte': 'Банк',
     'Ouvre le {date}': 'Открывается {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'Голосование начнётся {date}. Записывайся уже сейчас!',
     'Relever la Battle ({n} Ballons)': 'Принять Battle ({n} Мячей)',
     'Participer gratuitement': 'Участвовать бесплатно',
     'Participer ({n} Ballons)': 'Участвовать ({n} Мячей)',

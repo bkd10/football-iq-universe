@@ -299,6 +299,8 @@ const svTranslations = <String, Map<String, String>>{
     'À gagner': 'Att vinna',
     'Cagnotte': 'Prispott',
     'Ouvre le {date}': 'Öppnar {date}',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'Röstningen börjar {date}. Anmäl dig nu!',
     'Relever la Battle ({n} Ballons)': 'Anta Battlen ({n} Bollar)',
     'Participer gratuitement': 'Gå med gratis',
     'Participer ({n} Ballons)': 'Gå med ({n} Bollar)',

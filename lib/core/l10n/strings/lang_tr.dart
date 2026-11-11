@@ -299,6 +299,8 @@ const trTranslations = <String, Map<String, String>>{
     'À gagner': 'Kazanılacak',
     'Cagnotte': 'Ödül havuzu',
     'Ouvre le {date}': '{date} tarihinde açılıyor',
+    'Les votes commencent le {date}. Inscris-toi dès maintenant !':
+        'Oylama {date} tarihinde başlıyor. Hemen katıl!',
     'Relever la Battle ({n} Ballons)': 'Battle\'ı kabul et ({n} Top)',
     'Participer gratuitement': 'Ücretsiz katıl',
     'Participer ({n} Ballons)': 'Katıl ({n} Top)',
