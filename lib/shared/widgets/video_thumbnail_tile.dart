@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../features/videos/domain/entities/video.dart';
+import 'pressable.dart';
 
 /// Vignette vidéo réutilisée dans les grilles (Football Passport, fiche
 /// d'un Move, Trending Moves) : miniature + badge Move + compteur de vues.
@@ -15,8 +17,9 @@ class VideoThumbnailTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
+      semanticLabel: 'Vidéo, {n} vues'.trArgs({'n': Formatters.compactCount(video.viewsCount)}),
       child: Stack(
         fit: StackFit.expand,
         children: [

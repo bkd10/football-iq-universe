@@ -27,21 +27,21 @@ const _pages = [
     title: 'Ici, un inconnu peut devenir une star',
     description:
         'Le talent parle, pas les followers. Poste tes gestes techniques et '
-        'laisse notre algorithme Talent First te découvrir, où que tu sois.',
+        'laisse la communauté te découvrir, où que tu sois.',
   ),
   _OnboardingPage(
     icon: Icons.auto_awesome_outlined,
     title: 'Invente ton Move',
     description:
         'Crée un geste, donne-lui ton nom, et regarde la communauté le '
-        'reproduire. Chaque reproduction te crédite — à vie.',
+        'reproduire. Chaque reproduction porte ton nom.',
   ),
   _OnboardingPage(
     icon: Icons.trending_up_outlined,
-    title: 'Progresse, prouve, sois recruté',
+    title: 'Progresse, prouve, fais-toi remarquer',
     description:
-        'Ton Football IQ n\'est jamais achetable. Ton Football Passport '
-        'certifie ton niveau réel — c\'est ce que voient les recruteurs.',
+        'Ta note se gagne sur le terrain, grâce aux votes de la communauté. '
+        'Ton Football Passport montre ta progression aux recruteurs inscrits.',
   ),
 ];
 

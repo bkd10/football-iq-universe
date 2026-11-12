@@ -80,7 +80,7 @@ class _GuardianApprovalScreenState extends ConsumerState<GuardianApprovalScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Un recruteur vérifié souhaite contacter un joueur mineur.'.tr,
+                'Un recruteur souhaite contacter un joueur mineur.'.tr,
                 style: context.textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.sm),

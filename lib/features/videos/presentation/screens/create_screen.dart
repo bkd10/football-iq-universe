@@ -270,7 +270,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
               contentPadding: EdgeInsets.zero,
               title: Text('Créer un Move'.tr),
               subtitle: Text(
-                'Nomme ce geste — les reproductions te créditeront à vie.'.tr,
+                'Nomme ce geste : chaque reproduction portera ton nom.'.tr,
               ),
               value: _isMove,
               activeThumbColor: AppColors.primary,

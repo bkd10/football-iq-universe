@@ -19,6 +19,7 @@ import '../providers/challenge_providers.dart';
 import '../widgets/challenge_card.dart';
 import '../widgets/date_time_field.dart';
 import '../widgets/my_video_picker_sheet.dart';
+import '../../../../shared/widgets/pressable.dart';
 
 /// Détail d'un défi — voir PARTIE 8.3/9.2 (écrans "Challenge Detail" et
 /// "Challenge Voting" fusionnés). Le vote et la participation partagent
@@ -436,7 +437,8 @@ class _ParticipationTile extends ConsumerWidget {
       child: Row(
         children: [
           // Toucher la miniature ouvre la vidéo : on vote après l'avoir vue.
-          GestureDetector(
+          Pressable(
+            semanticLabel: 'Voir la vidéo'.tr,
             onTap: () => context.push(RouteNames.videoDetailPath(participation.videoId)),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusButton),

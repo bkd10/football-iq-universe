@@ -187,7 +187,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        ('Un recruteur vérifié ne peut te contacter qu\'après '
+                        ('Un recruteur ne peut te contacter qu\'après '
                                 'approbation d\'un tuteur — renseigne son contact pour '
                                 'pouvoir être approché.')
                             .tr,

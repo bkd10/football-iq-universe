@@ -11,6 +11,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../../core/widgets/inputs/app_text_field.dart';
+import '../../../legal/presentation/screens/legal_screen.dart';
 import '../providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -133,6 +134,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       'Tu es le tuteur d\'un joueur ? Approuver un contact'.tr,
                     ),
                   ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Documents légaux lisibles sans compte (loi LCEN, RGPD).
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (final doc in LegalDoc.values)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: context.textTheme.bodySmall,
+                          minimumSize: const Size(44, 44),
+                        ),
+                        onPressed: () => context.push(RouteNames.legalPath(doc.slug)),
+                        child: Text(doc.title),
+                      ),
+                  ],
                 ),
               ],
             ),

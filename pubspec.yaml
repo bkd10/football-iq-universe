@@ -75,3 +75,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    # Polices embarquées dans l'appli : aucune requête vers les serveurs de
+    # Google pour les afficher (voir bootstrap.dart, RGPD).
+    - assets/google_fonts/
+    - assets/licenses/

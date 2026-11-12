@@ -14,6 +14,7 @@ import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/ranking_entry.dart';
 import '../providers/ranking_providers.dart';
+import '../../../../shared/widgets/pressable.dart';
 
 enum _Region { world, country, city }
 
@@ -180,7 +181,7 @@ class _RankingRow extends StatelessWidget {
     final medalColor = _medalColors[entry.rank];
     final levelColor = AppColors.forLevel(entry.level);
 
-    return GestureDetector(
+    return Pressable(
       onTap: () => isMe
           ? context.go(RouteNames.profile)
           : context.push(RouteNames.otherProfilePath(entry.userId)),

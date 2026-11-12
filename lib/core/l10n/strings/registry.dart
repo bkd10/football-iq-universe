@@ -15,6 +15,7 @@ import 'lang_pt.dart';
 import 'lang_ru.dart';
 import 'lang_sv.dart';
 import 'lang_tr.dart';
+import 'legal.dart';
 import 'profile.dart';
 import 'security.dart';
 import 'server.dart';
@@ -39,6 +40,7 @@ const List<Map<String, Map<String, String>>> _allTables = [
   economyTranslations,
   profileTranslations,
   securityTranslations,
+  legalTranslations,
   socialTranslations,
   videosTranslations,
   serverTranslations,

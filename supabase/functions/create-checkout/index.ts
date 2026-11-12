@@ -52,6 +52,12 @@ Deno.serve(async (req) => {
       client_reference_id: String(purchase.purchase_id),
       'metadata[purchase_id]': String(purchase.purchase_id),
       'payment_intent_data[metadata][purchase_id]': String(purchase.purchase_id),
+      // Repris sur le reçu envoyé par Stripe (support durable) : confirme
+      // l'accord pour la livraison immédiate et la renonciation (art. L221-13
+      // du Code de la consommation).
+      'payment_intent_data[description]':
+        `${purchase.coins} Ballons – Football IQ. Contenu numérique livré immédiatement : ` +
+        'livraison immédiate demandée et renonciation au droit de rétractation acceptées avant le paiement.',
       locale: 'auto',
       // Contenu numérique livré tout de suite : le client renonce au délai
       // de rétractation (affiché aussi dans les Règles des Ballons).

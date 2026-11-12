@@ -452,8 +452,8 @@ class _TermsCheckbox extends StatelessWidget {
           value: value,
           onChanged: (v) => onChanged(v ?? false),
           title: Text(
-            ('J\'accepte les conditions d\'utilisation, la politique de '
-                    'confidentialité et les règles des Ballons.')
+            ('J\'accepte les conditions d\'utilisation et les règles des '
+                    'Ballons, et j\'ai lu la politique de confidentialité.')
                 .tr,
             style: context.textTheme.bodyMedium,
           ),

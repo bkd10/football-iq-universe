@@ -21,6 +21,7 @@ import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/video_providers.dart';
 import '../../../videos/presentation/widgets/comments_sheet.dart';
 import 'player_card_style.dart';
+import '../../../../shared/widgets/pressable.dart';
 
 /// Une "page" du feed : la vidéo présentée comme une carte de joueur (note,
 /// poste, stats du joueur) avec ses actions (Respect, Masterclass,
@@ -235,6 +236,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
               top: 8,
               child: _GlassButton(
                 icon: (controller?.isMuted ?? false) ? Icons.volume_off : Icons.volume_up,
+                label: (controller?.isMuted ?? false) ? 'Activer le son'.tr : 'Couper le son'.tr,
                 onTap: _toggleSound,
               ),
             ),
@@ -246,7 +248,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                 children: [
                   _GlassChip(text: '#${video.category}'),
                   if (video.isMove)
-                    GestureDetector(
+                    Pressable(
                       onTap: () => context.push(RouteNames.moveDetailPath(video.id)),
                       child: _GlassChip(
                         text: '🔥 Move : {name}'.trArgs({'name': video.moveName ?? 'original'.tr}),
@@ -254,7 +256,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                       ),
                     )
                   else if (video.originalMoveId != null)
-                    GestureDetector(
+                    Pressable(
                       onTap: () => context.push(RouteNames.moveDetailPath(video.originalMoveId!)),
                       child: _GlassChip(text: 'Reproduit un Move'.tr),
                     ),
@@ -303,7 +305,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: GestureDetector(
+            child: Pressable(
               onTap: () => context.push(RouteNames.otherProfilePath(video.userId)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +357,7 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
           ),
           if (!isMine) ...[
             const SizedBox(width: 8),
-            GestureDetector(
+            Pressable(
               onTap: () => ref.read(followControllerProvider(video.userId).notifier).toggle(),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -589,15 +591,17 @@ class _RatingBadge extends StatelessWidget {
 }
 
 class _GlassButton extends StatelessWidget {
-  const _GlassButton({required this.icon, required this.onTap});
+  const _GlassButton({required this.icon, required this.label, required this.onTap});
 
   final IconData icon;
+  final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
+      semanticLabel: label,
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: const BoxDecoration(color: Colors.black45, shape: BoxShape.circle),
@@ -654,7 +658,7 @@ class _CardAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = active ? style.panel : style.onPanel;
     return Expanded(
-      child: GestureDetector(
+      child: Pressable(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),

@@ -29,10 +29,11 @@ class AppColors {
   static const Color warning = Color(0xFFFFBE0B);
   static const Color info = Color(0xFF3A86FF);
 
-  // Text
+  // Text — contrastes vérifiés (WCAG AA, 4,5:1 minimum) sur background,
+  // surface et surfaceLight.
   static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF8B8B9A);
-  static const Color textTertiary = Color(0xFF5A5A6E);
+  static const Color textSecondary = Color(0xFFA0A0B0);
+  static const Color textTertiary = Color(0xFF9494AA);
 
   /// Couleur associée à chaque niveau de joueur (bordure d'avatar, badges).
   static Color forLevel(String level) {

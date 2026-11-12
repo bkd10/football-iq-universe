@@ -455,7 +455,7 @@ class _ContactPlayerButton extends ConsumerWidget {
           : () async {
               if (!isScout) {
                 context.showSnackBar(
-                  'Réservé aux recruteurs vérifiés · contact médié pour les mineurs.'.tr,
+                  'Réservé aux comptes recruteurs · contact médié pour les mineurs.'.tr,
                 );
                 return;
               }

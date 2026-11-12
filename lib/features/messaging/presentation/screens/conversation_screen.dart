@@ -87,7 +87,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
     final myUsername =
         ref.read(currentProfileProvider).valueOrNull?.username ?? 'ce joueur'.tr;
-    final text = ('Un recruteur vérifié souhaite contacter {username} sur '
+    final text = ('Un recruteur souhaite contacter {username} sur '
             'Football IQ Universe. Pour approuver ou refuser ce contact, ouvre '
             'l\'app, va dans Réglages > "J\'ai un code tuteur" et saisis ce '
             'code : {token}')
@@ -191,6 +191,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           ? const AppLoader(size: 20)
                           : const Icon(Icons.send, color: AppColors.primary),
                       onPressed: _isSending ? null : _send,
+                      tooltip: 'Envoyer'.tr,
                     ),
                   ],
                 ),

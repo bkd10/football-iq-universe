@@ -18,6 +18,7 @@ import '../../../moderation/presentation/widgets/report_content_sheet.dart';
 import '../../domain/entities/video.dart';
 import '../providers/video_providers.dart';
 import '../widgets/comments_sheet.dart';
+import '../../../../shared/widgets/pressable.dart';
 
 /// Écran "Video Detail" (PARTIE 9.2, écran 8) : vue plein écran d'une
 /// vidéo consultée hors du fil principal — grille du profil, fiche Move
@@ -136,6 +137,7 @@ class _VideoDetailBody extends ConsumerWidget {
           child: SafeArea(
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
+              tooltip: 'Retour'.tr,
               onPressed: () => context.canPop() ? context.pop() : context.go(RouteNames.feed),
             ),
           ),
@@ -195,6 +197,7 @@ class _VideoDetailBody extends ConsumerWidget {
                 end: AppSpacing.md,
                 child: IconButton(
                   icon: Icon(c.isMuted ? Icons.volume_off : Icons.volume_up, color: Colors.white),
+                  tooltip: c.isMuted ? 'Activer le son'.tr : 'Couper le son'.tr,
                   onPressed: () => c.isMuted = !c.isMuted,
                 ),
               ),
@@ -262,7 +265,7 @@ class _VideoDetailBody extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
+          Pressable(
             onTap: () => context.push(RouteNames.otherProfilePath(video.userId)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -294,7 +297,7 @@ class _VideoDetailBody extends ConsumerWidget {
             ),
           ] else if (video.originalMoveId != null) ...[
             const SizedBox(height: 6),
-            GestureDetector(
+            Pressable(
               onTap: () => context.push(RouteNames.moveDetailPath(video.originalMoveId!)),
               child: Text(
                 'Reproduit un Move'.tr,
@@ -335,7 +338,7 @@ class _RailButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
       child: Column(
         children: [

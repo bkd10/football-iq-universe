@@ -7,6 +7,8 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../../core/services/browser/browser.dart';
+import '../../../legal/data/legal_info.dart';
 import '../../../legal/presentation/screens/legal_screen.dart';
 import '../../../../shared/providers/supabase_provider.dart';
 
@@ -71,7 +73,7 @@ class SettingsScreen extends ConsumerWidget {
             title: Text('Protection des mineurs'.tr),
             subtitle: Text(
               ('Aucune géolocalisation précise publique. Le contact par un '
-                      'recruteur vérifié est toujours médié pour les moins de 18 ans.')
+                      'recruteur est toujours médié pour les moins de 18 ans.')
                   .tr,
             ),
           ),
@@ -92,17 +94,27 @@ class SettingsScreen extends ConsumerWidget {
           ),
           for (final doc in LegalDoc.values)
             ListTile(
-              leading: Icon(
-                switch (doc) {
-                  LegalDoc.terms => Icons.description_outlined,
-                  LegalDoc.privacy => Icons.lock_outline,
-                  LegalDoc.ballons => Icons.sports_soccer,
-                },
-              ),
+              leading: Icon(doc.icon),
               title: Text(doc.title),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(RouteNames.legalPath(doc.slug)),
             ),
+          ListTile(
+            leading: const Icon(Icons.folder_shared_outlined),
+            title: Text('Mes données'.tr),
+            subtitle: Text('Demander une copie, une correction ou la suppression.'.tr),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showMyData(context, email),
+          ),
+          ListTile(
+            leading: const Icon(Icons.copyright_outlined),
+            title: Text('Licences'.tr),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'Football IQ Universe',
+            ),
+          ),
           if (profileAsync.valueOrNull?.role == 'admin') ...[
             const Divider(),
             ListTile(
@@ -136,6 +148,41 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Exercice des droits RGPD : suppression directe dans l'appli, le reste
+  /// par e-mail (réponse sous un mois).
+  Future<void> _showMyData(BuildContext context, String? accountEmail) {
+    const contact = LegalInfo.contactEmail;
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Mes données'.tr),
+        content: Text(
+          ('Pour supprimer ton compte et toutes tes données, utilise « Supprimer '
+                  'mon compte » en bas de cette page. Pour recevoir une copie de tes '
+                  'données, en corriger ou t\'opposer à leur utilisation, écris-nous '
+                  'depuis l\'adresse de ton compte : nous répondons sous un mois.')
+              .tr,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text('Fermer'.tr),
+          ),
+          if (contact != null)
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                final subject = Uri.encodeComponent('Mes données – Football IQ');
+                final body = Uri.encodeComponent(accountEmail ?? '');
+                openExternalLink('mailto:$contact?subject=$subject&body=$body');
+              },
+              child: Text('Écrire un e-mail'.tr),
+            ),
         ],
       ),
     );

@@ -13,6 +13,7 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../profile/presentation/providers/social_providers.dart';
 import '../../domain/entities/app_notification.dart';
 import '../providers/notifications_providers.dart';
+import '../../../../shared/widgets/pressable.dart';
 
 /// Écran "Notifications" (PARTIE 9.2, écran 31) — nouvel abonné, like,
 /// commentaire, Move reproduit, badge débloqué, défi gagné/terminé.
@@ -159,7 +160,7 @@ class _NotificationTile extends ConsumerWidget {
       onTap: () => _onTap(context, ref),
       tileColor: notification.isRead ? null : AppColors.primary.withValues(alpha: 0.06),
       leading: showActor
-          ? GestureDetector(
+          ? Pressable(
               onTap: () => _openActor(context, ref),
               child: Stack(
                 clipBehavior: Clip.none,
@@ -202,7 +203,7 @@ class _NotificationTile extends ConsumerWidget {
         children: [
           if (notification.body != null) Text(notification.body!.trServer),
           if (showActor && username != null)
-            GestureDetector(
+            Pressable(
               onTap: () => _openActor(context, ref),
               child: Text(
                 '@{username} · voir le profil'.trArgs({'username': username}),

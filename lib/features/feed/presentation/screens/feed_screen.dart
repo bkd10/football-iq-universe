@@ -16,6 +16,7 @@ import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/video_providers.dart';
 import '../widgets/feed_guide_sheet.dart';
 import '../widgets/feed_video_tile.dart';
+import '../../../../shared/widgets/pressable.dart';
 
 enum _FeedTab { forYou, following, trending }
 
@@ -211,6 +212,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.search, color: Colors.white),
+                tooltip: 'Rechercher'.tr,
                 onPressed: () => context.push(RouteNames.search),
               ),
               IconButton(
@@ -229,6 +231,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       label: Text('$unread'),
                       child: const Icon(Icons.notifications_outlined, color: Colors.white),
                     ),
+                    tooltip: 'Notifications'.tr,
                     onPressed: () => context.push(RouteNames.notifications),
                   );
                 },
@@ -329,7 +332,7 @@ class _FeedTabLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(

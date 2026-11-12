@@ -19,11 +19,16 @@ fi
 
 flutter config --enable-web
 flutter pub get
-flutter build web --release \
+# --no-web-resources-cdn : le moteur d'affichage (CanvasKit) est servi par
+# notre site au lieu du CDN de Google (aucune adresse IP envoyée à Google).
+flutter build web --release --no-web-resources-cdn \
   --dart-define=ENVIRONMENT=prod \
   --dart-define=SUPABASE_URL="$SUPABASE_URL" \
   --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
   --dart-define=SENTRY_DSN="${SENTRY_DSN:-}"
+
+# Polices de secours hébergées chez nous (aucune requête vers Google).
+bash "$(dirname "$0")/mirror_fallback_fonts.sh" build/web
 
 # Cloudflare Pages : en-têtes de sécurité et routage (équivalent de
 # netlify.toml). L'app utilise des URL en "#/..." : pas de réécriture

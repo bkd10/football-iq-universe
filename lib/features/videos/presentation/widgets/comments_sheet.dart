@@ -180,6 +180,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                     const SizedBox(width: AppSpacing.sm),
                     IconButton(
                       onPressed: _isPosting ? null : _post,
+                      tooltip: 'Envoyer'.tr,
                       icon: _isPosting
                           ? const AppLoader(size: 20)
                           : const Icon(Icons.send, color: AppColors.primary),

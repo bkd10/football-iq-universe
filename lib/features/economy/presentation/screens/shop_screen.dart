@@ -146,9 +146,22 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
+          // Informations obligatoires avant l'achat (Code de la consommation,
+          // art. L221-5 et L221-28 13°) : prix final, paiement unique,
+          // renonciation au droit de rétractation.
+          Text(
+            ('Prix TTC, paiement unique : pas d\'abonnement, pas de frais '
+                    'cachés. Les Ballons arrivent tout de suite après le paiement : '
+                    'sur la page de paiement, tu demandes cette livraison immédiate '
+                    'et tu renonces au délai de rétractation de 14 jours. Paiement '
+                    'en double ou Ballons non reçus : remboursés.')
+                .tr,
+            style: context.textTheme.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.sm),
           TextButton(
             onPressed: () => context.push(RouteNames.legalPath(LegalDoc.ballons.slug)),
-            child: Text('Règles des Ballons'.tr),
+            child: Text('Règles des Ballons et remboursements'.tr),
           ),
         ],
       ),

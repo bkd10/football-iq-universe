@@ -6,10 +6,12 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../data/legal_info.dart';
 import '../../data/legal_texts.dart';
 
-/// Les trois documents légaux de l'appli.
+/// Les documents légaux de l'appli, tous lisibles sans compte.
 enum LegalDoc {
+  legalNotice('mentions-legales'),
   terms('cgu'),
   privacy('confidentialite'),
+  cookies('cookies'),
   ballons('regles-ballons');
 
   const LegalDoc(this.slug);
@@ -20,9 +22,19 @@ enum LegalDoc {
       LegalDoc.values.firstWhere((d) => d.slug == slug, orElse: () => LegalDoc.terms);
 
   String get title => switch (this) {
+        LegalDoc.legalNotice => 'Mentions légales'.tr,
         LegalDoc.terms => 'Conditions d\'utilisation'.tr,
         LegalDoc.privacy => 'Confidentialité'.tr,
-        LegalDoc.ballons => 'Règles des Ballons'.tr,
+        LegalDoc.cookies => 'Cookies'.tr,
+        LegalDoc.ballons => 'Règles des Ballons et remboursements'.tr,
+      };
+
+  IconData get icon => switch (this) {
+        LegalDoc.legalNotice => Icons.business_outlined,
+        LegalDoc.terms => Icons.description_outlined,
+        LegalDoc.privacy => Icons.lock_outline,
+        LegalDoc.cookies => Icons.cookie_outlined,
+        LegalDoc.ballons => Icons.sports_soccer,
       };
 
   /// Texte en français, sinon en anglais (version de référence : le
@@ -30,8 +42,10 @@ enum LegalDoc {
   String get body {
     final fr = L10n.language == 'fr';
     final raw = switch (this) {
+      LegalDoc.legalNotice => fr ? legalNoticeFr : legalNoticeEn,
       LegalDoc.terms => fr ? termsFr : termsEn,
       LegalDoc.privacy => fr ? privacyFr : privacyEn,
+      LegalDoc.cookies => fr ? cookiesFr : cookiesEn,
       LegalDoc.ballons => fr ? ballonsFr : ballonsEn,
     };
     var text = raw.trim();
@@ -66,7 +80,10 @@ class LegalScreen extends StatelessWidget {
               if (line.startsWith('## '))
                 Padding(
                   padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: AppSpacing.xs),
-                  child: Text(line.substring(3), style: context.textTheme.titleMedium),
+                  child: Semantics(
+                    header: true,
+                    child: Text(line.substring(3), style: context.textTheme.titleMedium),
+                  ),
                 )
               else
                 Padding(
