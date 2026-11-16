@@ -11,11 +11,11 @@ import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { allowedOrigin, corsHeaders, json, stripeRequest } from '../_shared/stripe.ts';
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST') return json({ error: 'Méthode non autorisée.' }, 405);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) });
+  if (req.method !== 'POST') return json(req, { error: 'Méthode non autorisée.' }, 405);
 
   const authorization = req.headers.get('Authorization');
-  if (!authorization) return json({ error: 'Connexion requise.' }, 401);
+  if (!authorization) return json(req, { error: 'Connexion requise.' }, 401);
 
   let packId: string | undefined;
   let origin: string | undefined;
@@ -24,18 +24,18 @@ Deno.serve(async (req) => {
     packId = body?.pack_id;
     origin = body?.return_origin;
   } catch {
-    return json({ error: 'Requête invalide.' }, 400);
+    return json(req, { error: 'Requête invalide.' }, 400);
   }
-  if (!packId) return json({ error: 'Pack introuvable.' }, 400);
+  if (!packId) return json(req, { error: 'Pack introuvable.' }, 400);
 
   const url = Deno.env.get('SUPABASE_URL')!;
   const userClient = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
     global: { headers: { Authorization: authorization } },
   });
   const { data, error } = await userClient.rpc('prepare_purchase', { p_pack_id: packId });
-  if (error) return json({ error: error.message }, 400);
+  if (error) return json(req, { error: error.message }, 400);
   const purchase = (data as Array<Record<string, unknown>>)?.[0];
-  if (!purchase) return json({ error: 'Pack introuvable.' }, 400);
+  if (!purchase) return json(req, { error: 'Pack introuvable.' }, 400);
 
   const appOrigin = allowedOrigin(origin);
   try {
@@ -73,10 +73,13 @@ Deno.serve(async (req) => {
       p_purchase_id: purchase.purchase_id,
       p_session_id: session.id,
     });
-    if (attachError) return json({ error: 'Une erreur serveur est survenue.' }, 500);
+    if (attachError) return json(req, { error: 'Une erreur serveur est survenue.' }, 500);
 
-    return json({ url: session.url });
+    return json(req, { url: session.url });
   } catch (e) {
-    return json({ error: e instanceof Error ? e.message : 'Erreur Stripe.' }, 502);
+    // Le détail de l'erreur Stripe reste dans les journaux, pas à l'écran.
+    console.error('stripe', e);
+    const notEnabled = e instanceof Error && e.message === 'Paiement pas encore activé.';
+    return json(req, { error: notEnabled ? e.message : 'Le paiement est momentanément indisponible.' }, 502);
   }
 });

@@ -1,15 +1,23 @@
 // Outils partagés par les fonctions Stripe.
 
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+/**
+ * CORS : seul le site du jeu (et ses versions test) peut appeler les
+ * fonctions depuis un navigateur. Un autre site reçoit l'adresse du jeu
+ * en réponse, que le navigateur refuse.
+ */
+export function corsHeaders(req: Request): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin(req.headers.get('Origin')),
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  };
+}
 
-export function json(body: unknown, status = 200): Response {
+export function json(req: Request, body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
   });
 }
 

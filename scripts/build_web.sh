@@ -31,7 +31,10 @@ flutter build web --release --no-web-resources-cdn \
 bash "$(dirname "$0")/mirror_fallback_fonts.sh" build/web
 
 # Cloudflare Pages : en-têtes de sécurité et routage (équivalent de
-# netlify.toml). L'app utilise des URL en "#/..." : pas de réécriture
+# netlify.toml). Content-Security-Policy : la page ne peut charger du code
+# que depuis notre site, et ne parler qu'à Supabase (et Sentry) : un
+# script injecté ne pourrait ni se charger d'ailleurs ni envoyer la
+# session du joueur vers un autre serveur. L'app utilise des URL en "#/..." : pas de réécriture
 # nécessaire, toutes les pages passent par index.html.
 cat > build/web/_headers <<'HEADERS'
 /*
@@ -40,4 +43,6 @@ cat > build/web/_headers <<'HEADERS'
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(self), microphone=(self), geolocation=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; media-src 'self' blob: https://*.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
 HEADERS
