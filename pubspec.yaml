@@ -48,7 +48,7 @@ dependencies:
 
   # Notifications push
   # Analytics & monitoring
-  sentry_flutter: ^8.9.0
+  sentry_flutter: ^10.5.0
 
   # Utilitaires
   dartz: ^0.10.1
