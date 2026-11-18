@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show FunctionException;
 
+import '../../../../core/config/store_rules.dart';
 import '../../../../core/constants/route_names.dart';
 
 import '../../../../core/l10n/l10n.dart';
@@ -95,6 +96,21 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!inAppPurchasesAllowed) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Boutique'.tr)),
+        body: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Text(
+            ('La boutique n\'est pas disponible dans cette version de '
+                    'l\'appli. Gagne des Ballons en jouant : missions, défis '
+                    'et bonus.')
+                .tr,
+            style: context.textTheme.bodyMedium,
+          ),
+        ),
+      );
+    }
     final packs = ref.watch(_packsProvider);
     return Scaffold(
       appBar: AppBar(title: Text('Boutique'.tr)),

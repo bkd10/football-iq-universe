@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/config/store_rules.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -86,14 +87,17 @@ class WalletScreen extends ConsumerWidget {
                     onPressed: () => context.push(RouteNames.earnBallons),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.storefront_outlined, size: 18),
-                    label: Text('Boutique'.tr),
-                    onPressed: () => context.push(RouteNames.shop),
+                // Boutique Stripe : site web seulement (règles Google Play).
+                if (inAppPurchasesAllowed) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.storefront_outlined, size: 18),
+                      label: Text('Boutique'.tr),
+                      onPressed: () => context.push(RouteNames.shop),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: AppSpacing.xl),

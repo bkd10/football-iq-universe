@@ -1,7 +1,7 @@
 name: football_iq_universe
 description: "Football IQ Universe — La plateforme mondiale de développement du talent footballistique."
 publish_to: "none"
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -43,6 +43,8 @@ dependencies:
   flutter_animate: ^4.5.0
   google_fonts: ^6.2.1
   share_plus: ^12.0.2
+  # Liens hors de l'appli sur Android (e-mail, appli 2FA, pages web).
+  url_launcher: ^6.3.1
 
   # Notifications push
   # Analytics & monitoring

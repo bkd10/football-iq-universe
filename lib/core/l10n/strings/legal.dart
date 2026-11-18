@@ -2,6 +2,8 @@
 // promesses corrigées, accessibilité), toutes les langues.
 const legalTranslations = <String, Map<String, String>>{
   'en': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'The shop is not available in this version of the app. Earn Balls by playing: missions, challenges and bonuses.',
     'Retour':
         'Back',
     'Activer le son':
@@ -58,6 +60,8 @@ const legalTranslations = <String, Map<String, String>>{
         'A scout wants to contact {username} on Football IQ Universe. To approve or decline this contact, open the app, go to Settings > "I have a guardian code" and enter this code: {token}',
   },
   'es': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'La tienda no está disponible en esta versión de la app. Gana Balones jugando: misiones, desafíos y bonos.',
     'Retour':
         'Volver',
     'Activer le son':
@@ -114,6 +118,8 @@ const legalTranslations = <String, Map<String, String>>{
         'Un ojeador quiere contactar con {username} en Football IQ Universe. Para aprobar o rechazar este contacto, abre la app, ve a Ajustes > "Tengo un código de tutor" e introduce este código: {token}',
   },
   'pt': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'A loja não está disponível nesta versão do app. Ganha Bolas a jogar: missões, desafios e bónus.',
     'Retour':
         'Voltar',
     'Activer le son':
@@ -170,6 +176,8 @@ const legalTranslations = <String, Map<String, String>>{
         'Um olheiro quer entrar em contato com {username} no Football IQ Universe. Para aprovar ou recusar esse contato, abra o app, vá em Configurações > "Tenho um código de responsável" e digite este código: {token}',
   },
   'de': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'Der Shop ist in dieser App-Version nicht verfügbar. Verdiene Bälle beim Spielen: Missionen, Challenges und Boni.',
     'Retour':
         'Zurück',
     'Activer le son':
@@ -226,6 +234,8 @@ const legalTranslations = <String, Map<String, String>>{
         'Ein Scout möchte {username} auf Football IQ Universe kontaktieren. Um diesen Kontakt freizugeben oder abzulehnen, öffne die App, geh zu Einstellungen > „Ich habe einen Elterncode“ und gib diesen Code ein: {token}',
   },
   'it': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'Il negozio non è disponibile in questa versione dell\'app. Guadagna Palloni giocando: missioni, sfide e bonus.',
     'Retour':
         'Indietro',
     'Activer le son':
@@ -282,6 +292,8 @@ const legalTranslations = <String, Map<String, String>>{
         'Un osservatore vuole contattare {username} su Football IQ Universe. Per approvare o rifiutare questo contatto, apri l\'app, vai su Impostazioni > "Ho un codice tutore" e inserisci questo codice: {token}',
   },
   'ar': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'المتجر غير متاح في هذا الإصدار من التطبيق. اربح الكرات باللعب: المهام والتحديات والمكافآت.',
     'Retour':
         'رجوع',
     'Activer le son':
@@ -338,6 +350,8 @@ const legalTranslations = <String, Map<String, String>>{
         'كشّاف يريد التواصل مع {username} على Football IQ Universe. للموافقة على هذا التواصل أو رفضه، افتح التطبيق، واذهب إلى الإعدادات > "لدي رمز وليّ أمر" وأدخل هذا الرمز: {token}',
   },
   'ru': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'Магазин недоступен в этой версии приложения. Зарабатывай мячи, играя: миссии, вызовы и бонусы.',
     'Retour':
         'Назад',
     'Activer le son':
@@ -394,6 +408,8 @@ const legalTranslations = <String, Map<String, String>>{
         'Скаут хочет связаться с {username} в Football IQ Universe. Чтобы одобрить или отклонить контакт, открой приложение, зайди в Настройки > «У меня есть код опекуна» и введи этот код: {token}',
   },
   'sv': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'Butiken är inte tillgänglig i den här versionen av appen. Tjäna bollar genom att spela: uppdrag, utmaningar och bonusar.',
     'Retour':
         'Tillbaka',
     'Activer le son':
@@ -450,6 +466,8 @@ const legalTranslations = <String, Map<String, String>>{
         'En scout vill kontakta {username} på Football IQ Universe. För att godkänna eller neka kontakten, öppna appen, gå till Inställningar > "Jag har en vårdnadshavarkod" och ange den här koden: {token}',
   },
   'tr': {
+    'La boutique n\'est pas disponible dans cette version de l\'appli. Gagne des Ballons en jouant : missions, défis et bonus.':
+        'Mağaza uygulamanın bu sürümünde kullanılamıyor. Oynayarak Top kazan: görevler, meydan okumalar ve bonuslar.',
     'Retour':
         'Geri',
     'Activer le son':
