@@ -24,6 +24,16 @@
 
 create schema if not exists private;
 
+-- Compteurs de la limite de débit (déjà créés par 0036 ; repris ici pour
+-- que ce fichier marche seul).
+create table if not exists private.rate_limit_hits (
+  user_id uuid not null,
+  action text not null,
+  bucket timestamptz not null,
+  hits integer not null default 0,
+  primary key (user_id, action, bucket)
+);
+
 -- -------------------------------------------------------------------------
 -- 1. Réglages
 -- -------------------------------------------------------------------------
@@ -136,7 +146,7 @@ as $$
     and c.end_date > now()
     and coalesce((select (value ->> 'enabled')::boolean from app_config where key = 'sponsored_feed'), true)
   order by c.end_date asc
-  limit 5;
+  limit 10;
 $$;
 
 revoke execute on function get_feed_sponsored_challenges() from public;
@@ -182,18 +192,18 @@ as $$
 declare
   v text[] := '{}';
 begin
-  if d.title is null or char_length(trim(d.title)) < 3 then v := v || 'titre'; end if;
-  if d.description is null or char_length(trim(d.description)) < 10 then v := v || 'description'; end if;
-  if d.sponsor_logo_url is null or d.sponsor_logo_url !~ '^https://' then v := v || 'logo du sponsor'; end if;
-  if d.start_date is null then v := v || 'date de début'; end if;
-  if d.end_date is null then v := v || 'date de fin'; end if;
+  if d.title is null or char_length(trim(d.title)) < 3 then v := array_append(v, 'titre'::text); end if;
+  if d.description is null or char_length(trim(d.description)) < 10 then v := array_append(v, 'description'::text); end if;
+  if d.sponsor_logo_url is null or d.sponsor_logo_url !~ '^https://' then v := array_append(v, 'logo du sponsor'::text); end if;
+  if d.start_date is null then v := array_append(v, 'date de début'::text); end if;
+  if d.end_date is null then v := array_append(v, 'date de fin'::text); end if;
   if d.start_date is not null and d.end_date is not null and d.end_date <= d.start_date then
-    v := v || 'fin après le début';
+    v := array_append(v, 'fin après le début'::text);
   end if;
-  if d.end_date is not null and d.end_date <= now() then v := v || 'fin dans le futur'; end if;
-  if d.entry_cost is null then v := v || 'coût d''entrée'; end if;
-  if d.reward_stars is null then v := v || 'récompense en Stars'; end if;
-  if not d.sponsor_confirmed then v := v || 'sponsor confirmé'; end if;
+  if d.end_date is not null and d.end_date <= now() then v := array_append(v, 'fin dans le futur'::text); end if;
+  if d.entry_cost is null then v := array_append(v, 'coût d''entrée'::text); end if;
+  if d.reward_stars is null then v := array_append(v, 'récompense en Stars'::text); end if;
+  if not d.sponsor_confirmed then v := array_append(v, 'sponsor confirmé'::text); end if;
   return v;
 end;
 $$;

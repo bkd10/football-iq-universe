@@ -880,39 +880,39 @@ const sponsoredTranslations = <String, Map<String, String>>{
 /// Textes serveur avec valeurs (groupes `$1`...).
 const sponsoredServerPatterns = <String, List<List<String>>>{
   'en': [
-    [r"Les votes ouvrent le (.+)\.", r"Voting opens on $1."],
+    [r'Les votes ouvrent le (.+)\.', r'Voting opens on $1.'],
     [r"Impossible d'activer : il manque (.+)\.", r"Can't activate: missing $1."],
   ],
   'es': [
-    [r"Les votes ouvrent le (.+)\.", r"Los votos abren el $1."],
-    [r"Impossible d'activer : il manque (.+)\.", r"No se puede activar: falta $1."],
+    [r'Les votes ouvrent le (.+)\.', r'Los votos abren el $1.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'No se puede activar: falta $1.'],
   ],
   'pt': [
-    [r"Les votes ouvrent le (.+)\.", r"A votação abre em $1."],
-    [r"Impossible d'activer : il manque (.+)\.", r"Não é possível ativar: falta $1."],
+    [r'Les votes ouvrent le (.+)\.', r'A votação abre em $1.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'Não é possível ativar: falta $1.'],
   ],
   'de': [
-    [r"Les votes ouvrent le (.+)\.", r"Die Abstimmung beginnt am $1."],
-    [r"Impossible d'activer : il manque (.+)\.", r"Aktivierung nicht möglich: Es fehlt $1."],
+    [r'Les votes ouvrent le (.+)\.', r'Die Abstimmung beginnt am $1.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'Aktivierung nicht möglich: Es fehlt $1.'],
   ],
   'it': [
-    [r"Les votes ouvrent le (.+)\.", r"I voti aprono il $1."],
-    [r"Impossible d'activer : il manque (.+)\.", r"Impossibile attivare: manca $1."],
+    [r'Les votes ouvrent le (.+)\.', r'I voti aprono il $1.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'Impossibile attivare: manca $1.'],
   ],
   'ar': [
-    [r"Les votes ouvrent le (.+)\.", r"يبدأ التصويت في $1."],
-    [r"Impossible d'activer : il manque (.+)\.", r"تعذّر التفعيل: ينقص $1."],
+    [r'Les votes ouvrent le (.+)\.', r'يبدأ التصويت في $1.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'تعذّر التفعيل: ينقص $1.'],
   ],
   'ru': [
-    [r"Les votes ouvrent le (.+)\.", r"Голосование откроется $1."],
-    [r"Impossible d'activer : il manque (.+)\.", r"Нельзя запустить: не хватает $1."],
+    [r'Les votes ouvrent le (.+)\.', r'Голосование откроется $1.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'Нельзя запустить: не хватает $1.'],
   ],
   'sv': [
-    [r"Les votes ouvrent le (.+)\.", r"Röstningen öppnar $1."],
-    [r"Impossible d'activer : il manque (.+)\.", r"Kan inte aktivera: saknas $1."],
+    [r'Les votes ouvrent le (.+)\.', r'Röstningen öppnar $1.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'Kan inte aktivera: saknas $1.'],
   ],
   'tr': [
-    [r"Les votes ouvrent le (.+)\.", r"Oylama $1 tarihinde açılıyor."],
-    [r"Impossible d'activer : il manque (.+)\.", r"Etkinleştirilemiyor: eksik $1."],
+    [r'Les votes ouvrent le (.+)\.', r'Oylama $1 tarihinde açılıyor.'],
+    [r"Impossible d'activer : il manque (.+)\.", r'Etkinleştirilemiyor: eksik $1.'],
   ],
 };
