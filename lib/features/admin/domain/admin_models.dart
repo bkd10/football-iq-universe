@@ -156,3 +156,109 @@ class AdminUser {
   final String? banReason;
   final int reportsCount;
 }
+
+/// Brouillon de défi sponsorisé (`sponsored_challenge_drafts`) : invisible
+/// des joueurs tant qu'il n'est pas activé. [missing] : ce qui empêche
+/// l'activation (dit par le serveur).
+class AdminSponsoredDraft {
+  const AdminSponsoredDraft({
+    required this.id,
+    required this.sponsorName,
+    this.title,
+    this.description,
+    this.sponsorLogoUrl,
+    this.sponsorConfirmed = false,
+    this.startDate,
+    this.endDate,
+    this.entryCost,
+    this.rewardStars,
+    this.prizeDescription,
+    this.challengeId,
+    this.challengeStatus,
+    this.missing = const [],
+  });
+
+  factory AdminSponsoredDraft.fromRow(Map<String, dynamic> r) {
+    DateTime? date(Object? v) => v is String ? DateTime.parse(v).toLocal() : null;
+    return AdminSponsoredDraft(
+      id: r['id'] as String,
+      sponsorName: r['sponsor_name'] as String? ?? 'Passe D',
+      title: r['title'] as String?,
+      description: r['description'] as String?,
+      sponsorLogoUrl: r['sponsor_logo_url'] as String?,
+      sponsorConfirmed: r['sponsor_confirmed'] as bool? ?? false,
+      startDate: date(r['start_date']),
+      endDate: date(r['end_date']),
+      entryCost: (r['entry_cost'] as num?)?.toInt(),
+      rewardStars: (r['reward_stars'] as num?)?.toInt(),
+      prizeDescription: r['prize_description'] as String?,
+      challengeId: r['challenge_id'] as String?,
+      challengeStatus: r['challenge_status'] as String?,
+      missing: ((r['missing'] as List?) ?? const []).map((e) => '$e').toList(),
+    );
+  }
+
+  final String id;
+  final String sponsorName;
+  final String? title;
+  final String? description;
+  final String? sponsorLogoUrl;
+  final bool sponsorConfirmed;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int? entryCost;
+  final int? rewardStars;
+  final String? prizeDescription;
+  final String? challengeId;
+  final String? challengeStatus;
+  final List<String> missing;
+
+  bool get isActivated => challengeId != null;
+}
+
+/// Alerte de vote suspect (même appareil, même réseau, compte tout récent,
+/// rafale de votes).
+class AdminVoteFlag {
+  const AdminVoteFlag({
+    required this.id,
+    required this.reason,
+    required this.status,
+    required this.createdAt,
+    required this.challengeId,
+    required this.challengeTitle,
+    this.details = const {},
+    this.voterUsername,
+    this.votedForUsername,
+    this.voterCreatedAt,
+    this.resolvedAt,
+  });
+
+  factory AdminVoteFlag.fromRow(Map<String, dynamic> r) => AdminVoteFlag(
+        id: r['id'] as String,
+        reason: r['reason'] as String,
+        status: r['status'] as String,
+        createdAt: DateTime.parse(r['created_at'] as String).toLocal(),
+        challengeId: r['challenge_id'] as String,
+        challengeTitle: r['challenge_title'] as String? ?? '',
+        details: (r['details'] as Map?)?.cast<String, dynamic>() ?? const {},
+        voterUsername: r['voter_username'] as String?,
+        votedForUsername: r['voted_for_username'] as String?,
+        voterCreatedAt: r['voter_created_at'] == null
+            ? null
+            : DateTime.parse(r['voter_created_at'] as String).toLocal(),
+        resolvedAt:
+            r['resolved_at'] == null ? null : DateTime.parse(r['resolved_at'] as String).toLocal(),
+      );
+
+  final String id;
+  final String reason;
+  final String status;
+  final DateTime createdAt;
+  final String challengeId;
+  final String challengeTitle;
+  final Map<String, dynamic> details;
+  final String? voterUsername;
+  final String? votedForUsername;
+  final DateTime? voterCreatedAt;
+  final DateTime? resolvedAt;
+}

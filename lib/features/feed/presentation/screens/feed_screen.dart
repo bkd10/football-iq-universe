@@ -14,6 +14,9 @@ import '../../../economy/presentation/providers/economy_providers.dart';
 import '../../../notifications/presentation/providers/notifications_providers.dart';
 import '../../../videos/domain/entities/video.dart';
 import '../../../videos/presentation/providers/video_providers.dart';
+import '../../../sponsored/domain/sponsored_models.dart';
+import '../../../sponsored/presentation/providers/sponsored_providers.dart';
+import '../../../sponsored/presentation/widgets/sponsored_challenge_card.dart';
 import '../widgets/feed_guide_sheet.dart';
 import '../widgets/feed_video_tile.dart';
 import '../../../../shared/widgets/pressable.dart';
@@ -147,10 +150,26 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         ),
                       );
                     }
+                    // « Pour toi » : un défi sponsorisé toutes les N vidéos
+                    // (N réglé dans le panneau admin). Pas dans le Vestiaire.
+                    final sponsored = _tab == _FeedTab.forYou
+                        ? ref.watch(sponsoredFeedChallengesProvider).valueOrNull ?? const []
+                        : const <SponsoredFeedChallenge>[];
+                    final config = ref.watch(sponsoredFeedConfigProvider).valueOrNull ??
+                        const SponsoredFeedConfig();
+                    final slots = buildFeedSlots(
+                      videoCount: videos.length,
+                      sponsoredCount: sponsored.length,
+                      everyN: config.everyN,
+                      enabled: config.enabled,
+                    );
                     return RefreshIndicator(
                       color: AppColors.primary,
                       backgroundColor: AppColors.surface,
-                      onRefresh: () => ref.read(_feed.notifier).refresh(),
+                      onRefresh: () async {
+                        ref.invalidate(sponsoredFeedChallengesProvider);
+                        await ref.read(_feed.notifier).refresh();
+                      },
                       child: PageView.builder(
                         controller: _pageController,
                         // Sur ordinateur aussi, on fait défiler les cartes à la souris.
@@ -158,12 +177,21 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           dragDevices: PointerDeviceKind.values.toSet(),
                         ),
                         scrollDirection: Axis.vertical,
-                        itemCount: videos.length,
-                        onPageChanged: (index) => _onPageChanged(index, videos.length),
+                        itemCount: slots.length,
+                        onPageChanged: (index) => _onPageChanged(index, slots.length),
                         itemBuilder: (context, index) {
+                          final slot = slots[index];
+                          if (slot is SponsoredSlot) {
+                            final challenge = sponsored[slot.challengeIndex];
+                            return SponsoredChallengeCard(
+                              key: ValueKey('sponsored-$index-${challenge.id}'),
+                              challenge: challenge,
+                            );
+                          }
+                          final video = videos[(slot as VideoSlot).videoIndex];
                           return FeedVideoTile(
-                            key: ValueKey('${_tab.name}-${videos[index].id}'),
-                            video: videos[index],
+                            key: ValueKey('${_tab.name}-${video.id}'),
+                            video: video,
                             isActive: index == _activeIndex,
                             feed: _feed,
                           );

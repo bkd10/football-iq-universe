@@ -23,6 +23,7 @@ import '../../../videos/presentation/widgets/comments_sheet.dart';
 import 'player_card_style.dart';
 import '../../../../shared/widgets/pressable.dart';
 import '../../../safety/presentation/widgets/safety_menu.dart';
+import '../../../sponsored/presentation/widgets/challenge_vote_button.dart';
 
 /// Une "page" du feed : la vidéo présentée comme une carte de joueur (note,
 /// poste, stats du joueur) avec ses actions (Respect, Masterclass,
@@ -258,6 +259,16 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                   ),
                 ),
               ),
+            // Vidéo d'un défi en cours : bouton Voter bien visible.
+            PositionedDirectional(
+              start: 10,
+              end: 10,
+              bottom: 42,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: ChallengeVoteButton(videoId: video.id),
+              ),
+            ),
             PositionedDirectional(
               start: 10,
               bottom: 10,

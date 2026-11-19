@@ -14,6 +14,7 @@ import '../../domain/usecases/get_challenges.dart';
 import '../../domain/usecases/get_participations.dart';
 import '../../domain/usecases/join_challenge.dart';
 import '../../domain/usecases/vote_for_participant.dart';
+import '../../../sponsored/presentation/providers/sponsored_providers.dart';
 
 final challengeRemoteDataSourceProvider = Provider<ChallengeRemoteDataSource>((ref) {
   return ChallengeRemoteDataSource(ref.watch(supabaseClientProvider));
@@ -111,6 +112,10 @@ class ChallengeActionsController extends AsyncNotifier<void> {
       },
       (_) {
         ref.invalidate(participationsProvider(challengeId));
+        // Le bouton Voter des vidéos de ce défi (fil, profils) change aussi.
+        ref
+            .read(localVotesProvider.notifier)
+            .update((m) => {...m, challengeId: participantUserId});
         state = const AsyncData(null);
         return true;
       },

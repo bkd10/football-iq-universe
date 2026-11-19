@@ -19,6 +19,7 @@ import '../../domain/entities/video.dart';
 import '../providers/video_providers.dart';
 import '../widgets/comments_sheet.dart';
 import '../../../../shared/widgets/pressable.dart';
+import '../../../sponsored/presentation/widgets/challenge_vote_button.dart';
 
 /// Écran "Video Detail" (PARTIE 9.2, écran 8) : vue plein écran d'une
 /// vidéo consultée hors du fil principal — grille du profil, fiche Move
@@ -268,6 +269,11 @@ class _VideoDetailBody extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Vidéo d'un défi en cours : bouton Voter (rien sinon).
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: ChallengeVoteButton(videoId: video.id),
+          ),
           Pressable(
             onTap: () => context.push(RouteNames.otherProfilePath(video.userId)),
             child: Row(

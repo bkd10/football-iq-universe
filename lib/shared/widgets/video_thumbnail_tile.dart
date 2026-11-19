@@ -5,15 +5,19 @@ import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../features/videos/domain/entities/video.dart';
+import '../../features/sponsored/presentation/widgets/challenge_vote_button.dart';
 import 'pressable.dart';
 
 /// Vignette vidéo réutilisée dans les grilles (Football Passport, fiche
 /// d'un Move, Trending Moves) : miniature + badge Move + compteur de vues.
 class VideoThumbnailTile extends StatelessWidget {
-  const VideoThumbnailTile({required this.video, this.onTap, super.key});
+  const VideoThumbnailTile({required this.video, this.onTap, this.showVote = false, super.key});
 
   final Video video;
   final VoidCallback? onTap;
+
+  /// Profil : petit bouton Voter si la vidéo est dans un défi en cours.
+  final bool showVote;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +40,12 @@ class VideoThumbnailTile extends StatelessWidget {
                   )
                 : const Icon(Icons.videocam_outlined, color: AppColors.textSecondary),
           ),
+          if (showVote)
+            PositionedDirectional(
+              end: 4,
+              bottom: 4,
+              child: ChallengeVoteButton(videoId: video.id, compact: true),
+            ),
           if (video.isMove)
             const PositionedDirectional(
               top: 4,

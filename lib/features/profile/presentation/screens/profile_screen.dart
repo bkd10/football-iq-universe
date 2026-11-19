@@ -413,6 +413,7 @@ class _VideosGrid extends ConsumerWidget {
           itemCount: filtered.length,
           itemBuilder: (context, index) => VideoThumbnailTile(
             video: filtered[index],
+            showVote: true,
             onTap: () => context.push(RouteNames.videoDetailPath(filtered[index].id)),
           ),
         );

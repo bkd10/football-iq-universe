@@ -90,4 +90,6 @@ class RouteNames {
   static const String adminHome = '/admin';
   static const String adminUsers = '/admin/users';
   static const String adminOfficialChallenge = '/admin/challenge';
+  static const String adminSponsored = '/admin/sponsored';
+  static const String adminVoteFlags = '/admin/votes';
 }

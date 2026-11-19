@@ -4,6 +4,7 @@ import '../../../../core/errors/exceptions.dart';
 import '../../domain/entities/battle_opponent.dart';
 import '../models/challenge_model.dart';
 import '../models/challenge_participation_model.dart';
+import '../../../sponsored/data/sponsored_remote_datasource.dart';
 
 const _creatorSelect = 'id, username, display_name, avatar_url, level, is_verified';
 
@@ -121,6 +122,7 @@ class ChallengeRemoteDataSource {
         params: {
           'p_challenge_id': challengeId,
           'p_participant_id': participantUserId,
+          'p_device_id': await SponsoredRemoteDataSource.deviceId(),
         },
       );
     } on supa.PostgrestException catch (e) {

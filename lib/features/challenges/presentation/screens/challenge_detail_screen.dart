@@ -14,6 +14,7 @@ import '../../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../safety/presentation/providers/safety_providers.dart';
+import '../../../../shared/providers/supabase_provider.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/challenge_participation.dart';
 import '../providers/challenge_providers.dart';
@@ -266,6 +267,7 @@ class _ChallengeBody extends ConsumerWidget {
                     (p) => _ParticipationTile(
                       participation: p,
                       challenge: challenge,
+                      votedInChallenge: participations.any((x) => x.hasVoted),
                     ),
                   )
                   .toList(),
@@ -441,13 +443,21 @@ class _InfoStat extends StatelessWidget {
 }
 
 class _ParticipationTile extends ConsumerWidget {
-  const _ParticipationTile({required this.participation, required this.challenge});
+  const _ParticipationTile({
+    required this.participation,
+    required this.challenge,
+    this.votedInChallenge = false,
+  });
 
   final ChallengeParticipation participation;
   final Challenge challenge;
 
+  /// Le joueur a déjà voté dans ce défi (pour cette vidéo ou une autre).
+  final bool votedInChallenge;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMine = ref.read(supabaseClientProvider).auth.currentUser?.id == participation.userId;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
@@ -493,22 +503,38 @@ class _ParticipationTile extends ConsumerWidget {
               ],
             ),
           ),
-          if (challenge.status == 'active' &&
-              challenge.hasStarted &&
+          if (challenge.status == 'active' && !challenge.hasStarted)
+            // Inscriptions ouvertes, votes pas encore : on dit quand.
+            Text(
+              'Votes dès le {date}'.trArgs({'date': Formatters.shortDate(challenge.startDate)}),
+              style: Theme.of(context).textTheme.bodySmall,
+            )
+          else if (challenge.status == 'active' &&
+              !challenge.hasEnded &&
               !(challenge.isBattle && challenge.participantsCount < 2))
             OutlinedButton.icon(
               // Le thème impose une largeur infinie aux boutons (pleine
               // largeur par défaut) : dans une Row, ça écrasait le pseudo
               // du participant à 0 px de large (une lettre par ligne).
               style: OutlinedButton.styleFrom(minimumSize: const Size(72, 40)),
-              onPressed: participation.hasVoted ? null : () => _vote(context, ref),
+              // Un seul vote par défi : après avoir voté, plus de bouton
+              // actif ; celui qu'on a choisi reste coché.
+              onPressed: participation.hasVoted || votedInChallenge || isMine
+                  ? null
+                  : () => _vote(context, ref),
               icon: Icon(
                 participation.hasVoted ? Icons.how_to_vote : Icons.how_to_vote_outlined,
                 size: 16,
               ),
-              label: Text('${participation.votesCount}'),
+              label: Text(
+                participation.hasVoted
+                    ? '{n} · ton vote'.trArgs({'n': participation.votesCount})
+                    : isMine
+                        ? '{n} votes'.trArgs({'n': participation.votesCount})
+                        : 'Voter · {n}'.trArgs({'n': participation.votesCount}),
+              ),
             )
-          else if (challenge.status == 'active')
+          else if (challenge.status == 'active' && !challenge.hasEnded)
             Text('En attente'.tr, style: Theme.of(context).textTheme.bodySmall)
           else
             Text(

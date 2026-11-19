@@ -89,4 +89,55 @@ class AdminRemoteDataSource {
         );
         return row['challenge_id'] as String;
       });
+
+  // --- Défis sponsorisés (20260101000038_sponsored_feed_votes.sql)
+
+  Future<List<AdminSponsoredDraft>> getSponsoredDrafts() => _call(() async {
+        final rows = await _client.rpc<List<dynamic>>('admin_list_sponsored_drafts');
+        return rows.map((r) => AdminSponsoredDraft.fromRow(r as Map<String, dynamic>)).toList();
+      });
+
+  Future<AdminSponsoredDraft> saveSponsoredDraft(String? id, Map<String, Object?> fields) =>
+      _call(() async {
+        final row = await _client.rpc<Map<String, dynamic>>(
+          'admin_save_sponsored_draft',
+          params: {'p_id': id, 'p_fields': fields},
+        );
+        return AdminSponsoredDraft.fromRow(row);
+      });
+
+  Future<String> activateSponsoredDraft(String id) => _call(() async {
+        final row = await _client.rpc<Map<String, dynamic>>(
+          'admin_activate_sponsored_draft',
+          params: {'p_id': id},
+        );
+        return row['challenge_id'] as String;
+      });
+
+  Future<void> setSponsoredFeed({required int everyN, required bool enabled}) => _call(
+        () => _client.rpc<dynamic>(
+          'admin_set_sponsored_feed',
+          params: {'p_every_n': everyN, 'p_enabled': enabled},
+        ),
+      );
+
+  Future<List<AdminVoteFlag>> getVoteFlags({String status = 'pending'}) => _call(() async {
+        final rows = await _client.rpc<List<dynamic>>(
+          'admin_list_vote_flags',
+          params: {'p_status': status, 'p_limit': 200},
+        );
+        return rows.map((r) => AdminVoteFlag.fromRow(r as Map<String, dynamic>)).toList();
+      });
+
+  Future<void> resolveVoteFlag(String id, {required bool removeVote}) => _call(
+        () => _client.rpc<dynamic>(
+          'admin_resolve_vote_flag',
+          params: {'p_flag_id': id, 'p_action': removeVote ? 'remove_vote' : 'ignore'},
+        ),
+      );
+
+  Future<int> pendingVoteFlagsCount() => _call(() async {
+        final n = await _client.rpc<dynamic>('admin_pending_vote_flags_count');
+        return (n as num?)?.toInt() ?? 0;
+      });
 }

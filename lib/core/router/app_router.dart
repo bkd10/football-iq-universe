@@ -32,6 +32,8 @@ import '../../features/messaging/presentation/screens/inbox_screen.dart';
 import '../../features/missions/presentation/screens/daily_missions_screen.dart';
 import '../../features/admin/presentation/screens/admin_home_screen.dart';
 import '../../features/admin/presentation/screens/admin_official_challenge_screen.dart';
+import '../../features/admin/presentation/screens/admin_sponsored_screen.dart';
+import '../../features/admin/presentation/screens/admin_vote_flags_screen.dart';
 import '../../features/admin/presentation/screens/admin_users_screen.dart';
 import '../../features/moderation/presentation/screens/admin_moderation_screen.dart';
 import '../../features/moves/presentation/screens/move_detail_screen.dart';
@@ -355,6 +357,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.adminOfficialChallenge,
         builder: (context, state) => const AdminOfficialChallengeScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.adminSponsored,
+        builder: (context, state) => const AdminSponsoredScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.adminVoteFlags,
+        builder: (context, state) => const AdminVoteFlagsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

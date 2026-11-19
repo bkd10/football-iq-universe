@@ -21,6 +21,7 @@ import 'profile.dart';
 import 'security.dart';
 import 'server.dart';
 import 'social.dart';
+import 'sponsored.dart';
 import 'videos.dart';
 
 /// Modèle pour traduire un texte serveur qui contient des valeurs : `$1`,
@@ -43,6 +44,7 @@ const List<Map<String, Map<String, String>>> _allTables = [
   securityTranslations,
   legalTranslations,
   minorsTranslations,
+  sponsoredTranslations,
   socialTranslations,
   videosTranslations,
   serverTranslations,
@@ -80,5 +82,7 @@ List<ServerPattern> serverPatterns(String language) => [
       for (final p in _allPatterns[language] ?? const <List<String>>[])
         ServerPattern(p[0], p[1]),
       for (final p in minorsServerPatterns[language] ?? const <List<String>>[])
+        ServerPattern(p[0], p[1]),
+      for (final p in sponsoredServerPatterns[language] ?? const <List<String>>[])
         ServerPattern(p[0], p[1]),
     ];

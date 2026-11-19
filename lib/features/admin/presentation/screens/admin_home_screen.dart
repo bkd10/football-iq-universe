@@ -65,6 +65,22 @@ class AdminHomeScreen extends ConsumerWidget {
               subtitle: 'Gratuit pour les joueurs, mis en avant comme officiel.'.tr,
               onTap: () => context.push(RouteNames.adminOfficialChallenge),
             ),
+            _ToolTile(
+              icon: Icons.campaign_outlined,
+              title: 'Défis sponsorisés'.tr,
+              subtitle: 'Préparer, activer, et fréquence dans le fil.'.tr,
+              onTap: () => context.push(RouteNames.adminSponsored),
+            ),
+            _ToolTile(
+              icon: Icons.how_to_vote_outlined,
+              title: 'Votes suspects'.tr,
+              subtitle: 'Même appareil, compte tout récent, rafales : garder ou annuler.'.tr,
+              badge: ref.watch(adminPendingVoteFlagsProvider).valueOrNull ?? 0,
+              onTap: () async {
+                await context.push(RouteNames.adminVoteFlags);
+                ref.invalidate(adminPendingVoteFlagsProvider);
+              },
+            ),
           ],
         ),
       ),

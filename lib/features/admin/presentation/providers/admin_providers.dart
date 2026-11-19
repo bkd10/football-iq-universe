@@ -30,6 +30,24 @@ final adminUsersProvider = FutureProvider.autoDispose<List<AdminUser>>((ref) {
   return ref.watch(adminDataSourceProvider).getUsers(search: search.isEmpty ? null : search);
 });
 
+final adminSponsoredDraftsProvider = FutureProvider.autoDispose<List<AdminSponsoredDraft>>((ref) {
+  return ref.watch(adminDataSourceProvider).getSponsoredDrafts();
+});
+
+final adminVoteFlagsStatusProvider = StateProvider.autoDispose<String>((ref) => 'pending');
+
+final adminVoteFlagsProvider = FutureProvider.autoDispose<List<AdminVoteFlag>>((ref) {
+  return ref.watch(adminDataSourceProvider).getVoteFlags(status: ref.watch(adminVoteFlagsStatusProvider));
+});
+
+final adminPendingVoteFlagsProvider = FutureProvider.autoDispose<int>((ref) async {
+  try {
+    return await ref.watch(adminDataSourceProvider).pendingVoteFlagsCount();
+  } catch (_) {
+    return 0;
+  }
+});
+
 /// Texte lisible pour une erreur du panneau admin (message du serveur).
 String adminErrorText(Object error) =>
     error is ServerException ? error.message.trServer : 'Une erreur est survenue.'.tr;
