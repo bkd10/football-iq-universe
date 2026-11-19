@@ -51,14 +51,18 @@ class _ParentConsentScreenState extends ConsumerState<ParentConsentScreen> {
           error: (e, _) => Text(e is Failure ? e.message : 'Lien invalide ou déjà utilisé.'.tr),
           data: (req) {
             if (_answered != null) {
+              final signup = req?['kind'] == 'signup';
               return Text(
-                _answered! ? 'Merci : les achats sont autorisés.'.tr : 'Merci : les achats restent bloqués.'.tr,
+                signup
+                    ? (_answered! ? 'Merci : le compte est validé.'.tr : 'Merci : le compte reste bloqué.'.tr)
+                    : (_answered! ? 'Merci : les achats sont autorisés.'.tr : 'Merci : les achats restent bloqués.'.tr),
                 style: context.textTheme.titleMedium,
               );
             }
             if (req == null || req['valid'] != true) {
               return Text('Lien invalide ou déjà utilisé.'.tr);
             }
+            if (req['kind'] == 'signup') return _signupRequest(context, req);
             final limit = ((req['monthly_limit_cents'] as num?) ?? 5000) / 100;
             return ListView(
               children: [
@@ -91,6 +95,36 @@ class _ParentConsentScreenState extends ConsumerState<ParentConsentScreen> {
           },
         ),
       ),
+    );
+  }
+  Widget _signupRequest(BuildContext context, Map<String, dynamic> req) {
+    return ListView(
+      children: [
+        Text(
+          '@{name} a créé un compte Football IQ et a besoin de ton accord.'.trArgs({'name': req['username']}),
+          style: context.textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          ('Football IQ est un jeu de football : vidéos, défis et classements. '
+                  'Le compte de ton enfant démarre en mode protégé : profil limité, '
+                  'messages privés seulement entre abonnés mutuels, ville cachée, '
+                  'aucun achat, aucune marque ne peut lui écrire. Tant que tu n\'as '
+                  'pas validé, il peut regarder mais pas publier, commenter ni écrire. '
+                  'Tu peux demander la suppression du compte à tout moment.')
+              .tr,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        FilledButton(
+          onPressed: _busy ? null : () => _answer(true),
+          child: Text('Je valide le compte'.tr),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        OutlinedButton(
+          onPressed: _busy ? null : () => _answer(false),
+          child: Text('Je refuse'.tr),
+        ),
+      ],
     );
   }
 }

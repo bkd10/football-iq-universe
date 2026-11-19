@@ -16,6 +16,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../shared/providers/supabase_provider.dart';
 import '../../../legal/presentation/screens/legal_screen.dart';
 import '../../../safety/presentation/providers/safety_providers.dart';
+import '../../../safety/presentation/widgets/parent_pending_banner.dart';
 
 /// Pack de Ballons tel que fixé côté serveur (`coin_packs`) : l'appli
 /// n'invente jamais un prix.
@@ -219,7 +220,7 @@ class _MinorShopNoticeState extends ConsumerState<_MinorShopNotice> {
     setState(() => _busy = true);
     try {
       final token = await ref.read(safetyDataSourceProvider).requestParentPurchaseConsent();
-      final link = '${Uri.base.origin}${RouteNames.parentConsentPrefix}$token';
+      final link = parentConsentLink(token);
       await Clipboard.setData(ClipboardData(text: link));
       if (mounted) setState(() => _link = link);
     } on Failure catch (f) {

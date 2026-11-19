@@ -51,6 +51,12 @@ set value = jsonb_build_object(
       -- 'disabled' : aucun achat avant la majorité ;
       -- 'parental_consent' : achat possible après l'accord d'un parent.
       'minor_purchases', 'disabled',
+      -- Sous l'âge de consentement du pays (`parental_consent_under`,
+      -- réglable par pays dans `country_rules`) :
+      -- 'parent_email' : compte créé mais « en attente » jusqu'à ce que le
+      --   parent confirme par le lien reçu par e-mail ;
+      -- 'refuse' : inscription refusée.
+      'under_consent_mode', 'parent_email',
       'minor_monthly_limit_cents', 5000,
       'parent_link_valid_days', 7,
       -- Nombre de personnes différentes qui signalent une vidéo avant
@@ -199,6 +205,10 @@ begin
     raise exception 'Les comptes recruteur et marque sont réservés aux majeurs.' using errcode = 'P0001';
   end if;
   if v_age < (v_rules ->> 'parental_consent_under')::int then
+    if coalesce(private.legal_value('under_consent_mode') #>> '{}', 'parent_email') = 'refuse' then
+      raise exception 'Il faut avoir au moins % ans pour s''inscrire.', (v_rules ->> 'parental_consent_under')::int
+        using errcode = 'P0001';
+    end if;
     if not coalesce(p_parental_attestation, false)
        or p_guardian_email is null
        or p_guardian_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'
@@ -300,6 +310,8 @@ begin
       values (new.id, v_guardian)
       on conflict (player_id) do update set guardian_email = excluded.guardian_email;
     end if;
+    -- Sous l'âge de consentement : compte en attente de l'accord du parent.
+    perform private.start_parent_signup_consent(new.id, v_birth, v_meta ->> 'country');
   end if;
 
   if v_initial_coins > 0 then
@@ -359,6 +371,7 @@ begin
     values (v_uid, v_guardian)
     on conflict (player_id) do update set guardian_email = excluded.guardian_email;
   end if;
+  perform private.start_parent_signup_consent(v_uid, p_birth_date, v_country);
 end;
 $$;
 
@@ -1544,19 +1557,172 @@ revoke execute on function get_rankings(text, text, text, integer) from public;
 grant execute on function get_rankings(text, text, text, integer) to anon, authenticated;
 
 -- =========================================================================
--- 9. Achats de Ballons par un mineur
+-- 8 bis. Accord du parent à l'inscription (sous l'âge de consentement du pays)
+--     Mode 'parent_email' : le compte est créé « en attente ». Le joueur
+--     peut regarder, mais pas publier, commenter, écrire, voter, créer ou
+--     rejoindre un défi, ni acheter, tant que le parent n'a pas confirmé
+--     avec le lien reçu par e-mail (fonction Edge `send-parent-consent`).
+--     Mode 'refuse' : inscription refusée (`private.check_age_rules`).
 -- =========================================================================
-alter table account_consents add column if not exists purchase_consent_at timestamptz;
-
+-- Liens à usage unique envoyés au parent (inscription, achats).
 create table if not exists private.parent_consent_links (
   token uuid primary key default gen_random_uuid(),
   user_id uuid not null references profiles (id) on delete cascade,
-  kind text not null check (kind in ('purchases')),
+  kind text not null check (kind in ('purchases', 'signup')),
   created_at timestamptz not null default now(),
+  sent_count integer not null default 0,
+  last_sent_at timestamptz,
   expires_at timestamptz not null,
   used_at timestamptz,
   decision text check (decision in ('approved', 'declined'))
 );
+alter table private.parent_consent_links add column if not exists sent_count integer not null default 0;
+alter table private.parent_consent_links add column if not exists last_sent_at timestamptz;
+alter table private.parent_consent_links drop constraint if exists parent_consent_links_kind_check;
+alter table private.parent_consent_links add constraint parent_consent_links_kind_check
+  check (kind in ('purchases', 'signup'));
+
+alter table account_consents add column if not exists parent_confirmation_required boolean not null default false;
+alter table account_consents add column if not exists parent_confirmed_at timestamptz;
+alter table account_consents add column if not exists parent_declined_at timestamptz;
+
+create or replace function private.parent_pending(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from account_consents c
+    join profiles p on p.id = c.user_id
+    where c.user_id = p_user_id
+      and c.parent_confirmation_required
+      and c.parent_confirmed_at is null
+      and p.birth_date is not null
+      and extract(year from age(current_date, p.birth_date))::int
+          < (private.age_rules(p.country) ->> 'parental_consent_under')::int
+  );
+$$;
+
+revoke execute on function private.parent_pending(uuid) from public, anon, authenticated;
+
+-- Appelée à l'inscription : sous l'âge de consentement, compte en attente
+-- et lien à usage unique pour le parent.
+create or replace function private.start_parent_signup_consent(p_user_id uuid, p_birth date, p_country text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_birth is null
+     or coalesce(private.legal_value('under_consent_mode') #>> '{}', 'parent_email') <> 'parent_email'
+     or extract(year from age(current_date, p_birth))::int
+        >= (private.age_rules(p_country) ->> 'parental_consent_under')::int then
+    return;
+  end if;
+  update account_consents set parent_confirmation_required = true where user_id = p_user_id;
+  insert into private.parent_consent_links (user_id, kind, expires_at)
+  values (p_user_id, 'signup',
+          now() + make_interval(days => coalesce((private.legal_value('parent_link_valid_days') #>> '{}')::int, 7)));
+end;
+$$;
+
+revoke execute on function private.start_parent_signup_consent(uuid, date, text) from public, anon, authenticated;
+
+-- Le joueur en attente demande (ou redemande) l'e-mail pour son parent.
+-- Limité : une fois toutes les 10 minutes, 5 fois par jour. Renvoie le
+-- lien (pour l'e-mail, ou à transmettre lui-même si l'envoi d'e-mails
+-- n'est pas encore configuré) et l'adresse du parent.
+create or replace function request_parent_signup_consent()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_link private.parent_consent_links;
+  v_guardian text;
+begin
+  if v_uid is null then
+    raise exception 'Connexion requise.' using errcode = '42501';
+  end if;
+  if not private.parent_pending(v_uid) then
+    raise exception 'Action invalide.' using errcode = 'P0001';
+  end if;
+  select guardian_email into v_guardian from account_consents where user_id = v_uid;
+  select * into v_link from private.parent_consent_links
+  where user_id = v_uid and kind = 'signup' and used_at is null and expires_at > now()
+  order by created_at desc limit 1
+  for update;
+  if v_link.token is null then
+    insert into private.parent_consent_links (user_id, kind, expires_at)
+    values (v_uid, 'signup',
+            now() + make_interval(days => coalesce((private.legal_value('parent_link_valid_days') #>> '{}')::int, 7)))
+    returning * into v_link;
+  end if;
+  if v_link.last_sent_at > now() - interval '10 minutes'
+     or (v_link.sent_count >= 5 and v_link.last_sent_at > now() - interval '1 day') then
+    raise exception 'E-mail déjà envoyé. Réessaie dans quelques minutes.' using errcode = 'P0001';
+  end if;
+  update private.parent_consent_links
+  set sent_count = case when last_sent_at > now() - interval '1 day' then sent_count + 1 else 1 end,
+      last_sent_at = now()
+  where token = v_link.token;
+  return jsonb_build_object('token', v_link.token, 'guardian_email', v_guardian,
+                            'username', (select username from profiles where id = v_uid));
+end;
+$$;
+
+revoke execute on function request_parent_signup_consent() from public, anon;
+grant execute on function request_parent_signup_consent() to authenticated;
+
+-- Tant que le parent n'a pas confirmé : pas de publication ni d'échange.
+create or replace function private.refuse_if_parent_pending()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := (to_jsonb(new) ->> tg_argv[0])::uuid;
+begin
+  if v_uid is not null and private.parent_pending(v_uid) then
+    raise exception 'Ton compte attend l''accord de ton parent.' using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function private.refuse_if_parent_pending() from public, anon, authenticated;
+
+drop trigger if exists parent_pending_videos on videos;
+create trigger parent_pending_videos before insert on videos
+  for each row execute function private.refuse_if_parent_pending('user_id');
+drop trigger if exists parent_pending_comments on comments;
+create trigger parent_pending_comments before insert on comments
+  for each row execute function private.refuse_if_parent_pending('user_id');
+drop trigger if exists parent_pending_messages on messages;
+create trigger parent_pending_messages before insert on messages
+  for each row execute function private.refuse_if_parent_pending('sender_id');
+drop trigger if exists parent_pending_participations on challenge_participations;
+create trigger parent_pending_participations before insert on challenge_participations
+  for each row execute function private.refuse_if_parent_pending('user_id');
+drop trigger if exists parent_pending_challenges on challenges;
+create trigger parent_pending_challenges before insert on challenges
+  for each row execute function private.refuse_if_parent_pending('creator_id');
+drop trigger if exists parent_pending_votes on challenge_votes;
+create trigger parent_pending_votes before insert on challenge_votes
+  for each row execute function private.refuse_if_parent_pending('voter_id');
+
+-- =========================================================================
+-- 9. Achats de Ballons par un mineur
+-- =========================================================================
+alter table account_consents add column if not exists purchase_consent_at timestamptz;
+
 
 create or replace function private.can_purchase(p_user_id uuid)
 returns boolean
@@ -1571,6 +1737,7 @@ as $$
     left join account_consents c on c.user_id = p.id
     where p.id = p_user_id
       and p.birth_date is not null
+      and not private.parent_pending(p.id)
       and (
         not private.is_minor(p.id)
         or (
@@ -1666,7 +1833,7 @@ begin
   if not private.is_minor(v_uid) then
     raise exception 'Action invalide.' using errcode = 'P0001';
   end if;
-  delete from private.parent_consent_links where user_id = v_uid and used_at is null;
+  delete from private.parent_consent_links where user_id = v_uid and kind = 'purchases' and used_at is null;
   insert into private.parent_consent_links (user_id, kind, expires_at)
   values (v_uid, 'purchases',
           now() + make_interval(days => coalesce((private.legal_value('parent_link_valid_days') #>> '{}')::int, 7)))
@@ -1686,6 +1853,7 @@ as $$
   select jsonb_build_object(
     'kind', l.kind,
     'username', p.username,
+    'adult_age', (private.age_rules(p.country) ->> 'adult_age')::int,
     'monthly_limit_cents', private.legal_setting('minor_monthly_limit_cents', 5000),
     'valid', l.used_at is null and l.expires_at > now()
   )
@@ -1711,6 +1879,22 @@ begin
   update private.parent_consent_links
   set used_at = now(), decision = case when p_approve then 'approved' else 'declined' end
   where token = p_token;
+  if v_link.kind = 'signup' then
+    -- Accord du parent pour le compte lui-même.
+    update account_consents
+    set parent_confirmed_at = case when p_approve then now() end,
+        parent_declined_at = case when p_approve then null else now() end,
+        parental_attestation = parental_attestation or p_approve
+    where user_id = v_link.user_id;
+    insert into notifications (user_id, type, title, body)
+    values (
+      v_link.user_id, 'moderation',
+      case when p_approve then 'Compte validé par ton parent' else 'Compte refusé par ton parent' end,
+      case when p_approve then 'Ton parent a validé ton compte : tu peux publier, commenter et participer aux défis.'
+           else 'Ton parent n''a pas validé ton compte. Tu peux le supprimer dans Réglages.' end
+    );
+    return jsonb_build_object('approved', p_approve);
+  end if;
   if p_approve then
     insert into account_consents (user_id, terms_version, is_minor, purchase_consent_at)
     values (v_link.user_id, private.terms_version(), true, now())
@@ -1822,6 +2006,12 @@ begin
   select * into v_p from profiles where id = v_uid;
   v_s := private.safety(v_uid);
   return jsonb_build_object(
+    -- « protégé » (moins de 18 ans ou âge inconnu) ou « standard ».
+    'account_mode', case when private.is_minor(v_uid) then 'protected' else 'standard' end,
+    'parent_pending', private.parent_pending(v_uid),
+    'parent_declined', exists (select 1 from account_consents c
+                               where c.user_id = v_uid and c.parent_declined_at is not null
+                                 and c.parent_confirmed_at is null),
     'is_minor', private.is_minor(v_uid),
     'age_known', v_p.birth_date is not null,
     'role', v_p.role,

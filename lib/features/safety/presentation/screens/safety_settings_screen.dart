@@ -50,6 +50,15 @@ class _SafetySettingsScreenState extends ConsumerState<SafetySettingsScreen> {
           absorbing: _saving,
           child: ListView(
             children: [
+              ListTile(
+                leading: Icon(s.isProtected ? Icons.shield : Icons.person_outline),
+                title: Text(s.isProtected ? 'Mode protégé'.tr : 'Mode standard'.tr),
+                subtitle: Text(
+                  s.isProtected
+                      ? 'Compte de moins de 18 ans : protections renforcées.'.tr
+                      : 'Compte de 18 ans et plus.'.tr,
+                ),
+              ),
               if (s.isMinor)
                 Container(
                   margin: const EdgeInsets.all(AppSpacing.md),

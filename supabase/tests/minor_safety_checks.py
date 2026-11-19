@@ -100,10 +100,21 @@ def signup_sql(m, email):
     )
 
 
-def new_user(prefix, birth, role=None, minor=False, country=None):
+def signup_token(uid):
+    return val("select token from private.parent_consent_links where user_id = '%s' and kind = 'signup' "
+               "and used_at is null order by created_at desc limit 1" % uid)
+
+
+def new_user(prefix, birth, role=None, minor=False, country=None, confirm=True):
+    """Crée un compte ; un mineur est validé par son parent (sauf confirm=False)."""
     name = (prefix + "_" + uuid.uuid4().hex[:6])[:20]
     m = meta(name, birth, role, guardian=("parent_" + name + "@test.dev") if minor else None, country=country)
-    return val(signup_sql(m, name + "@test.dev")).splitlines()[0]
+    uid = val(signup_sql(m, name + "@test.dev")).splitlines()[0]
+    if minor and confirm:
+        token = signup_token(uid)
+        if token:
+            val("select answer_parent_consent('%s', true)" % token, anon=True)
+    return uid
 
 
 def set_legal(patch):
@@ -138,7 +149,10 @@ def main():
 
 
 def tests():
-    set_legal({"strict_mode": True, "min_age": 13, "country_rules": {}, "minor_purchases": "disabled"})
+    set_legal({"strict_mode": True, "min_age": 13, "country_rules": {}, "minor_purchases": "disabled",
+               "under_consent_mode": "parent_email", "parental_consent_under": 18})
+    val("insert into coin_packs (id, coins, price_cents, currency, sort_order, active) values "
+        "('test_pack', 100, 199, 'eur', 99, true) on conflict (id) do nothing")
 
     print("— 1. Âge à l'inscription")
     n = "kid_" + uuid.uuid4().hex[:6]
@@ -186,6 +200,53 @@ def tests():
     n = "old2_" + uuid.uuid4().hex[:6]
     refused("mode strict (nouvelle appli publiée) : inscription sans CGU refusée",
             signup_sql({"username": n}, n + "@test.dev"), contains="conditions d'utilisation")
+
+    print("— 1 bis. Accord du parent à l'inscription")
+    kid = new_user("kidp", years_ago(15), minor=True, confirm=False)
+    me = json.loads(val("select get_my_safety()", kid))
+    check("sous l'âge de consentement : compte « protégé » en attente du parent",
+          me.get("parent_pending") is True and me.get("account_mode") == "protected", me)
+    url = "https://abc.supabase.co/storage/v1/object/public/videos/%s/x.mp4" % kid
+    refused("en attente : publication de vidéo refusée",
+            "insert into videos (user_id, video_url, caption, category, rights_confirmed_at) "
+            "values ('%s', '%s', 't', 'dribble', now())" % (kid, url), kid, contains="accord de ton parent")
+    set_legal({"minor_purchases": "parental_consent"})
+    refused("en attente : achat refusé (même en mode accord parental)", "select * from prepare_purchase('test_pack')",
+            kid, contains="accord de tes parents")
+    set_legal({"minor_purchases": "disabled"})
+    req = json.loads(val("select request_parent_signup_consent()", kid))
+    check("le joueur obtient le lien et l'e-mail du parent pour l'envoi", bool(req.get("token"))
+          and str(req.get("guardian_email", "")).startswith("parent_"), req)
+    refused("renvoi de l'e-mail limité (10 minutes)", "select request_parent_signup_consent()", kid,
+            contains="Réessaie")
+    info = json.loads(val("select get_parent_consent_request('%s')" % req["token"], anon=True))
+    check("le parent voit la demande de compte sans se connecter", info.get("kind") == "signup"
+          and info.get("valid") is True, info)
+    accepted("le parent confirme par le lien", "select answer_parent_consent('%s', true)" % req["token"], anon=True)
+    me = json.loads(val("select get_my_safety()", kid))
+    check("après confirmation : plus en attente, toujours en mode protégé",
+          me.get("parent_pending") is False and me.get("account_mode") == "protected", me)
+    accepted("après confirmation : publication possible", "select '%s'" % video_of(kid))
+    kid2 = new_user("kidn", years_ago(14), minor=True, confirm=False)
+    val("select answer_parent_consent('%s', false)" % signup_token(kid2), anon=True)
+    me = json.loads(val("select get_my_safety()", kid2))
+    check("parent refuse : compte toujours bloqué", me.get("parent_pending") is True
+          and me.get("parent_declined") is True, me)
+    adult0 = new_user("adlt0", years_ago(25))
+    me = json.loads(val("select get_my_safety()", adult0))
+    check("18 ans et plus : mode « standard », sans attente", me.get("account_mode") == "standard"
+          and me.get("parent_pending") is False, me)
+    set_legal({"under_consent_mode": "refuse"})
+    n = "ref_" + uuid.uuid4().hex[:6]
+    refused("mode « refuser » : 16 ans refusé sous l'âge de consentement",
+            signup_sql(meta(n, years_ago(16), guardian="p_" + n + "@x.dev"), n + "@test.dev"),
+            contains="au moins 18 ans")
+    set_legal({"country_rules": {"united kingdom": {"parental_consent_under": 13}}})
+    uk16 = new_user("uk16", years_ago(16), minor=True, country="United Kingdom", confirm=False)
+    me = json.loads(val("select get_my_safety()", uk16))
+    check("âge de consentement par pays (13 ans au Royaume-Uni) : 16 ans accepté, protégé, sans attente",
+          me.get("parent_pending") is False and me.get("account_mode") == "protected", me)
+    set_legal({"under_consent_mode": "parent_email", "country_rules": {}})
 
     print("— 2. Réglages par défaut des moins de 18 ans")
     s = json.loads(val("select get_my_safety()", minor))

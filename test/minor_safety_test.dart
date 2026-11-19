@@ -68,6 +68,16 @@ void main() {
       expect(s.hideShop, isTrue);
     });
 
+    test('modes « protégé » / « standard » et compte en attente du parent', () {
+      final pending = MySafety.fromJson({'account_mode': 'protected', 'parent_pending': true, 'is_minor': true});
+      expect(pending.isProtected, isTrue);
+      expect(pending.parentPending, isTrue);
+      final adult = MySafety.fromJson({'account_mode': 'standard', 'is_minor': false});
+      expect(adult.isProtected, isFalse);
+      expect(adult.parentPending, isFalse);
+      expect(MySafety.fallback.isProtected, isTrue);
+    });
+
     test('mineur sans accord : boutique cachée ; majeur : boutique visible', () {
       expect(MySafety.fromJson({'is_minor': true, 'can_purchase': false}).hideShop, isTrue);
       expect(MySafety.fromJson({'is_minor': true, 'can_purchase': true}).hideShop, isFalse);
@@ -85,6 +95,8 @@ void main() {
       'Messages privés seulement entre abonnés mutuels.',
       'Confirme que tu as le droit de publier cette vidéo.',
       'Et si tu faisais une pause ?',
+      'Ton compte attend l\'accord de ton parent.',
+      'Mode protégé',
     ];
     for (final s in samples) {
       expect(en.containsKey(s), isTrue, reason: s);
