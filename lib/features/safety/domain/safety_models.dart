@@ -106,6 +106,9 @@ class MySafety {
     this.canPurchase = false,
     this.purchaseConsentAt,
     this.minorMonthlyLimitCents = 5000,
+    this.accountMode = 'protected',
+    this.parentPending = false,
+    this.parentDeclined = false,
   });
 
   factory MySafety.fromJson(Map<String, dynamic> j) => MySafety(
@@ -123,6 +126,9 @@ class MySafety {
         canPurchase: j['can_purchase'] as bool? ?? false,
         purchaseConsentAt: DateTime.tryParse(j['purchase_consent_at'] as String? ?? ''),
         minorMonthlyLimitCents: (j['minor_monthly_limit_cents'] as num?)?.toInt() ?? 5000,
+        accountMode: j['account_mode'] as String? ?? 'protected',
+        parentPending: j['parent_pending'] as bool? ?? false,
+        parentDeclined: j['parent_declined'] as bool? ?? false,
       );
 
   /// Réglages prudents tant que le serveur n'a pas répondu.
@@ -142,6 +148,15 @@ class MySafety {
   final bool canPurchase;
   final DateTime? purchaseConsentAt;
   final int minorMonthlyLimitCents;
+
+  /// « protected » (moins de 18 ans ou âge inconnu) ou « standard ».
+  final String accountMode;
+
+  /// Compte en attente de l'accord du parent (sous l'âge de consentement).
+  final bool parentPending;
+  final bool parentDeclined;
+
+  bool get isProtected => accountMode != 'standard';
 
   /// Un mineur ne voit jamais d'incitation à acheter.
   bool get hideShop => isMinor && !canPurchase;

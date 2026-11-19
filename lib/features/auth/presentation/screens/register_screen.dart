@@ -412,6 +412,13 @@ class _MinorNotice extends StatelessWidget {
                 .tr,
             style: context.textTheme.bodyMedium,
           ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            ('Ton parent recevra un e-mail pour valider ton compte. En attendant, '
+                    'tu pourras regarder les vidéos, mais pas publier, commenter ni écrire.')
+                .tr,
+            style: context.textTheme.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(
             label: 'E-mail d\'un parent'.tr,

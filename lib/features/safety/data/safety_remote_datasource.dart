@@ -78,6 +78,27 @@ class SafetyRemoteDataSource {
         return (row as Map<String, dynamic>)['token'] as String;
       });
 
+  /// Envoie (ou renvoie) l'e-mail au parent. Sans service d'e-mail
+  /// configuré, renvoie le lien à transmettre soi-même.
+  Future<({bool sent, String? link, String? email})> sendParentSignupEmail() => _call(() async {
+        try {
+          final res = await _client.functions.invoke(
+            'send-parent-consent',
+            body: {'return_origin': Uri.base.origin},
+          );
+          final data = (res.data as Map?) ?? const {};
+          return (
+            sent: data['sent'] == true,
+            link: data['link'] as String?,
+            email: data['guardian_email'] as String?,
+          );
+        } on supa.FunctionException catch (e) {
+          final details = e.details;
+          final message = details is Map ? details['error'] as String? : null;
+          throw ServerFailure(message ?? 'Une erreur inattendue est survenue.');
+        }
+      });
+
   Future<Map<String, dynamic>?> getParentConsentRequest(String token) => _call(() async {
         final row = await _client.rpc<dynamic>('get_parent_consent_request', params: {'p_token': token});
         return row is Map<String, dynamic> ? row : null;

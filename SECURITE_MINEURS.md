@@ -22,7 +22,8 @@ Tout se règle dans `app_config`, clé `legal`. Rien n'est figé dans le code.
 |---|---|---|
 | `min_age` | 13 | Âge minimum pour s'inscrire |
 | `adult_age` | 18 | Âge à partir duquel le compte n'est plus mineur |
-| `parental_consent_under` | 18 | En dessous, l'accord parental est obligatoire à l'inscription |
+| `parental_consent_under` | 18 | Âge de consentement : en dessous, l'accord du parent est obligatoire. Réglable par pays dans `country_rules` (ex. Royaume-Uni 13, France 15) |
+| `under_consent_mode` | `parent_email` | `parent_email` : compte créé « en attente » jusqu'à ce que le parent confirme par le lien reçu par e-mail ; `refuse` : inscription refusée |
 | `pro_min_age` | 18 | Âge minimum des comptes recruteur et marque |
 | `country_rules` | `{}` | Règles par pays, ex. `{"france": {"min_age": 15}, "fr": {"min_age": 15}}` |
 | `minor_purchases` | `disabled` | `disabled` : aucun achat avant 18 ans ; `parental_consent` : achat possible après l'accord d'un parent |
@@ -45,12 +46,14 @@ where key = 'legal';
 Code serveur : `supabase/migrations/20260101000037_minor_safety.sql`, désigné ci-dessous par « 0037 » suivi du numéro de section.
 
 Deux suites de tests :
-- **DB** : `supabase/tests/minor_safety_checks.py`, 77 vérifications sur une base de test locale, jamais sur la production ;
+- **DB** : `supabase/tests/minor_safety_checks.py`, 90 vérifications sur une base de test locale, jamais sur la production ;
 - **Flutter** : `test/minor_safety_test.dart` et `test/legal_test.dart`.
 
 | # | Mesure | Où dans le code | Testé ? |
 |---|---|---|---|
 | 1 | Date de naissance obligatoire, âge minimum réglable (par pays), message clair dans les 10 langues | 0037 §1 (`private.check_age_rules`, `handle_new_user`, `get_age_rules`) ; `register_screen.dart` ; `AgeRules` dans `safety/domain/safety_models.dart` ; traductions dans `l10n/strings/minors.dart` | Oui : DB (refus à 12 ans, règle pays, mode compatible) et Flutter (`AgeRules`, traduction du message serveur) |
+| 1 bis | Sous l'âge de consentement du pays : e-mail au parent avec lien de confirmation. Tant qu'il n'a pas validé, le compte peut regarder mais ne peut ni publier, ni commenter, ni écrire, ni voter, ni créer ou rejoindre un défi, ni acheter. Le parent peut refuser. Le mode `refuse` refuse l'inscription | 0037 §8 bis (`private.parent_pending`, `start_parent_signup_consent`, `request_parent_signup_consent`, déclencheurs `parent_pending_*`), §9 (`answer_parent_consent`) ; fonction Edge `supabase/functions/send-parent-consent` ; `parent_pending_banner.dart`, `parent_consent_screen.dart` | Oui : DB (attente, publication et achat refusés, lien, limite de renvoi, validation, refus, mode `refuse`, âge par pays). L'envoi réel de l'e-mail n'a pas été testé |
+| 1 ter | Deux modes de compte : « protégé » (moins de 18 ans ou âge inconnu) et « standard » (18 ans et plus) | `get_my_safety` (`account_mode`) ; en tête de l'écran Sécurité et confidentialité | Oui : DB et Flutter |
 | 2 | Compte mineur marqué en base, mis à jour chaque nuit | 0037 §1 (`private.is_minor`, `refresh_minor_flags`, tâche cron `refresh-minor-flags`) | Oui : DB |
 | 3 | Réglages par défaut des moins de 18 ans : profil limité, messages privés entre abonnés mutuels, pas de Battle aléatoire, ville cachée | 0037 §2 (`user_safety_settings`, `apply_default_safety_settings`) ; écran `safety_settings_screen.dart` | Oui : DB |
 | 4 | Un mineur ne peut pas ouvrir ses messages privés à tout le monde | 0037 §2 (`update_my_safety_settings`) ; option masquée à l'écran | Oui : DB |
@@ -77,19 +80,20 @@ Deux suites de tests :
 
 ```bash
 sudo bash supabase/tests/local_db/build_test_db.sh   # base de TEST locale (PostgreSQL)
-python3 supabase/tests/minor_safety_checks.py         # 77 vérifications
-flutter analyze && flutter test                        # 26 tests
+python3 supabase/tests/minor_safety_checks.py         # 90 vérifications
+flutter analyze && flutter test                        # 27 tests
 ```
 
 Résultat au 2026-11-19 :
-- base de test : 77/77 OK ;
+- base de test : 90/90 OK ;
 - `flutter analyze` : aucun problème ;
-- `flutter test` : 26/26 OK.
+- `flutter test` : 27/27 OK.
 
 Ce qui n'est **pas testé automatiquement** :
 - les écrans eux-mêmes (boutons, case, rappel de pause, bandeaux) : à vérifier à la main sur la version test ;
 - le parcours Stripe réel ;
-- l'envoi du lien au parent, qui est aujourd'hui copié et partagé par le joueur et n'est pas envoyé par e-mail.
+- l'envoi réel de l'e-mail au parent (fonction `send-parent-consent`), qui demande un compte Resend. Sans lui, l'appli copie le lien pour que le joueur le transmette ;
+- le lien d'accord pour les achats, qui est copié par le joueur et pas envoyé par e-mail.
 
 ## Fichiers SQL à lancer (Supabase, SQL Editor), dans l'ordre
 
@@ -123,7 +127,7 @@ Ces trois fichiers ont été essayés sur une copie de test qui imite la product
   - organisme de règlement des litiges (ADR).
 - **Enregistrement auprès de l'ICO** (data protection fee) : une démarche faite par la société.
 - **Stripe** : les prix en livres sterling pour le Royaume-Uni, et la page de paiement qui affiche la renonciation au délai de rétractation.
-- **E-mails aux parents** : aujourd'hui, le lien d'accord parental est copié par le joueur. Un envoi automatique demande un service d'e-mail (Resend, Postmark…).
+- **E-mails aux parents** : créer un compte Resend (gratuit au début), vérifier le domaine d'envoi, puis ajouter les secrets `RESEND_API_KEY` et `PARENT_EMAIL_FROM` dans Supabase (Edge Functions > Secrets) et déployer la fonction `send-parent-consent`. Sans cela, le compte reste en attente et le joueur doit transmettre le lien lui-même.
 - **Avocat britannique** : relecture des CGU, de la politique de confidentialité, des mentions légales et de la page Sécurité.
 
 ## Questions pour l'avocat
@@ -134,4 +138,5 @@ Ces trois fichiers ont été essayés sur une copie de test qui imite la product
 4. **Représentant dans l'UE** (article 27 du RGPD) : est-il nécessaire si des joueurs français sont visés ?
 5. **Online Safety Act.** Il faut faire les évaluations demandées par l'Ofcom : illegal content risk assessment et children's access assessment, puis children's risk assessment. Faut-il aussi une vérification d'âge plus forte que la date déclarée ?
 6. **Achats par des mineurs.** Faut-il garder `disabled` ou passer en `parental_consent` ? Le plafond de 50 € par mois est-il adapté ?
-7. **Droit à l'image et sponsors.** Le texte du point 19 suffit-il ? Faut-il un contrat séparé, signé par le parent, avant toute réutilisation par un sponsor ?
+7. **Accord du parent.** Un e-mail avec un lien suffit-il comme preuve ? Que faire des comptes refusés ou jamais validés : les supprimer automatiquement après N jours ? Aujourd'hui ils restent bloqués.
+8. **Droit à l'image et sponsors.** Le texte du point 19 suffit-il ? Faut-il un contrat séparé, signé par le parent, avant toute réutilisation par un sponsor ?

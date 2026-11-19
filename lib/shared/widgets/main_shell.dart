@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/l10n/l10n.dart';
 import '../../features/safety/presentation/widgets/break_reminder.dart';
+import '../../features/safety/presentation/widgets/parent_pending_banner.dart';
 
 /// Coquille de navigation principale — 5 onglets, voir PARTIE 9.1 :
 /// Feed / Défis / Créer (bouton central proéminent) / Classements / Profil.
@@ -24,7 +25,14 @@ class MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BreakReminder(child: navigationShell),
+      body: BreakReminder(
+        child: Column(
+          children: [
+            const ParentPendingBanner(),
+            Expanded(child: navigationShell),
+          ],
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: navigationShell.currentIndex,
         onTap: _onTap,
