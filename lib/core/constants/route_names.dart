@@ -59,6 +59,10 @@ class RouteNames {
   static const String legal = '/legal/:doc';
   static String legalPath(String doc) => '/legal/$doc';
   static const String securitySettings = '/settings/security';
+  static const String safetySettings = '/settings/safety';
+  // Accord d'un parent (sans compte) pour les achats d'un mineur.
+  static const String parentConsentPrefix = '/parent/';
+  static const String parentConsent = '/parent/:token';
   static const String search = '/search';
   static const String pepiteOfTheDay = '/pepite';
 

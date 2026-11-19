@@ -1,0 +1,4 @@
+comment = 'fake pg_cron for tests'
+default_version = '1.0'
+relocatable = false
+schema = pg_catalog

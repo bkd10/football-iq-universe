@@ -51,6 +51,12 @@ class AdminReport {
     this.videoUrl,
     this.thumbnailUrl,
     this.targetStatus,
+    this.details,
+    this.status = 'pending',
+    this.resolvedAt,
+    this.resolvedByUsername,
+    this.resolutionNote,
+    this.minorInvolved = false,
   });
 
   factory AdminReport.fromRow(Map<String, dynamic> row) {
@@ -68,6 +74,12 @@ class AdminReport {
       videoUrl: row['video_url'] as String?,
       thumbnailUrl: row['thumbnail_url'] as String?,
       targetStatus: row['target_status'] as String?,
+      details: row['details'] as String?,
+      status: row['status'] as String? ?? 'pending',
+      resolvedAt: DateTime.tryParse(row['resolved_at'] as String? ?? '')?.toLocal(),
+      resolvedByUsername: row['resolved_by_username'] as String?,
+      resolutionNote: row['resolution_note'] as String?,
+      minorInvolved: row['minor_involved'] as bool? ?? false,
     );
   }
 
@@ -84,6 +96,18 @@ class AdminReport {
   final String? videoUrl;
   final String? thumbnailUrl;
   final String? targetStatus;
+
+  /// Précisions écrites par le signaleur.
+  final String? details;
+
+  /// pending, actioned (retiré), dismissed (gardé).
+  final String status;
+  final DateTime? resolvedAt;
+  final String? resolvedByUsername;
+  final String? resolutionNote;
+
+  /// L'auteur ou un signaleur a moins de 18 ans : à traiter en premier.
+  final bool minorInvolved;
 }
 
 class AdminUser {

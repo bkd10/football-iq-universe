@@ -22,6 +22,7 @@ import '../../../videos/presentation/providers/video_providers.dart';
 import '../../../videos/presentation/widgets/comments_sheet.dart';
 import 'player_card_style.dart';
 import '../../../../shared/widgets/pressable.dart';
+import '../../../safety/presentation/widgets/safety_menu.dart';
 
 /// Une "page" du feed : la vidéo présentée comme une carte de joueur (note,
 /// poste, stats du joueur) avec ses actions (Respect, Masterclass,
@@ -240,6 +241,23 @@ class _FeedVideoTileState extends ConsumerState<FeedVideoTile> {
                 onTap: _toggleSound,
               ),
             ),
+            if (ref.read(supabaseClientProvider).auth.currentUser?.id != video.userId)
+              PositionedDirectional(
+                end: 8,
+                top: 56,
+                child: _GlassButton(
+                  icon: Icons.more_horiz,
+                  label: 'Signaler ou bloquer'.tr,
+                  onTap: () => showSafetyMenu(
+                    context,
+                    ref,
+                    targetType: 'video',
+                    targetId: video.id,
+                    authorId: video.userId,
+                    authorName: video.creator?.username,
+                  ),
+                ),
+              ),
             PositionedDirectional(
               start: 10,
               bottom: 10,

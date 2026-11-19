@@ -9,8 +9,10 @@ part 'profile_model.g.dart';
 /// utilisateurs (voir `20260101000021_security_audit_fixes.sql`). Un
 /// `select()` sans liste (`*`) échouerait donc avec une erreur de droits.
 /// Le joueur lit son propre profil complet via la RPC `get_my_profile`.
-const kPublicProfileColumns = 'id, username, display_name, avatar_url, bio, '
-    'country, city, position, preferred_foot, height_cm, weight_kg, role, '
+/// Bio, ville, taille et poids n'en font plus partie : ils passent par
+/// `get_public_profile`, qui les masque pour un profil limité (mineurs).
+const kPublicProfileColumns = 'id, username, display_name, avatar_url, '
+    'country, position, preferred_foot, role, '
     'is_verified, verification_type, coins, stars, level, iq_technique, '
     'iq_creativity, iq_popularity, iq_consistency, iq_tactical, streak_days, '
     'last_login_date, followers_count, following_count, videos_count, '

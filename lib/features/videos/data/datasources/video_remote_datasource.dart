@@ -318,6 +318,8 @@ class VideoRemoteDataSource {
             if (isMove) 'move_name': trimmedMoveName,
             if (moveSlug != null) 'move_slug': moveSlug,
             if (originalMoveId != null) 'original_move_id': originalMoveId,
+            // L'auteur a coché « J'ai le droit de publier » (droit à l'image).
+            'rights_confirmed_at': DateTime.now().toUtc().toIso8601String(),
           })
           .select('*, creator:profiles($_creatorSelect)')
           .single();

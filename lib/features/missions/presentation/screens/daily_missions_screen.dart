@@ -10,6 +10,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/widgets/cards/app_card.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../safety/presentation/providers/safety_providers.dart';
 import '../../domain/entities/daily_mission.dart';
 import '../providers/missions_providers.dart';
 
@@ -24,6 +25,7 @@ class DailyMissionsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final missionAsync = ref.watch(todayMissionProvider);
     final streakDays = ref.watch(currentProfileProvider).valueOrNull?.streakDays ?? 0;
+    final safety = ref.watch(mySafetyNowProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text('Missions du jour'.tr)),
@@ -41,8 +43,12 @@ class DailyMissionsScreen extends ConsumerWidget {
           data: (mission) => ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              _StreakCard(streakDays: streakDays),
-              const SizedBox(height: AppSpacing.lg),
+              // Séries masquables (réglage `show_streaks`, masquées par
+              // défaut chez les moins de 18 ans).
+              if (safety.showStreaks) ...[
+                _StreakCard(streakDays: streakDays, gentle: safety.gentleStreaks),
+                const SizedBox(height: AppSpacing.lg),
+              ],
               _ProgressHeader(mission: mission),
               const SizedBox(height: AppSpacing.md),
               _MissionTile(
@@ -75,9 +81,10 @@ class DailyMissionsScreen extends ConsumerWidget {
 }
 
 class _StreakCard extends StatelessWidget {
-  const _StreakCard({required this.streakDays});
+  const _StreakCard({required this.streakDays, required this.gentle});
 
   final int streakDays;
+  final bool gentle;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +102,11 @@ class _StreakCard extends StatelessWidget {
                   (streakDays > 1 ? '{n} jours' : '{n} jour').trArgs({'n': streakDays}),
                   style: context.textTheme.headlineMedium,
                 ),
+                if (gentle)
+                  Text(
+                    'Un jour sans jouer ne remet pas ta série à zéro.'.tr,
+                    style: context.textTheme.bodySmall,
+                  ),
               ],
             ),
           ),

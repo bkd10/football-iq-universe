@@ -13,6 +13,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../safety/presentation/providers/safety_providers.dart';
 import '../../domain/entities/challenge.dart';
 import '../../domain/entities/challenge_participation.dart';
 import '../providers/challenge_providers.dart';
@@ -90,9 +91,13 @@ class _ChallengeBody extends ConsumerWidget {
               switch (challenge.status) {
                 'completed' => 'Terminé'.tr,
                 'cancelled' => 'Annulé'.tr,
-                _ => challenge.hasStarted
-                    ? Formatters.countdown(challenge.timeRemaining)
-                    : 'Commence dans {time}'.trArgs({'time': Formatters.countdown(challenge.timeUntilStart)}),
+                _ => Formatters.challengeTime(
+                    hasStarted: challenge.hasStarted,
+                    startDate: challenge.startDate,
+                    endDate: challenge.endDate,
+                    countdowns: ref.watch(mySafetyNowProvider).showCountdowns,
+                    startPrefix: 'Commence dans {time}',
+                  ),
               },
               style: AppTypography.stat(fontSize: 15, color: AppColors.gold),
             ),
@@ -105,6 +110,17 @@ class _ChallengeBody extends ConsumerWidget {
           Text(
             'Par {sponsor}'.trArgs({'sponsor': challenge.sponsorName}),
             style: const TextStyle(color: AppColors.diamond, fontWeight: FontWeight.w600),
+          ),
+        ],
+        if (challenge.type == 'sponsored') ...[
+          const SizedBox(height: AppSpacing.xs),
+          // Publicité clairement signalée (CAP Code, règles des stores).
+          Text(
+            ('Sponsorisé : ce défi est proposé et financé par une marque. '
+                    'La marque ne peut pas t\'écrire en privé et ne voit jamais '
+                    'tes coordonnées.')
+                .tr,
+            style: context.textTheme.bodySmall,
           ),
         ],
         if (challenge.description != null && challenge.description!.isNotEmpty) ...[

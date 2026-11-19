@@ -21,6 +21,8 @@ import '../../features/challenges/presentation/screens/create_battle_screen.dart
 import '../../features/challenges/presentation/screens/create_challenge_screen.dart';
 import '../../features/economy/presentation/screens/earn_ballons_screen.dart';
 import '../../features/economy/presentation/screens/shop_screen.dart';
+import '../../features/safety/presentation/screens/parent_consent_screen.dart';
+import '../../features/safety/presentation/screens/safety_settings_screen.dart';
 import '../../features/economy/presentation/screens/wallet_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
 import '../../features/legal/presentation/screens/legal_screen.dart';
@@ -91,7 +93,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Approbation tuteur : toujours accessible, connecté ou non — le
       // tuteur n'a pas nécessairement de compte dans l'app (voir
       // `GuardianApprovalScreen`).
-      if (location.startsWith(RouteNames.guardianApprovalEntry)) {
+      if (location.startsWith(RouteNames.guardianApprovalEntry) ||
+          location.startsWith(RouteNames.parentConsentPrefix)) {
         return null;
       }
 
@@ -320,6 +323,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => GuardianApprovalScreen(
           initialToken: state.pathParameters['token'],
         ),
+      ),
+      GoRoute(
+        path: RouteNames.parentConsent,
+        builder: (context, state) => ParentConsentScreen(token: state.pathParameters['token']!),
+      ),
+      GoRoute(
+        path: RouteNames.safetySettings,
+        builder: (context, state) => const SafetySettingsScreen(),
       ),
       GoRoute(
         path: RouteNames.scoutHome,

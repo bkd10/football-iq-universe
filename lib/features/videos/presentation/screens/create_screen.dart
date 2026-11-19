@@ -41,6 +41,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
   String _category = AppConstants.videoCategories.first;
   bool _isMove = false;
   bool _isUploading = false;
+  bool _rightsConfirmed = false;
   String? _statusMessage;
 
   @override
@@ -108,6 +109,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
       _captionController.clear();
       _moveNameController.clear();
       _isMove = false;
+      _rightsConfirmed = false;
       _category = AppConstants.videoCategories.first;
     });
   }
@@ -115,6 +117,11 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
   Future<void> _publish() async {
     final picked = _pickedVideo;
     if (picked == null || _isUploading) return;
+
+    if (!_rightsConfirmed) {
+      context.showSnackBar('Confirme que tu as le droit de publier cette vidéo.'.tr, isError: true);
+      return;
+    }
 
     if (_isMove && _moveNameController.text.trim().isEmpty) {
       context.showSnackBar('Donne un nom à ton Move.'.tr, isError: true);
@@ -284,6 +291,30 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
               decoration: InputDecoration(labelText: 'Nom du Move'.tr),
             ),
           ],
+          const SizedBox(height: AppSpacing.md),
+          // Droit à l'image : case obligatoire avant chaque publication.
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _rightsConfirmed,
+            onChanged: _isUploading ? null : (v) => setState(() => _rightsConfirmed = v ?? false),
+            title: Text(
+              ('J\'ai filmé cette vidéo ou j\'ai le droit de la publier, et '
+                      'les personnes qu\'on voit dedans sont d\'accord (leurs parents '
+                      'aussi si elles ont moins de 18 ans).')
+                  .tr,
+              style: context.textTheme.bodyMedium,
+            ),
+          ),
+          Text(
+            ('Ta vidéo reste à toi. Tu nous autorises seulement à l\'afficher '
+                    'dans Football IQ tant qu\'elle est en ligne. Un sponsor ne peut '
+                    'pas la réutiliser (pub, réseaux) sans te demander, et sans '
+                    'l\'accord de ton parent si tu as moins de 18 ans. Tu peux la '
+                    'supprimer quand tu veux.')
+                .tr,
+            style: context.textTheme.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.xl),
           if (_statusMessage != null) ...[
             Text(
@@ -296,7 +327,7 @@ class _CreateScreenState extends ConsumerState<CreateScreen> {
           AppPrimaryButton(
             label: 'Publier'.tr,
             isLoading: _isUploading,
-            onPressed: _isUploading ? null : _publish,
+            onPressed: _isUploading || !_rightsConfirmed ? null : _publish,
           ),
         ],
       ),

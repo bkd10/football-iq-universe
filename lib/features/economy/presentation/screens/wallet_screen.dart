@@ -14,6 +14,7 @@ import '../../../../core/utils/extensions/string_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../safety/presentation/providers/safety_providers.dart';
 import '../../domain/entities/coin_transaction.dart';
 import '../providers/economy_providers.dart';
 
@@ -88,7 +89,10 @@ class WalletScreen extends ConsumerWidget {
                   ),
                 ),
                 // Boutique Stripe : site web seulement (règles Google Play).
-                if (inAppPurchasesAllowed) ...[
+                // Moins de 18 ans sans accord possible : pas de bouton Boutique.
+                if (inAppPurchasesAllowed &&
+                    (!ref.watch(mySafetyNowProvider).hideShop ||
+                        ref.watch(mySafetyNowProvider).parentalPurchaseMode)) ...[
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: OutlinedButton.icon(

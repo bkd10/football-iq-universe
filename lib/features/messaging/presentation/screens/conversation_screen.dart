@@ -15,6 +15,7 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/conversation.dart';
 import '../../domain/entities/message.dart';
 import '../providers/messaging_providers.dart';
+import '../../../safety/presentation/widgets/safety_menu.dart';
 
 /// Fil de discussion joueur ↔ recruteur — voir PARTIE 8.4/8.5.
 ///
@@ -72,7 +73,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           .read(messagesControllerProvider(widget.conversationId).notifier)
           .refresh();
     } else {
-      context.showSnackBar('Échec de l\'envoi.'.tr, isError: true);
+      final reason = ref.read(messagesControllerProvider(widget.conversationId).notifier).lastError;
+      context.showSnackBar(reason ?? 'Échec de l\'envoi.'.tr, isError: true);
     }
   }
 
@@ -122,6 +124,21 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   ? '@${conversation.otherUsername ?? 'inconnu'.tr}'
                   : 'Conversation'.tr,
         ),
+        actions: [
+          if (conversation?.otherUserId != null)
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'Signaler ou bloquer'.tr,
+              onPressed: () => showSafetyMenu(
+                context,
+                ref,
+                targetType: 'profile',
+                targetId: conversation!.otherUserId!,
+                authorId: conversation.otherUserId,
+                authorName: conversation.otherUsername,
+              ),
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -163,7 +180,21 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[messages.length - 1 - index];
-                    return _MessageBubble(message: message, isMine: message.senderId == myId);
+                    final isMine = message.senderId == myId;
+                    // Appui long sur un message reçu : signaler ou bloquer.
+                    return GestureDetector(
+                      onLongPress: isMine
+                          ? null
+                          : () => showSafetyMenu(
+                                context,
+                                ref,
+                                targetType: 'message',
+                                targetId: message.id,
+                                authorId: message.senderId,
+                                authorName: conversation?.otherUsername,
+                              ),
+                      child: _MessageBubble(message: message, isMine: isMine),
+                    );
                   },
                 );
               },

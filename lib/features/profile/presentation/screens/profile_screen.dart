@@ -17,7 +17,9 @@ import '../../../../shared/widgets/video_thumbnail_tile.dart';
 import '../../../auth/domain/entities/profile.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../messaging/presentation/providers/messaging_providers.dart';
-import '../../../moderation/presentation/widgets/report_content_sheet.dart';
+import '../../../safety/domain/safety_models.dart';
+import '../../../safety/presentation/providers/safety_providers.dart';
+import '../../../safety/presentation/widgets/safety_menu.dart';
 import '../../../videos/presentation/providers/video_providers.dart';
 import '../../domain/entities/user_badge.dart';
 import '../providers/badges_providers.dart';
@@ -40,9 +42,13 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMe = userId == null;
-    final profileAsync = isMe
-        ? ref.watch(currentProfileProvider)
-        : ref.watch(otherProfileProvider(userId!));
+    // Profil d'un autre joueur : passe par `get_public_profile`, qui masque
+    // ce qu'un profil limité (mineurs par défaut) ne montre pas aux
+    // inconnus, et refuse l'accès en cas de blocage.
+    final AsyncValue<({Profile? profile, PublicProfileFlags flags})> async = isMe
+        ? ref.watch(currentProfileProvider).whenData((p) => (profile: p, flags: const PublicProfileFlags()))
+        : ref.watch(publicProfileProvider(userId!));
+    final loaded = async.valueOrNull;
 
     return DefaultTabController(
       length: 3,
@@ -69,22 +75,29 @@ class ProfileScreen extends ConsumerWidget {
                 ]
               : [
                   IconButton(
-                    icon: const Icon(Icons.flag_outlined),
-                    tooltip: 'Signaler ce profil'.tr,
-                    onPressed: () => showReportContentSheet(
+                    icon: const Icon(Icons.more_vert),
+                    tooltip: 'Signaler ou bloquer'.tr,
+                    onPressed: () => showSafetyMenu(
                       context,
+                      ref,
                       targetType: 'profile',
                       targetId: userId!,
+                      authorId: userId,
+                      authorName: loaded?.profile?.username,
                     ),
                   ),
                 ],
         ),
-        body: profileAsync.when(
+        body: async.when(
           loading: () => const AppFullScreenLoader(),
           error: (error, _) => Center(
             child: Text(error is Failure ? error.message : '$error'),
           ),
-          data: (profile) {
+          data: (result) {
+            final profile = result.profile;
+            if (result.flags.unavailable && !isMe) {
+              return _UnavailableProfile(userId: userId!, iBlocked: result.flags.iBlocked);
+            }
             if (profile == null) {
               return Center(
                 child: Text(
@@ -93,7 +106,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               );
             }
-            return _ProfileBody(profile: profile, isMe: isMe);
+            return _ProfileBody(profile: profile, isMe: isMe, limited: result.flags.limited);
           },
         ),
       ),
@@ -101,11 +114,60 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
+/// Profil bloqué (dans un sens ou dans l'autre) : rien n'est montré.
+class _UnavailableProfile extends ConsumerWidget {
+  const _UnavailableProfile({required this.userId, required this.iBlocked});
+
+  final String userId;
+  final bool iBlocked;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.block, size: 40, color: AppColors.textSecondary),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              iBlocked ? 'Tu as bloqué ce joueur.'.tr : 'Ce profil n\'est pas disponible.'.tr,
+              textAlign: TextAlign.center,
+              style: context.textTheme.bodyLarge,
+            ),
+            if (iBlocked) ...[
+              const SizedBox(height: AppSpacing.md),
+              OutlinedButton(
+                onPressed: () async {
+                  try {
+                    await ref.read(safetyDataSourceProvider).unblock(userId);
+                  } on Failure catch (f) {
+                    if (context.mounted) context.showSnackBar(f.message, isError: true);
+                    return;
+                  }
+                  ref
+                    ..invalidate(publicProfileProvider(userId))
+                    ..invalidate(myBlocksProvider);
+                },
+                child: Text('Débloquer'.tr),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ProfileBody extends ConsumerWidget {
-  const _ProfileBody({required this.profile, required this.isMe});
+  const _ProfileBody({required this.profile, required this.isMe, this.limited = false});
 
   final Profile profile;
   final bool isMe;
+
+  /// Profil limité vu par un inconnu : ni abonnés, ni vidéos, ni badges.
+  final bool limited;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -166,6 +228,22 @@ class _ProfileBody extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 _IqBars(profile: profile),
+                if (limited) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    children: [
+                      const Icon(Icons.lock_outline, size: 18, color: AppColors.textSecondary),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          'Profil limité : ses vidéos et ses abonnés sont visibles par les joueurs qu\'il suit.'.tr,
+                          style: context.textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (!limited) ...[
                 const SizedBox(height: AppSpacing.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -175,6 +253,7 @@ class _ProfileBody extends ConsumerWidget {
                     _CountTile(label: 'Vidéos'.tr, value: profile.videosCount),
                   ],
                 ),
+                ],
                 if (!isMe) ...[
                   const SizedBox(height: AppSpacing.lg),
                   _ContactPlayerButton(playerId: profile.id),
@@ -197,11 +276,25 @@ class _ProfileBody extends ConsumerWidget {
         ),
       ],
       body: TabBarView(
-        children: [
-          _VideosGrid(userId: profile.id, movesOnly: false),
-          _VideosGrid(userId: profile.id, movesOnly: true),
-          _BadgesTab(userId: profile.id),
-        ],
+        children: limited
+            ? [
+                for (var i = 0; i < 3; i++)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Text(
+                        'Ce joueur a un profil limité.'.tr,
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
+              ]
+            : [
+                _VideosGrid(userId: profile.id, movesOnly: false),
+                _VideosGrid(userId: profile.id, movesOnly: true),
+                _BadgesTab(userId: profile.id),
+              ],
       ),
     );
   }

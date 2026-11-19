@@ -13,6 +13,8 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/buttons/app_primary_button.dart';
 import '../../../../core/widgets/inputs/app_text_field.dart';
 import '../../../legal/presentation/screens/legal_screen.dart';
+import '../../../safety/domain/safety_models.dart';
+import '../../../safety/presentation/providers/safety_providers.dart';
 import '../providers/auth_providers.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -41,7 +43,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String _accountType = 'player';
 
   @override
+  void initState() {
+    super.initState();
+    // L'âge minimum peut dépendre du pays.
+    _countryController.addListener(_onCountryChanged);
+  }
+
+  void _onCountryChanged() => setState(() {});
+
+  @override
   void dispose() {
+    _countryController.removeListener(_onCountryChanged);
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -51,19 +63,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  /// Règles d'âge du serveur (âge minimum, accord parental, règles par
+  /// pays), lues dans `app_config.legal`.
+  AgeRules get _rules =>
+      (ref.read(ageRulesProvider).valueOrNull ?? const AgeRules()).forCountry(_countryController.text);
+
   /// Âge en années révolues (null tant que la date n'est pas choisie).
   int? get _age {
     final birth = _birthDate;
     if (birth == null) return null;
-    final now = DateTime.now();
-    var age = now.year - birth.year;
-    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) {
-      age--;
-    }
-    return age;
+    return AgeRules.ageOn(birth, DateTime.now());
   }
 
-  bool get _isMinor => (_age ?? 99) < AppConstants.parentalConsentUnderAge;
+  bool get _isMinor => _rules.needsParentalConsent(_age ?? 99);
 
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
@@ -78,20 +90,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (picked != null) setState(() => _birthDate = picked);
   }
 
-  /// Règles d'âge, mêmes que le serveur (`handle_new_user`). Renvoie le
-  /// message à afficher, ou `null` si tout est bon.
+  /// Règles d'âge, mêmes que le serveur (`private.check_age_rules`).
+  /// Renvoie le message à afficher, ou `null` si tout est bon.
   String? _ageProblem() {
-    final age = _age;
-    if (age == null) return 'Indique ta date de naissance.'.tr;
-    if (age < AppConstants.minimumAge) {
-      return 'Il faut avoir au moins 13 ans pour s\'inscrire.'.tr;
-    }
-    if (_accountType != 'player' && age < 18) {
-      return 'Les comptes recruteur et marque sont réservés aux majeurs.'.tr;
-    }
-    if (_isMinor && !_parentalAttestation) {
-      return 'Coche l\'attestation d\'accord parental pour continuer.'.tr;
-    }
+    final problem = _rules.check(
+      age: _age,
+      accountType: _accountType,
+      parentalAttestation: _parentalAttestation,
+    );
+    if (problem != null) return problem.text.trArgs(problem.args);
     if (!_termsAccepted) {
       return 'Accepte les conditions d\'utilisation pour continuer.'.tr;
     }
@@ -145,6 +152,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Recharge l'écran quand les règles du serveur arrivent.
+    ref.watch(ageRulesProvider);
+    final minAge = _rules.minAge;
     ref.listen(authControllerProvider, (previous, next) {
       next.whenOrNull(
         error: (error, _) {
@@ -215,11 +225,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 _BirthDateField(
                   value: _birthDate,
                   onTap: _pickBirthDate,
-                  error: (_age != null && _age! < AppConstants.minimumAge)
-                      ? 'Il faut avoir au moins 13 ans pour s\'inscrire.'.tr
+                  error: (_age != null && _age! < minAge)
+                      ? 'Il faut avoir au moins {n} ans pour s\'inscrire.'.trArgs({'n': minAge})
                       : null,
                 ),
-                if (_isMinor && (_age ?? 0) >= AppConstants.minimumAge) ...[
+                if (_isMinor && (_age ?? 0) >= minAge) ...[
                   const SizedBox(height: AppSpacing.md),
                   _MinorNotice(
                     guardianController: _guardianController,
@@ -395,9 +405,10 @@ class _MinorNotice extends StatelessWidget {
           Text(
             ('Pour utiliser Football IQ, tu dois avoir l\'autorisation de tes '
                     'parents (ou de ton tuteur légal). Montre-leur les conditions '
-                    'd\'utilisation. Ils seront toujours prévenus avant qu\'un '
-                    'recruteur te contacte, et les achats demandent aussi leur '
-                    'accord.')
+                    'd\'utilisation et la page Sécurité. Ton compte démarre avec '
+                    'les réglages les plus protecteurs : profil limité, messages '
+                    'privés seulement entre abonnés mutuels, ville cachée, pas '
+                    'd\'achat. Un recruteur doit toujours avoir l\'accord de ton parent.')
                 .tr,
             style: context.textTheme.bodyMedium,
           ),

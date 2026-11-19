@@ -9,6 +9,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../providers/video_providers.dart';
+import '../../../safety/presentation/widgets/safety_menu.dart';
 
 /// Bottom sheet des commentaires d'une vidéo — voir PARTIE 9.2 (écran
 /// "Comments"). Ouverte depuis le rail d'icônes du feed.
@@ -153,6 +154,19 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                                     style: context.textTheme.bodyLarge,
                                   ),
                                 ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.more_horiz, size: 18),
+                              tooltip: 'Signaler ou bloquer'.tr,
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () => showSafetyMenu(
+                                context,
+                                ref,
+                                targetType: 'comment',
+                                targetId: comment.id,
+                                authorId: comment.userId,
+                                authorName: comment.author?.username,
                               ),
                             ),
                           ],

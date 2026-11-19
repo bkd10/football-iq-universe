@@ -12,7 +12,8 @@ enum LegalDoc {
   terms('cgu'),
   privacy('confidentialite'),
   cookies('cookies'),
-  ballons('regles-ballons');
+  ballons('regles-ballons'),
+  safety('securite');
 
   const LegalDoc(this.slug);
 
@@ -27,6 +28,7 @@ enum LegalDoc {
         LegalDoc.privacy => 'Confidentialité'.tr,
         LegalDoc.cookies => 'Cookies'.tr,
         LegalDoc.ballons => 'Règles des Ballons et remboursements'.tr,
+        LegalDoc.safety => 'Sécurité et aide'.tr,
       };
 
   IconData get icon => switch (this) {
@@ -35,6 +37,7 @@ enum LegalDoc {
         LegalDoc.privacy => Icons.lock_outline,
         LegalDoc.cookies => Icons.cookie_outlined,
         LegalDoc.ballons => Icons.sports_soccer,
+        LegalDoc.safety => Icons.health_and_safety_outlined,
       };
 
   /// Texte en français, sinon en anglais (version de référence : le
@@ -47,6 +50,7 @@ enum LegalDoc {
       LegalDoc.privacy => fr ? privacyFr : privacyEn,
       LegalDoc.cookies => fr ? cookiesFr : cookiesEn,
       LegalDoc.ballons => fr ? ballonsFr : ballonsEn,
+      LegalDoc.safety => fr ? safetyFr : safetyEn,
     };
     var text = raw.trim();
     LegalInfo.placeholders.forEach((k, v) => text = text.replaceAll('{$k}', v));

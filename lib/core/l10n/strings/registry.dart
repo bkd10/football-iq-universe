@@ -16,6 +16,7 @@ import 'lang_ru.dart';
 import 'lang_sv.dart';
 import 'lang_tr.dart';
 import 'legal.dart';
+import 'minors.dart';
 import 'profile.dart';
 import 'security.dart';
 import 'server.dart';
@@ -41,6 +42,7 @@ const List<Map<String, Map<String, String>>> _allTables = [
   profileTranslations,
   securityTranslations,
   legalTranslations,
+  minorsTranslations,
   socialTranslations,
   videosTranslations,
   serverTranslations,
@@ -76,5 +78,7 @@ Map<String, String> translationTable(String language) {
 
 List<ServerPattern> serverPatterns(String language) => [
       for (final p in _allPatterns[language] ?? const <List<String>>[])
+        ServerPattern(p[0], p[1]),
+      for (final p in minorsServerPatterns[language] ?? const <List<String>>[])
         ServerPattern(p[0], p[1]),
     ];

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show FunctionException;
 
 import '../../../../core/config/store_rules.dart';
 import '../../../../core/constants/route_names.dart';
-
+import '../../../../core/errors/failures.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/services/browser/browser.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -14,6 +15,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/providers/supabase_provider.dart';
 import '../../../legal/presentation/screens/legal_screen.dart';
+import '../../../safety/presentation/providers/safety_providers.dart';
 
 /// Pack de Ballons tel que fixé côté serveur (`coin_packs`) : l'appli
 /// n'invente jamais un prix.
@@ -111,6 +113,15 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
         ),
       );
     }
+    final safety = ref.watch(mySafetyNowProvider);
+    // Moins de 18 ans sans accord parental : aucun pack ni prix affiché,
+    // pas d'incitation à acheter (le serveur refuse de toute façon).
+    if (safety.hideShop) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Boutique'.tr)),
+        body: _MinorShopNotice(parentalMode: safety.parentalPurchaseMode),
+      );
+    }
     final packs = ref.watch(_packsProvider);
     return Scaffold(
       appBar: AppBar(title: Text('Boutique'.tr)),
@@ -130,11 +141,15 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    ('Paiement sécurisé par Stripe. Les Ballons servent à entrer '
-                            'dans les défis et aux bonus, et n\'ont aucune valeur en '
-                            'argent. Moins de 18 ans : achats avec l\'accord de tes '
-                            'parents, 50 € maximum par mois.')
-                        .tr,
+                    safety.isMinor
+                        ? ('Paiement sécurisé par Stripe. Les Ballons servent à entrer '
+                                'dans les défis et aux bonus, et n\'ont aucune valeur en '
+                                'argent. Ton parent a donné son accord : {limit} € maximum par mois.')
+                            .trArgs({'limit': (safety.minorMonthlyLimitCents / 100).toStringAsFixed(0)})
+                        : ('Paiement sécurisé par Stripe. Les Ballons servent à entrer '
+                                'dans les défis et aux bonus, et n\'ont aucune valeur en '
+                                'argent.')
+                            .tr,
                     style: context.textTheme.bodySmall,
                   ),
                 ),
@@ -181,6 +196,82 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Ce que voit un joueur de moins de 18 ans qui ne peut pas acheter.
+/// Mode `parental_consent` : il peut créer un lien à envoyer à son parent.
+class _MinorShopNotice extends ConsumerStatefulWidget {
+  const _MinorShopNotice({required this.parentalMode});
+
+  final bool parentalMode;
+
+  @override
+  ConsumerState<_MinorShopNotice> createState() => _MinorShopNoticeState();
+}
+
+class _MinorShopNoticeState extends ConsumerState<_MinorShopNotice> {
+  bool _busy = false;
+  String? _link;
+
+  Future<void> _createLink() async {
+    setState(() => _busy = true);
+    try {
+      final token = await ref.read(safetyDataSourceProvider).requestParentPurchaseConsent();
+      final link = '${Uri.base.origin}${RouteNames.parentConsentPrefix}$token';
+      await Clipboard.setData(ClipboardData(text: link));
+      if (mounted) setState(() => _link = link);
+    } on Failure catch (f) {
+      if (mounted) context.showSnackBar(f.message, isError: true);
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        const Icon(Icons.shield_outlined, size: 40, color: AppColors.primary),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          widget.parentalMode
+              ? ('Tu as moins de 18 ans : pour acheter des Ballons, il faut '
+                      'l\'accord d\'un parent.')
+                  .tr
+              : 'Les achats de Ballons sont désactivés pour les moins de 18 ans.'.tr,
+          style: context.textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          ('Tu peux gagner des Ballons gratuitement en jouant : missions, '
+                  'défis et bonus. Tout le jeu reste accessible sans payer.')
+              .tr,
+          style: context.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.emoji_events_outlined, size: 18),
+          label: Text('Comment gagner'.tr),
+          onPressed: () => context.push(RouteNames.earnBallons),
+        ),
+        if (widget.parentalMode) ...[
+          const SizedBox(height: AppSpacing.md),
+          FilledButton(
+            onPressed: _busy ? null : _createLink,
+            child: Text('Demander l\'accord de mon parent'.tr),
+          ),
+          if (_link != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Lien copié. Envoie-le à ton parent : il reste valable quelques jours.'.tr,
+              style: context.textTheme.bodySmall,
+            ),
+            SelectableText(_link!, style: context.textTheme.bodySmall),
+          ],
+        ],
+      ],
     );
   }
 }

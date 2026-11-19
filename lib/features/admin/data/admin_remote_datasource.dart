@@ -26,8 +26,14 @@ class AdminRemoteDataSource {
         return AdminStats.fromRow(row);
       });
 
-  Future<List<AdminReport>> getReports() => _call(() async {
-        final rows = await _client.rpc<List<dynamic>>('admin_list_reports');
+  /// File de modération : `pending` (en attente, mineurs concernés et
+  /// contenus les plus signalés d'abord) ou `handled` (traités, avec statut
+  /// et date de traitement).
+  Future<List<AdminReport>> getReports({String status = 'pending'}) => _call(() async {
+        final rows = await _client.rpc<List<dynamic>>(
+          'admin_moderation_queue',
+          params: {'p_status': status, 'p_limit': 200},
+        );
         return rows.map((r) => AdminReport.fromRow(r as Map<String, dynamic>)).toList();
       });
 

@@ -14,7 +14,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/loaders/app_loader.dart';
 import '../../../../core/l10n/l10n.dart';
-import '../../../moderation/presentation/widgets/report_content_sheet.dart';
+import '../../../safety/presentation/widgets/safety_menu.dart';
 import '../../domain/entities/video.dart';
 import '../providers/video_providers.dart';
 import '../widgets/comments_sheet.dart';
@@ -147,12 +147,15 @@ class _VideoDetailBody extends ConsumerWidget {
           end: AppSpacing.sm,
           child: SafeArea(
             child: IconButton(
-              icon: const Icon(Icons.flag_outlined, color: Colors.white),
-              tooltip: 'Signaler'.tr,
-              onPressed: () => showReportContentSheet(
+              icon: const Icon(Icons.more_vert, color: Colors.white),
+              tooltip: 'Signaler ou bloquer'.tr,
+              onPressed: () => showSafetyMenu(
                 context,
+                ref,
                 targetType: 'video',
                 targetId: video.id,
+                authorId: video.userId,
+                authorName: video.creator?.username,
               ),
             ),
           ),

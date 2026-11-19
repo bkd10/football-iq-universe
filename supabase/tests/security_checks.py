@@ -243,14 +243,14 @@ def main():
     storage = f"{API}/storage/v1/object/public"
 
     # --- Parcours normaux -------------------------------------------------
-    s, r = ins("videos", {"user_id": a, "video_url": f"{storage}/videos/{a}/x.mp4", "category": "dribble",
+    s, r = ins("videos", {"user_id": a, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{a}/x.mp4", "category": "dribble",
                           "is_move": True, "move_name": "Roulette"}, a_tok)
     check("publier un Move", s == 201, r)
     vid = r[0]["id"]
-    s, r = ins("videos", {"user_id": b, "video_url": f"{storage}/videos/{b}/y.mp4", "category": "dribble",
+    s, r = ins("videos", {"user_id": b, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{b}/y.mp4", "category": "dribble",
                           "original_move_id": vid}, b_tok)
     check("reproduire un Move", s == 201, r)
-    ins("videos", {"user_id": b, "video_url": f"{storage}/videos/{b}/z.mp4", "category": "dribble",
+    ins("videos", {"user_id": b, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{b}/z.mp4", "category": "dribble",
                    "original_move_id": vid}, b_tok)
     s, r = rpc("award_coins", {"p_reason": "post_video", "p_reference_id": vid, "p_local_date": today}, a_tok)
     check("récompense vidéo publiée", s == 200, r)
@@ -305,10 +305,10 @@ def main():
                                     "p_end_date": end, "p_prize_pool": 1000000}, c_tok)
     pool = sel(f"challenges?id=eq.{r.get('challenge_id')}&select=prize_pool")[1] if s == 200 else None
     check("FRAUDE cagnotte gratuite ignorée", pool == [{"prize_pool": 0}], (s, r, pool))
-    s, r = ins("videos", {"user_id": a, "video_url": f"{storage}/videos/{a}/f.mp4", "category": "dribble",
+    s, r = ins("videos", {"user_id": a, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{a}/f.mp4", "category": "dribble",
                           "views_count": 99, "talent_score": 999, "is_boosted": True}, a_tok)
     check("FRAUDE vidéo avec stats truquées refusée", s in (401, 403), r)
-    s, r = ins("videos", {"user_id": b, "video_url": "https://evil.example/x.mp4", "category": "dribble"}, b_tok)
+    s, r = ins("videos", {"user_id": b, "rights_confirmed_at": "now", "video_url": "https://evil.example/x.mp4", "category": "dribble"}, b_tok)
     check("FRAUDE vidéo hébergée ailleurs refusée", s == 400, r)
     stars = profile(a)["stars"]
     for _ in range(100):
@@ -403,16 +403,16 @@ def main():
     def sql(q):
         return subprocess.run(["psql", DB_URL, "-Atqc", q], capture_output=True, text=True).stdout.strip()
 
-    s, r = ins("videos", {"user_id": b, "video_url": f"{storage}/videos/{b}/w1.mp4", "category": "dribble",
+    s, r = ins("videos", {"user_id": b, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{b}/w1.mp4", "category": "dribble",
                           "duration_seconds": 10}, b_tok)
     wv1 = r[0]["id"]
-    s, r = ins("videos", {"user_id": b, "video_url": f"{storage}/videos/{b}/w2.mp4", "category": "dribble",
+    s, r = ins("videos", {"user_id": b, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{b}/w2.mp4", "category": "dribble",
                           "duration_seconds": 10}, b_tok)
     wv2 = r[0]["id"]
-    s, r = ins("videos", {"user_id": a, "video_url": f"{storage}/videos/{a}/av.mp4", "category": "dribble",
+    s, r = ins("videos", {"user_id": a, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{a}/av.mp4", "category": "dribble",
                           "duration_seconds": 12}, a_tok)
     avid = r[0]["id"]
-    s, r = ins("videos", {"user_id": c, "video_url": f"{storage}/videos/{c}/cv.mp4", "category": "dribble"}, c_tok)
+    s, r = ins("videos", {"user_id": c, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{c}/cv.mp4", "category": "dribble"}, c_tok)
     d_tok, d = signup("dan" + sfx)
     sql(f"update profiles set coins = coins + 900 where id='{d}'; "
         f"insert into transactions (user_id, type, amount, currency, balance_after, reason) "
@@ -497,7 +497,7 @@ def main():
     check("grand livre toujours juste après Battles et remboursements", s == 200 and r == [], r)
     # --- Pas de jeu d'argent : Ballons achetés jamais misés ---
     g_tok, g = signup("gus" + sfx)
-    s, r = ins("videos", {"user_id": g, "video_url": f"{storage}/videos/{g}/g1.mp4", "category": "dribble",
+    s, r = ins("videos", {"user_id": g, "rights_confirmed_at": "now", "video_url": f"{storage}/videos/{g}/g1.mp4", "category": "dribble",
                           "duration_seconds": 10}, g_tok)
     gv = r[0]["id"]
     earned = profile(g)["coins"]

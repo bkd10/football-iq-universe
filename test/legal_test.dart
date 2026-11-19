@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:football_iq_universe/core/l10n/l10n.dart';
+import 'package:football_iq_universe/features/legal/data/legal_info.dart';
 import 'package:football_iq_universe/features/legal/presentation/screens/legal_screen.dart';
 
 void main() {
@@ -22,7 +23,7 @@ void main() {
   test('les documents obligatoires existent', () {
     expect(
       LegalDoc.values.map((d) => d.slug),
-      containsAll(['mentions-legales', 'cgu', 'confidentialite', 'cookies', 'regles-ballons']),
+      containsAll(['mentions-legales', 'cgu', 'confidentialite', 'cookies', 'regles-ballons', 'securite']),
     );
   });
 
@@ -38,6 +39,30 @@ void main() {
       L10n.setLanguage(lang);
       for (final s in samples) {
         expect(s.tr, isNot(s), reason: '$lang : $s');
+      }
+    }
+  });
+
+  test('société britannique et champs à compléter listés', () {
+    expect(LegalInfo.companyName, 'Bkd sport Ltd');
+    L10n.setLanguage('fr');
+    final notice = LegalDoc.fromSlug('mentions-legales').body;
+    expect(notice, contains('Bkd sport Ltd'));
+    expect(notice, contains('Londres'));
+    if (!LegalInfo.isComplete) {
+      expect(notice, contains('[à compléter]'));
+      expect(LegalInfo.missingFields, isNotEmpty);
+    }
+    L10n.setLanguage('en');
+    expect(LegalDoc.fromSlug('mentions-legales').body, contains('London'));
+  });
+
+  test('aucun texte ne prétend que l\'appli est « conforme »', () {
+    for (final lang in ['fr', 'en']) {
+      L10n.setLanguage(lang);
+      for (final doc in LegalDoc.values) {
+        final banned = lang == 'fr' ? 'est conforme' : 'is compliant';
+        expect(doc.body.toLowerCase(), isNot(contains(banned)), reason: '${doc.slug} $lang');
       }
     }
   });

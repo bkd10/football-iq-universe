@@ -12,49 +12,78 @@ import '../../../admin/domain/admin_messages.dart';
 import '../../../admin/domain/admin_models.dart';
 import '../../../admin/presentation/providers/admin_providers.dart';
 
-const _targetLabels = {'video': 'Vidéo', 'comment': 'Commentaire', 'profile': 'Profil'};
+const _targetLabels = {
+  'video': 'Vidéo',
+  'comment': 'Commentaire',
+  'profile': 'Profil',
+  'message': 'Message privé',
+};
 
 /// Signalements en attente, un par contenu (les signalements multiples sur
 /// un même contenu sont regroupés). L'admin voit le contenu, puis décide de
 /// le garder ou de le retirer (bannir pour un profil), avec un message
 /// pré-écrit et modifiable envoyé à l'auteur et aux signaleurs.
-class AdminModerationScreen extends ConsumerWidget {
+class AdminModerationScreen extends StatelessWidget {
   const AdminModerationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final reportsAsync = ref.watch(adminReportsProvider);
-
-    return Scaffold(
-      appBar: AppBar(title: Text('Signalements'.tr)),
-      body: reportsAsync.when(
-        loading: () => const Center(child: AppLoader()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Text(adminErrorText(error), textAlign: TextAlign.center),
-          ),
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Signalements'.tr),
+          bottom: TabBar(tabs: [Tab(text: 'En attente'.tr), Tab(text: 'Traités'.tr)]),
         ),
-        data: (reports) {
-          if (reports.isEmpty) {
-            return Center(
-              child: Text('Aucun signalement en attente.'.tr, style: context.textTheme.bodyMedium),
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(adminReportsProvider),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount: reports.length,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, index) => _ReportCard(report: reports[index]),
-            ),
-          );
-        },
+        body: TabBarView(
+          children: [
+            _ReportList(provider: adminReportsProvider, emptyText: 'Aucun signalement en attente.'.tr),
+            _ReportList(provider: adminHandledReportsProvider, emptyText: 'Aucun signalement traité.'.tr),
+          ],
+        ),
       ),
     );
   }
 }
+
+class _ReportList extends ConsumerWidget {
+  const _ReportList({required this.provider, required this.emptyText});
+
+  final AutoDisposeFutureProvider<List<AdminReport>> provider;
+  final String emptyText;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reportsAsync = ref.watch(provider);
+    return reportsAsync.when(
+      loading: () => const Center(child: AppLoader()),
+      error: (error, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Text(adminErrorText(error), textAlign: TextAlign.center),
+        ),
+      ),
+      data: (reports) {
+        if (reports.isEmpty) {
+          return Center(child: Text(emptyText, style: context.textTheme.bodyMedium));
+        }
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(provider),
+          child: ListView.separated(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            itemCount: reports.length,
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+            itemBuilder: (context, index) => _ReportCard(report: reports[index]),
+          ),
+        );
+      },
+    );
+  }
+}
+
+String _date(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')} '
+    '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
 class _ReportCard extends ConsumerWidget {
   const _ReportCard({required this.report});
@@ -71,6 +100,7 @@ class _ReportCard extends ConsumerWidget {
     if (done ?? false) {
       ref
         ..invalidate(adminReportsProvider)
+        ..invalidate(adminHandledReportsProvider)
         ..invalidate(adminStatsProvider);
     }
   }
@@ -79,7 +109,8 @@ class _ReportCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isVideo = report.targetType == 'video';
     final isProfile = report.targetType == 'profile';
-    final canOpen = (isVideo || isProfile) && report.targetStatus == 'active';
+    final canOpen = (isVideo || isProfile) &&
+        (report.targetStatus == 'active' || (isVideo && report.targetStatus == 'flagged'));
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -94,13 +125,16 @@ class _ReportCard extends ConsumerWidget {
             children: [
               _Badge(text: _targetLabels[report.targetType]?.tr ?? report.targetType),
               const SizedBox(width: AppSpacing.sm),
+              if (report.minorInvolved) ...[
+                _Badge(text: 'Mineur concerné'.tr, color: AppColors.warning),
+                const SizedBox(width: AppSpacing.sm),
+              ],
               if (report.reportsCount > 1)
-                _Badge(text: '{n} signalements'.trArgs({'n': report.reportsCount}), color: AppColors.error),
+                Flexible(
+                  child: _Badge(text: '{n} signalements'.trArgs({'n': report.reportsCount}), color: AppColors.error),
+                ),
               const Spacer(),
-              Text(
-                '${report.createdAt.day}/${report.createdAt.month}',
-                style: context.textTheme.bodySmall,
-              ),
+              Text(_date(report.createdAt), style: context.textTheme.bodySmall),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -170,6 +204,11 @@ class _ReportCard extends ConsumerWidget {
                             'Contenu supprimé par son auteur'.tr,
                             style: context.textTheme.bodySmall?.copyWith(color: AppColors.warning),
                           ),
+                        if (report.targetStatus == 'flagged')
+                          Text(
+                            'Masquée automatiquement en attendant ta décision'.tr,
+                            style: context.textTheme.bodySmall?.copyWith(color: AppColors.warning),
+                          ),
                         if (report.targetStatus == 'removed' || report.targetStatus == 'banned')
                           Text(
                             'Déjà retiré'.tr,
@@ -182,11 +221,39 @@ class _ReportCard extends ConsumerWidget {
               ),
             ),
           ),
+          if ((report.details ?? '').isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text('« {text} »'.trArgs({'text': report.details}), style: context.textTheme.bodySmall),
+          ],
           const SizedBox(height: AppSpacing.xs),
           Text(
             'Signalé par @{name}'.trArgs({'name': report.reporterUsername ?? 'compte supprimé'.tr}),
             style: context.textTheme.bodySmall,
           ),
+          if (report.status != 'pending') ...[
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                _Badge(
+                  text: report.status == 'actioned' ? 'Retiré'.tr : 'Gardé'.tr,
+                  color: report.status == 'actioned' ? AppColors.error : AppColors.primary,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    report.resolvedAt == null
+                        ? ''
+                        : 'Traité le {date} par @{name}'.trArgs({
+                            'date': _date(report.resolvedAt!),
+                            'name': report.resolvedByUsername ?? '?',
+                          }),
+                    style: context.textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (report.status == 'pending') ...[
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -206,6 +273,7 @@ class _ReportCard extends ConsumerWidget {
               ),
             ],
           ),
+          ],
         ],
       ),
     );
@@ -232,7 +300,7 @@ class _DecisionSheetState extends ConsumerState<_DecisionSheet> {
   List<String> get _authorPresets {
     if (widget.report.targetType == 'profile') return AdminMessages.banReasons;
     if (!widget.remove) return AdminMessages.authorKept;
-    return widget.report.targetType == 'comment'
+    return widget.report.targetType == 'comment' || widget.report.targetType == 'message'
         ? AdminMessages.authorRemovedComment
         : AdminMessages.authorRemovedVideo;
   }

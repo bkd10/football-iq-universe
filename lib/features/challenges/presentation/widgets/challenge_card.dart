@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -6,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/cards/app_card.dart';
+import '../../../safety/presentation/providers/safety_providers.dart';
 import '../../domain/entities/challenge.dart';
 
 const challengeTypeLabels = {
@@ -16,14 +18,15 @@ const challengeTypeLabels = {
   'sponsored': '💼 Sponsorisé',
 };
 
-class ChallengeCard extends StatelessWidget {
+class ChallengeCard extends ConsumerWidget {
   const ChallengeCard({required this.challenge, this.onTap, super.key});
 
   final Challenge challenge;
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final countdowns = ref.watch(mySafetyNowProvider).showCountdowns;
     final isKing = challenge.type == 'king';
     final isSponsored = challenge.type == 'sponsored';
     final isCompleted = challenge.status == 'completed' || challenge.status == 'cancelled';
@@ -55,9 +58,12 @@ class ChallengeCard extends StatelessWidget {
                 )
               else
                 Text(
-                  challenge.hasStarted
-                      ? Formatters.countdown(challenge.timeRemaining)
-                      : 'Dans {time}'.trArgs({'time': Formatters.countdown(challenge.timeUntilStart)}),
+                  Formatters.challengeTime(
+                    hasStarted: challenge.hasStarted,
+                    startDate: challenge.startDate,
+                    endDate: challenge.endDate,
+                    countdowns: countdowns,
+                  ),
                   style: AppTypography.stat(fontSize: 12, color: AppColors.gold),
                 ),
             ],

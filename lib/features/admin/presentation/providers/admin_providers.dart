@@ -18,6 +18,11 @@ final adminReportsProvider = FutureProvider.autoDispose<List<AdminReport>>((ref)
   return ref.watch(adminDataSourceProvider).getReports();
 });
 
+/// Signalements déjà traités (historique, avec date de traitement).
+final adminHandledReportsProvider = FutureProvider.autoDispose<List<AdminReport>>((ref) {
+  return ref.watch(adminDataSourceProvider).getReports(status: 'handled');
+});
+
 final adminUserSearchProvider = StateProvider.autoDispose<String>((ref) => '');
 
 final adminUsersProvider = FutureProvider.autoDispose<List<AdminUser>>((ref) {

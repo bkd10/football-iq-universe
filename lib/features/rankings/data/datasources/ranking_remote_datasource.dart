@@ -18,19 +18,18 @@ class RankingRemoteDataSource {
     final column = RankingCategory.columns[category] ?? 'stars';
 
     try {
-      final baseQuery = _client
-          .from('profiles')
-          .select('id, username, display_name, avatar_url, level, country, city, score:$column')
-          // Recruteurs, marques et admins n'ont pas leur place au classement.
-          .eq('role', 'player');
-
-      final withCountry = country != null ? baseQuery.eq('country', country) : baseQuery;
-      final withCity = city != null ? withCountry.eq('city', city) : withCountry;
-
-      final rows = await withCity.order(column, ascending: false).limit(limit);
+      // `get_rankings` : recruteurs, marques, admins et bannis exclus ; la
+      // ville d'un joueur qui la masque (mineurs par défaut) n'est ni
+      // affichée, ni utilisée pour le classement de sa ville.
+      final rows = await _client.rpc<List<dynamic>>('get_rankings', params: {
+        'p_category': column,
+        'p_country': country,
+        'p_city': city,
+        'p_limit': limit,
+      },);
 
       return rows
-          .map((row) => RankingEntryModel.fromJson(row))
+          .map((row) => RankingEntryModel.fromJson(row as Map<String, dynamic>))
           .toList();
     } catch (e) {
       throw ServerException(e.toString());

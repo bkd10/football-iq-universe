@@ -271,12 +271,12 @@ class AuthRemoteDataSource {
     if (userId == _client.auth.currentUser?.id) {
       return _readOwnProfile();
     }
-    final json = await _client
-        .from('profiles')
-        .select(kPublicProfileColumns)
-        .eq('id', userId)
-        .maybeSingle();
-    return json != null ? ProfileModel.fromJson(json) : null;
+    // Profil d'un autre joueur : `get_public_profile` masque ce qu'un profil
+    // limité ne montre pas aux inconnus et ne renvoie rien en cas de
+    // blocage (voir `20260101000037_minor_safety.sql`).
+    final json = await _client.rpc<dynamic>('get_public_profile', params: {'p_user_id': userId});
+    if (json is! Map<String, dynamic> || json['unavailable'] == true) return null;
+    return ProfileModel.fromJson(json);
   }
 
   Future<ProfileModel> _fetchProfile(

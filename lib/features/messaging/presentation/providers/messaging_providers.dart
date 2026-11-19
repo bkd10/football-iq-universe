@@ -89,14 +89,24 @@ class MessagesController extends FamilyAsyncNotifier<List<Message>, String> {
     );
   }
 
+  /// Dernière raison de refus du serveur (ex. « Messages privés seulement
+  /// entre abonnés mutuels. »), déjà traduite.
+  String? lastError;
+
   Future<bool> send(String body) async {
     final result = await ref.read(sendMessageUseCaseProvider)(
       conversationId: arg,
       body: body,
     );
     return result.fold(
-      (failure) => false,
-      (_) => true,
+      (failure) {
+        lastError = failure.message;
+        return false;
+      },
+      (_) {
+        lastError = null;
+        return true;
+      },
     );
   }
 }

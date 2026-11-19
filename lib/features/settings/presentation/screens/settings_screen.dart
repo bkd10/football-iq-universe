@@ -55,6 +55,13 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.push(RouteNames.securitySettings),
           ),
           ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: Text('Sécurité et confidentialité'.tr),
+            subtitle: Text('Profil, messages privés, joueurs bloqués, temps d\'écran.'.tr),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(RouteNames.safetySettings),
+          ),
+          ListTile(
             leading: const Icon(Icons.mail_outline),
             title: Text('Messages'.tr),
             trailing: const Icon(Icons.chevron_right),
@@ -72,10 +79,13 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.shield_outlined),
             title: Text('Protection des mineurs'.tr),
             subtitle: Text(
-              ('Aucune géolocalisation précise publique. Le contact par un '
-                      'recruteur est toujours médié pour les moins de 18 ans.')
+              ('Aucune position GPS collectée. Moins de 18 ans : profil limité, '
+                      'messages privés entre abonnés mutuels, pas d\'achat sans '
+                      'accord, contact recruteur toujours validé par un parent.')
                   .tr,
             ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(RouteNames.legalPath('securite')),
           ),
           ListTile(
             leading: const Icon(Icons.verified_user_outlined),

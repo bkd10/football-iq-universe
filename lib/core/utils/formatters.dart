@@ -50,4 +50,31 @@ class Formatters {
     if (hours > 0) return '{h}h {m}min'.trArgs({'h': hours, 'm': minutes});
     return '{n}min'.trArgs({'n': minutes});
   }
+
+  /// Date courte « 24/11 18:00 », sans compte à rebours (réglage
+  /// `show_countdowns` désactivé, par défaut chez les moins de 18 ans).
+  static String shortDate(DateTime date) {
+    final d = date.toLocal();
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${two(d.day)}/${two(d.month)} ${two(d.hour)}:${two(d.minute)}';
+  }
+
+  /// Texte de temps d'un défi : compte à rebours, ou date fixe si
+  /// [countdowns] vaut false.
+  static String challengeTime({
+    required bool hasStarted,
+    required DateTime startDate,
+    required DateTime endDate,
+    required bool countdowns,
+    String startPrefix = 'Dans {time}',
+  }) {
+    if (!countdowns) {
+      return hasStarted
+          ? 'Fin le {date}'.trArgs({'date': shortDate(endDate)})
+          : 'Début le {date}'.trArgs({'date': shortDate(startDate)});
+    }
+    return hasStarted
+        ? countdown(endDate.difference(DateTime.now()))
+        : startPrefix.trArgs({'time': countdown(startDate.difference(DateTime.now()))});
+  }
 }
